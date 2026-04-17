@@ -26,15 +26,15 @@ export default function LandingPage() {
                 Portal acadêmico da <span className="font-bold text-[#1A1A1A]">CETEP Bacia do Rio Corrente</span>. Acesse suas notas, tarefas e acompanhe sua jornada acadêmica com facilidade.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link to="/auth" className="px-10 py-5 bg-indigo-600 text-white rounded-full font-bold hover:bg-slate-900 transition-all flex items-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1">
+                <Link to="/auth" className="px-10 py-5 bg-indigo-900 text-white rounded-full font-bold hover:bg-slate-900 transition-all flex items-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1">
                   Acessar Portal do Aluno <ArrowRight className="w-5 h-5" />
                 </Link>
-                <button className="px-10 py-5 border-2 border-indigo-600/10 rounded-full font-bold text-slate-800 hover:bg-gray-50 transition-all flex items-center gap-3">
+                <Link to="/auth" className="px-10 py-5 border-2 border-indigo-600/10 rounded-full font-bold text-slate-800 hover:bg-gray-50 transition-all flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-indigo-600/10 flex items-center justify-center">
                     <Play className="w-5 h-5 text-indigo-600 fill-current" />
                   </div>
                   Painel do Professor
-                </button>
+                </Link>
               </div>
             </motion.div>
 

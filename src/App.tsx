@@ -70,16 +70,27 @@ function Placeholder({ name, desc }: { name: string, desc: string }) {
 
 export default function App() {
   const Router = isPreview ? HashRouter : BrowserRouter;
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<'student' | 'teacher'>('student');
+  
+  // Persistence with localStorage
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('cetep_auth') === 'true';
+  });
+  
+  const [userRole, setUserRole] = useState<'student' | 'teacher'>(() => {
+    return (localStorage.getItem('cetep_role') as 'student' | 'teacher') || 'student';
+  });
 
   const login = (role: 'student' | 'teacher' = 'student') => {
     setIsAuthenticated(true);
     setUserRole(role);
+    localStorage.setItem('cetep_auth', 'true');
+    localStorage.setItem('cetep_role', role);
   };
   
   const logout = () => {
     setIsAuthenticated(false);
+    localStorage.removeItem('cetep_auth');
+    localStorage.removeItem('cetep_role');
   };
 
   return (
@@ -92,7 +103,7 @@ export default function App() {
             {/* Intelligent Root Redirect */}
             <Route 
               path="/" 
-              element={<Navigate to={isPreview ? "/sitemap" : "/lp-video"} replace />} 
+              element={<Navigate to="/lp-video" replace />} 
             />
             
             {/* Core Public Routes */}
