@@ -1,11 +1,11 @@
 import { motion } from 'motion/react';
-import { ArrowRight, Play, BookCheck, ShieldCheck, Globe, Users, Trophy, BookOpen } from 'lucide-react';
+import { ArrowRight, Play, BookOpen, ShieldCheck, Globe, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white font-sans">
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-24 pb-32 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/5 via-white to-transparent">
         <div className="container mx-auto px-6">
@@ -19,8 +19,8 @@ export default function LandingPage() {
                 <Trophy className="w-4 h-4" />
                 <span>Centro Territorial de Educação Profissional</span>
               </div>
-              <h1 className="text-6xl lg:text-8xl font-serif font-medium leading-[0.9] text-[#1A1A1A] mb-8">
-                Sua porta de entrada para o <span className="italic text-indigo-600 border-b-4 border-indigo-600/20">sucesso</span> profissional.
+              <h1 className="text-6xl lg:text-8xl font-bold leading-[0.9] text-[#1A1A1A] mb-8 tracking-tighter">
+                Sua porta de entrada para o <span className="text-indigo-600">sucesso</span> profissional.
               </h1>
               <p className="text-xl text-[#1A1A1A]/70 mb-10 max-w-xl leading-relaxed">
                 Portal acadêmico da <span className="font-bold text-[#1A1A1A]">CETEP Bacia do Rio Corrente</span>. Acesse suas notas, tarefas e acompanhe sua jornada acadêmica com facilidade.
@@ -62,11 +62,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Stats/Feature Grid */}
+      {/* Feature Grid */}
       <section className="py-32 bg-gray-50">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-20">
-            <h2 className="text-4xl font-serif font-medium text-[#1A1A1A] mb-6">Educação Profissional de Excelência</h2>
+            <h2 className="text-4xl font-bold text-[#1A1A1A] mb-6">Educação Profissional de Excelência</h2>
             <p className="text-gray-500 text-lg">Oferecemos cursos técnicos especializados para preparar você para os desafios do mercado de trabalho contemporâneo.</p>
           </div>
 
@@ -75,13 +75,13 @@ export default function LandingPage() {
               { 
                 icon: BookOpen, 
                 title: "Cursos Técnicos", 
-                desc: "Informática, Administração, Nutrição e mais.",
+                desc: "Informática, Administração, Nutrição e outros.",
                 items: ["Laboratórios Modernos", "Projetos Reais", "Certificação"]
               },
               { 
                 icon: ShieldCheck, 
                 title: "Ambiente Seguro", 
-                desc: "Controle de acesso e monitoramento constante.",
+                desc: "Controle de acesso e acompanhamento constante.",
                 items: ["Segurança 24h", "Portal Monitorado", "Suporte"]
               },
               { 
@@ -99,8 +99,8 @@ export default function LandingPage() {
                 <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-8">
                   <feature.icon className="w-8 h-8 text-indigo-600" />
                 </div>
-                <h3 className="text-2xl font-serif font-medium mb-4">{feature.title}</h3>
-                <p className="text-gray-500 mb-8">{feature.desc}</p>
+                <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
+                <p className="text-gray-500 mb-8 text-sm">{feature.desc}</p>
                 <ul className="space-y-3">
                   {feature.items.map((item, idx) => (
                     <li key={idx} className="flex items-center gap-3 text-sm font-medium text-slate-800">
@@ -115,6 +115,21 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Footer */}
+      <footer className="py-12 border-t border-gray-100">
+         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex items-center gap-4">
+               <Logo className="w-10 h-10 grayscale opacity-50" />
+               <div className="text-left">
+                  <p className="text-xs font-black text-slate-900 tracking-tighter leading-none">CETEP</p>
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1">Bacia do Rio Corrente</p>
+               </div>
+            </div>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+               © 2024 CETEP • PORTAL ACADÊMICO
+            </p>
+         </div>
+      </footer>
     </div>
   );
 }

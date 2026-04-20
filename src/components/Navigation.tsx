@@ -8,13 +8,14 @@ interface NavigationProps {
   isAuthenticated: boolean;
   logout: () => void;
   userRole?: 'student' | 'teacher';
+  userEmail?: string;
 }
 
-export default function Navigation({ isAuthenticated, logout, userRole }: NavigationProps) {
+export default function Navigation({ isAuthenticated, logout, userRole, userEmail }: NavigationProps) {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const isTeacher = userRole === 'teacher';
+  const isCoordinator = userEmail === 'codernador12@gmail.com';
 
   // Define nav items based on auth state and role
   const navItems = isAuthenticated 
@@ -22,10 +23,11 @@ export default function Navigation({ isAuthenticated, logout, userRole }: Naviga
         { name: 'Início', path: '/dashboard', icon: Layout },
         { name: 'Jornal', path: '/journal' },
         { name: 'Sala de Aula', path: '/classroom' },
-        { name: 'Cursos Extras', path: '/extra-courses' },
         { name: 'Notas', path: '/students' },
+        { name: 'Cursos', path: '/extra-courses' },
         { name: 'Estágios', path: '/internships' },
-        ...(isTeacher ? [{ name: 'Painel Prof.', path: '/teachers' }] : []),
+        { name: 'Sobre', path: '/about' },
+        ...(isCoordinator ? [{ name: 'Painel Coordenação', path: '/teachers' }] : []),
       ]
     : [
         { name: 'Início', path: '/lp-video' },

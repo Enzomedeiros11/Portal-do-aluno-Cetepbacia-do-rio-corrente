@@ -1,20 +1,119 @@
-import { motion } from 'motion/react';
-import { Users, Search, Plus, Save, Filter } from 'lucide-react';
-import { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Users, Search, Plus, Save, Filter, Trash2, CheckCircle, BookOpen } from 'lucide-react';
+import { useState, FormEvent, useEffect } from 'react';
+import { User, COURSES, GRADES } from '../types';
+import { toast } from 'sonner';
 
-export default function Teachers() {
+interface TeachersProps {
+  allUsers: User[];
+  onUpdateUsers: (newUsers: User[]) => void;
+  currentUser: User | null;
+}
+
+export default function Teachers({ allUsers, onUpdateUsers, currentUser }: TeachersProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filterCourse, setFilterCourse] = useState('Todos');
+  const [filterGrade, setFilterGrade] = useState('Todos');
+  const [selectedSubject, setSelectedSubject] = useState('Português');
   
-  const students = [
-    { id: 1, name: 'Enzo Medeiros', curso: 'Técnico em Informática', n1: '8.5', n2: '9.0', n3: '', n4: '' },
-    { id: 2, name: 'Ana Oliveira', curso: 'Técnico em Informática', n1: '7.0', n2: '8.5', n3: '', n4: '' },
-    { id: 3, name: 'Bruno Santos', curso: 'Técnico em Informática', n1: '9.0', n2: '9.5', n3: '', n4: '' },
-    { id: 4, name: 'Clara Lima', curso: 'Técnico em Informática', n1: '6.5', n2: '7.0', n3: '', n4: '' },
-  ];
+  // Local state for editing grades before saving globally
+  const [localGrades, setLocalGrades] = useState<Record<string, { n1: string; n2: string; n3: string }>>({});
 
-  const filteredStudents = students.filter(s => 
-    s.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    // Sync local grades with the current subject when subject or users change
+    const grades: Record<string, { n1: string; n2: string; n3: string }> = {};
+    allUsers.forEach(u => {
+      if (u.role === 'student') {
+        const studentGrades = u.subjectGrades?.[selectedSubject] || { n1: '', n2: '', n3: '' };
+        grades[u.id] = studentGrades;
+      }
+    });
+    setLocalGrades(grades);
+  }, [allUsers, selectedSubject]);
+
+  const studentsOnly = allUsers.filter(u => u.role === 'student');
+
+  const filteredStudents = studentsOnly.filter(s => {
+    const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCourse = filterCourse === 'Todos' || s.course === filterCourse;
+    const matchesGrade = filterGrade === 'Todos' || s.grade === filterGrade;
+    return matchesSearch && matchesCourse && matchesGrade;
+  });
+
+  const [newStudent, setNewStudent] = useState({ name: '', curso: 'Técnico em Informática', grade: '1º Ano' });
+
+  const handleAddStudent = (e: FormEvent) => {
+    e.preventDefault();
+    if (newStudent.name) {
+      const studentToAdd: User = { 
+        id: Date.now().toString(), 
+        name: newStudent.name, 
+        email: `${newStudent.name.toLowerCase().replace(' ', '.')}@cetep.com`,
+        password: 'password', // Default password
+        role: 'student',
+        course: newStudent.curso,
+        grade: newStudent.grade,
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${newStudent.name}`,
+        subjectGrades: {}
+      };
+      onUpdateUsers([...allUsers, studentToAdd]);
+      setNewStudent({ name: '', curso: 'Técnico em Informática', grade: '1º Ano' });
+      setIsModalOpen(false);
+      toast.success(`Estudante ${studentToAdd.name} adicionado com sucesso!`);
+    } else {
+      toast.error('Por favor, preencha o nome do aluno.');
+    }
+  };
+
+  const handleRemoveStudent = (id: string, name: string) => {
+    if (confirm(`Tem certeza que deseja remover ${name}?`)) {
+      onUpdateUsers(allUsers.filter(s => s.id !== id));
+      toast.success(`${name} removido da lista.`);
+    }
+  };
+
+  const handleGradeChange = (studentId: string, field: 'n1' | 'n2' | 'n3', value: string) => {
+    setLocalGrades(prev => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        [field]: value
+      }
+    }));
+  };
+
+  const handleSaveGrades = () => {
+    const updatedUsers = allUsers.map(u => {
+      if (u.role === 'student' && localGrades[u.id]) {
+        return {
+          ...u,
+          subjectGrades: {
+            ...(u.subjectGrades || {}),
+            [selectedSubject]: localGrades[u.id]
+          }
+        };
+      }
+      return u;
+    });
+    
+    onUpdateUsers(updatedUsers);
+    toast.success(`Notas de ${selectedSubject} salvas com sucesso!`);
+  };
+
+  const ALL_SUBJECTS = [
+    'Português', 'Matemática', 'Química', 'Física', 'Biologia', 
+    'História', 'Geografia', 'Inglês', 'Filosofia', 'Sociologia', 
+    'Educação Física', 'Artes', 'Banco de Dados', 'Robótica', 
+    'Prática Profissional', 'Fundamentos e Arquitetura', 'Programação Web',
+    'Gestão de Pessoas', 'Logística', 'Contabilidade', 'Marketing', 
+    'Administração Financeira', 'Anatomia', 'Fisiologia', 
+    'Composição de Alimentos', 'Nutrição Clínica', 'Higiene de Alimentos',
+    'Zootecnia', 'Fitotecnia', 'Máquinas Agrícolas', 'Solos', 'Topografia',
+    'Fundamentos de Enfermagem', 'Farmacologia', 'Saúde Coletiva', 
+    'Enfermagem Cirúrgica', 'Ecologia', 'Gestão Ambiental', 
+    'Educação Ambiental', 'Poluição e Controle', 'Microbiologia Ambiental'
+  ];
 
   return (
     <div className="min-h-screen bg-white pt-24 pb-12 px-6">
@@ -23,101 +122,253 @@ export default function Teachers() {
           <div>
             <div className="flex items-center gap-3 mb-2">
               <Users className="text-indigo-600 w-10 h-10" />
-              <h1 className="text-4xl font-serif font-medium text-slate-900">Painel do Professor</h1>
+              <h1 className="text-4xl font-bold text-slate-900">Gestão de Alunos</h1>
             </div>
-            <p className="text-gray-500">Gestão acadêmica e lançamento de notas da CETEP Bacia do Rio Corrente.</p>
+            <p className="text-gray-500">Coordene notas, turmas e frequências de forma centralizada.</p>
           </div>
-          <div className="flex gap-4">
-             <button className="px-6 py-3 bg-indigo-900 text-white rounded-2xl font-bold flex items-center gap-2 hover:bg-slate-900 transition-all shadow-lg shadow-indigo-900/10">
-                <Plus className="w-5 h-5" /> Novo Aluno
-             </button>
-          </div>
+          
+          <button 
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-3 px-8 py-4 bg-indigo-900 text-white rounded-2xl font-bold shadow-xl shadow-indigo-900/10 hover:bg-slate-900 transition-all active:scale-95 text-sm uppercase tracking-widest"
+          >
+            <Plus className="w-5 h-5" /> Adicionar Aluno
+          </button>
         </header>
 
-        <div className="bg-[#F8F9FA] p-8 rounded-[48px] border border-gray-100 shadow-sm mb-12">
-           <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-              <div className="relative w-full md:w-96">
-                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                 <input 
-                   type="text" 
-                   placeholder="Buscar aluno por nome..." 
-                   className="w-full pl-12 pr-4 py-3 bg-white rounded-2xl border border-gray-200 focus:ring-2 focus:ring-indigo-600 outline-none transition-all"
-                   value={searchTerm}
-                   onChange={(e) => setSearchTerm(e.target.value)}
-                 />
+        <div className="bg-[#F9F9FB] p-8 rounded-[48px] border border-gray-100 mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+              <div className="lg:col-span-4 relative">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-2 block ml-1">Pesquisar</label>
+                  <Search className="absolute left-4 bottom-4 translate-y-0 text-gray-400 w-4 h-4" />
+                  <input 
+                    type="text" 
+                    placeholder="Nome do aluno..." 
+                    className="w-full pl-12 pr-4 py-3 bg-white rounded-2xl border border-gray-200 focus:ring-2 focus:ring-indigo-600 outline-none transition-all shadow-sm text-sm"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
               </div>
-              <div className="flex items-center gap-4">
-                 <button className="p-3 bg-white rounded-2xl border border-gray-200 hover:bg-gray-50 transition-colors">
-                    <Filter className="w-5 h-5 text-gray-500" />
-                 </button>
-                 <select className="px-4 py-3 bg-white rounded-2xl border border-gray-200 outline-none">
-                    <option>Técnico em Informática</option>
-                    <option>Administração</option>
-                    <option>Nutrição</option>
-                 </select>
+              <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Matéria Atual</label>
+                    <div className="relative">
+                      <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400" />
+                      <select 
+                        value={selectedSubject}
+                        onChange={(e) => setSelectedSubject(e.target.value)}
+                        className="w-full pl-11 pr-4 py-3 bg-white rounded-2xl border border-gray-200 outline-none text-xs font-bold shadow-sm appearance-none focus:ring-2 focus:ring-indigo-600"
+                      >
+                        {ALL_SUBJECTS.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Série</label>
+                    <select 
+                      value={filterGrade}
+                      onChange={(e) => setFilterGrade(e.target.value)}
+                      className="w-full px-4 py-3 bg-white rounded-2xl border border-gray-200 outline-none text-xs font-bold shadow-sm focus:ring-2 focus:ring-indigo-600"
+                    >
+                      <option value="Todos">Todas as Séries</option>
+                      {GRADES.filter(g => g !== 'Docente').map(g => (
+                        <option key={g} value={g}>{g}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Curso</label>
+                    <select 
+                      value={filterCourse}
+                      onChange={(e) => setFilterCourse(e.target.value)}
+                      className="w-full px-4 py-3 bg-white rounded-2xl border border-gray-200 outline-none text-xs font-bold shadow-sm focus:ring-2 focus:ring-indigo-600"
+                    >
+                      <option value="Todos">Todos os Cursos</option>
+                      {COURSES.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-end">
+                    <button 
+                      onClick={() => {
+                        setSearchTerm('');
+                        setFilterCourse('Todos');
+                        setFilterGrade('Todos');
+                      }}
+                      className="w-full py-3 bg-gray-200 text-gray-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-gray-300 transition-all"
+                    >
+                      Limpar Filtros
+                    </button>
+                  </div>
               </div>
-           </div>
+            </div>
         </div>
 
         <div className="bg-white rounded-[40px] border border-gray-100 shadow-sm overflow-hidden mb-12">
            <div className="overflow-x-auto">
-              <table className="w-full text-left">
+              <table className="w-full text-left border-collapse">
                  <thead>
                     <tr className="bg-gray-50">
-                       <th className="px-8 py-5 text-xs font-black uppercase text-gray-400 tracking-widest">Estudante</th>
-                       <th className="px-4 py-5 text-xs font-black uppercase text-gray-400 tracking-widest text-center">1º Bim</th>
-                       <th className="px-4 py-5 text-xs font-black uppercase text-gray-400 tracking-widest text-center">2º Bim</th>
-                       <th className="px-4 py-5 text-xs font-black uppercase text-gray-400 tracking-widest text-center">3º Bim</th>
-                       <th className="px-4 py-5 text-xs font-black uppercase text-gray-400 tracking-widest text-center">4º Bim</th>
-                       <th className="px-8 py-5 text-xs font-black uppercase text-gray-400 tracking-widest text-right whitespace-nowrap">Ações</th>
+                       <th className="px-8 py-5 text-xs font-black uppercase text-gray-400 tracking-widest border-b border-gray-100">Estudante</th>
+                       <th className="px-4 py-5 text-xs font-black uppercase text-gray-400 tracking-widest text-center border-b border-gray-100">1º Bim</th>
+                       <th className="px-4 py-5 text-xs font-black uppercase text-gray-400 tracking-widest text-center border-b border-gray-100">2º Bim</th>
+                       <th className="px-4 py-5 text-xs font-black uppercase text-gray-400 tracking-widest text-center border-b border-gray-100">3º Bim</th>
+                       <th className="px-8 py-5 text-xs font-black uppercase text-gray-400 tracking-widest text-right whitespace-nowrap border-b border-gray-100">Ação</th>
                     </tr>
                  </thead>
                  <tbody className="divide-y divide-gray-50">
-                    {filteredStudents.map((s) => (
+                    {filteredStudents.length > 0 ? filteredStudents.map((s) => (
                       <tr key={s.id} className="hover:bg-gray-50/50 transition-colors group">
                          <td className="px-8 py-5">
                             <h4 className="font-bold text-slate-900 leading-none">{s.name}</h4>
-                            <p className="text-[10px] text-gray-400 mt-1 font-bold">{s.curso}</p>
+                            <p className="text-[10px] text-gray-400 mt-1 font-bold">{s.course} • {s.grade}</p>
                          </td>
                          <td className="px-4 py-5 text-center">
-                            <input type="text" defaultValue={s.n1} className="w-12 h-10 bg-indigo-50 border border-indigo-100 rounded-lg text-center font-bold text-indigo-900 focus:bg-white transition-colors" />
+                            <input 
+                              type="text" 
+                              value={localGrades[s.id]?.n1 || ''} 
+                              onChange={(e) => handleGradeChange(s.id, 'n1', e.target.value)}
+                              className="w-12 h-10 bg-indigo-50 border border-indigo-100 rounded-lg text-center font-bold text-indigo-900 focus:bg-white transition-colors outline-none focus:ring-2 focus:ring-indigo-600" 
+                            />
                          </td>
                          <td className="px-4 py-5 text-center">
-                            <input type="text" defaultValue={s.n2} className="w-12 h-10 bg-indigo-50 border border-indigo-100 rounded-lg text-center font-bold text-indigo-900 focus:bg-white transition-colors" />
+                            <input 
+                              type="text" 
+                              value={localGrades[s.id]?.n2 || ''} 
+                              onChange={(e) => handleGradeChange(s.id, 'n2', e.target.value)}
+                              className="w-12 h-10 bg-indigo-50 border border-indigo-100 rounded-lg text-center font-bold text-indigo-900 focus:bg-white transition-colors outline-none focus:ring-2 focus:ring-indigo-600" 
+                            />
                          </td>
                          <td className="px-4 py-5 text-center">
-                            <input type="text" className="w-12 h-10 bg-gray-50 border border-gray-100 rounded-lg text-center font-bold text-slate-400 focus:bg-white transition-colors" />
+                            <input 
+                              type="text" 
+                              value={localGrades[s.id]?.n3 || ''} 
+                              onChange={(e) => handleGradeChange(s.id, 'n3', e.target.value)}
+                              className="w-12 h-10 bg-gray-50 border border-gray-100 rounded-lg text-center font-bold text-slate-400 focus:bg-white transition-colors outline-none focus:ring-2 focus:ring-indigo-600" 
+                            />
                          </td>
-                         <td className="px-4 py-5 text-center">
-                            <input type="text" className="w-12 h-10 bg-gray-50 border border-gray-100 rounded-lg text-center font-bold text-slate-400 focus:bg-white transition-colors" />
-                         </td>
-                         <td className="px-8 py-5 text-right">
-                             <button className="p-2.5 bg-indigo-900 text-white rounded-xl hover:bg-slate-900 transition-all opacity-0 group-hover:opacity-100">
-                                <Save className="w-4 h-4" />
-                             </button>
+                         <td className="px-8 py-5 text-right whitespace-nowrap">
+                            <button 
+                              onClick={() => handleRemoveStudent(s.id, s.name)}
+                              className="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-600 hover:text-white transition-all opacity-100 md:opacity-0 group-hover:opacity-100 shadow-sm"
+                              title="Remover aluno"
+                            >
+                               <Trash2 className="w-4 h-4" />
+                            </button>
                          </td>
                       </tr>
-                    ))}
+                    )) : (
+                      <tr>
+                        <td colSpan={6} className="px-8 py-20 text-center">
+                           <div className="flex flex-col items-center gap-4">
+                              <Users className="w-12 h-12 text-gray-200" />
+                              <p className="text-gray-400 font-medium italic">Nenhum estudante encontrado com os filtros selecionados.</p>
+                           </div>
+                        </td>
+                      </tr>
+                    )}
                  </tbody>
               </table>
            </div>
         </div>
 
-        <div className="bg-indigo-50 p-8 rounded-[40px] border border-indigo-100 flex items-center justify-between">
-           <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-indigo-100">
-                 <Save className="text-indigo-600 w-6 h-6" />
-              </div>
-              <div>
-                 <h4 className="font-bold text-indigo-900 italic">Modo de Edição Ativo</h4>
-                 <p className="text-xs text-indigo-600/60 font-medium">As alterações serão salvas diretamente no sistema acadêmico.</p>
-              </div>
-           </div>
-           <button className="px-8 py-3 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-700 transition-all">
-              Aplicar a Todos
-           </button>
-        </div>
+        <div className="bg-indigo-900 p-8 rounded-[48px] shadow-2xl shadow-indigo-900/20 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div className="relative z-10 flex items-center gap-4">
+               <div className="w-14 h-14 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 shadow-sm">
+                  <CheckCircle className="text-white w-8 h-8" />
+               </div>
+               <div>
+                  <h4 className="font-bold text-white text-xl">Salvar Grade de Notas</h4>
+                  <p className="text-sm text-indigo-100/60 font-medium italic">As notas acima serão vinculadas à matéria: {selectedSubject}.</p>
+               </div>
+            </div>
+            <div className="relative z-10 flex items-center gap-3 w-full md:w-auto">
+               <button 
+                 onClick={handleSaveGrades}
+                 className="flex-1 md:flex-none px-10 py-5 bg-white text-indigo-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-50 transition-all flex items-center justify-center gap-3 shadow-xl"
+               >
+                  <Save className="w-5 h-5" /> Salvar Notas de {selectedSubject}
+               </button>
+            </div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32" />
+         </div>
       </div>
+
+      <AnimatePresence>
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-[48px] w-full max-w-xl p-10 shadow-2xl overflow-hidden relative"
+            >
+              <div className="absolute top-0 left-0 right-0 h-2 bg-indigo-600" />
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="absolute top-6 right-6 p-2 text-gray-400 hover:text-rose-600 transition-colors"
+              >
+                <Trash2 className="w-6 h-6" />
+              </button>
+              <h3 className="text-3xl font-bold text-slate-900 mb-8">Novo Aluno</h3>
+              
+              <form onSubmit={handleAddStudent} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Nome do Estudante</label>
+                  <input 
+                    type="text" 
+                    placeholder="Ex: João Silva"
+                    className="w-full px-6 py-4 bg-gray-50 rounded-2xl border border-gray-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-medium"
+                    value={newStudent.name}
+                    onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Curso</label>
+                    <select 
+                      className="w-full px-6 py-4 bg-gray-50 rounded-2xl border border-gray-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-bold"
+                      value={newStudent.curso}
+                      onChange={(e) => setNewStudent({...newStudent, curso: e.target.value})}
+                    >
+                      {COURSES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Série</label>
+                    <select 
+                      className="w-full px-6 py-4 bg-gray-50 rounded-2xl border border-gray-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-bold"
+                      value={newStudent.grade}
+                      onChange={(e) => setNewStudent({...newStudent, grade: e.target.value})}
+                    >
+                      {GRADES.filter(g => g !== 'Docente').map(g => <option key={g} value={g}>{g}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex gap-4 pt-6">
+                  <button 
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 px-8 py-4 bg-gray-50 text-gray-500 rounded-2xl font-bold hover:bg-gray-100 transition-all text-xs uppercase tracking-widest"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    type="submit"
+                    className="flex-1 px-8 py-4 bg-indigo-900 text-white rounded-2xl font-bold hover:bg-slate-900 shadow-xl shadow-indigo-900/10 transition-all text-xs uppercase tracking-widest"
+                  >
+                    Cadastrar Aluno
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

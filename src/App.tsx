@@ -4,7 +4,7 @@
  */
 
 import { BrowserRouter, HashRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage';
 import Sitemap from './components/Sitemap';
 import Navigation from './components/Navigation';
@@ -18,7 +18,11 @@ import Classroom from './components/Classroom';
 import ExtraCourses from './components/ExtraCourses';
 import Internships from './components/Internships';
 import Teachers from './components/Teachers';
+import About from './components/About';
+import Settings from './components/Settings';
 import Logo from './components/Logo';
+import { User } from './types';
+import { Toaster, toast } from 'sonner';
 
 /**
  * Detects if the current environment is a cloud-based preview/dev environment.
@@ -71,32 +75,137 @@ function Placeholder({ name, desc }: { name: string, desc: string }) {
 export default function App() {
   const Router = isPreview ? HashRouter : BrowserRouter;
   
-  // Persistence with localStorage
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('cetep_auth') === 'true';
-  });
-  
-  const [userRole, setUserRole] = useState<'student' | 'teacher'>(() => {
-    return (localStorage.getItem('cetep_role') as 'student' | 'teacher') || 'student';
+  // Simulated Database
+  const [users, setUsers] = useState<User[]>(() => {
+    const saved = localStorage.getItem('cetep_users');
+    const initialUsers: User[] = [
+      {
+        id: '1',
+        email: 'codernador12@gmail.com',
+        password: '000000',
+        name: 'Coordenador Pedagógico',
+        role: 'teacher',
+        grade: 'Docente',
+        course: 'Coordenação',
+        isOnline: true,
+        lastSeen: new Date().toISOString()
+      },
+      {
+        id: 't2',
+        email: 'prof.ana@cetep.com',
+        name: 'Profa. Ana Costa',
+        role: 'teacher',
+        grade: 'Docente',
+        course: 'Matemática',
+        isOnline: true,
+        lastSeen: new Date().toISOString()
+      },
+      {
+        id: 't3',
+        email: 'prof.roberto@cetep.com',
+        name: 'Prof. Roberto Melo',
+        role: 'teacher',
+        grade: 'Docente',
+        course: 'Ética',
+        isOnline: false,
+        lastSeen: new Date().toISOString()
+      },
+      {
+        id: 's1',
+        email: 'joao.silva@cetep.com',
+        name: 'João Silva',
+        role: 'student',
+        grade: '1º Ano',
+        course: 'Técnico em Informática',
+        isOnline: true,
+        lastSeen: new Date().toISOString()
+      },
+      {
+        id: 's2',
+        email: 'maria.oliveira@cetep.com',
+        name: 'Maria Oliveira',
+        role: 'student',
+        grade: '1º Ano',
+        course: 'Técnico em Informática',
+        isOnline: true,
+        lastSeen: new Date().toISOString()
+      },
+      {
+        id: 's3',
+        email: 'pedro.santos@cetep.com',
+        name: 'Pedro Santos',
+        role: 'student',
+        grade: '1º Ano',
+        course: 'Administração',
+        isOnline: true,
+        lastSeen: new Date().toISOString()
+      }
+    ];
+    return saved ? JSON.parse(saved) : initialUsers;
   });
 
-  const login = (role: 'student' | 'teacher' = 'student') => {
-    setIsAuthenticated(true);
-    setUserRole(role);
-    localStorage.setItem('cetep_auth', 'true');
-    localStorage.setItem('cetep_role', role);
+  // Active Session
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    const saved = localStorage.getItem('cetep_current_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+
+  const isAuthenticated = !!currentUser;
+  const userRole = currentUser?.role || 'student';
+
+  useEffect(() => {
+    localStorage.setItem('cetep_users', JSON.stringify(users));
+  }, [users]);
+
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('cetep_current_user', JSON.stringify(currentUser));
+      localStorage.setItem('cetep_auth', 'true');
+      localStorage.setItem('cetep_role', currentUser.role);
+      
+      // Update isOnline status for the current user in the main users list
+      setUsers(prev => prev.map(u => 
+        u.id === currentUser.id ? { ...u, isOnline: true, lastSeen: new Date().toISOString() } : u
+      ));
+    } else {
+      localStorage.removeItem('cetep_current_user');
+      localStorage.setItem('cetep_auth', 'false');
+    }
+  }, [currentUser]);
+
+  const login = (authenticatedUser: User) => {
+    const updatedUser = { ...authenticatedUser, isOnline: true, lastSeen: new Date().toISOString() };
+    setCurrentUser(updatedUser);
+  };
+
+  const register = (newUser: User) => {
+    const userWithStatus = { ...newUser, isOnline: true, lastSeen: new Date().toISOString() };
+    setUsers(prev => [...prev, userWithStatus]);
+    setCurrentUser(userWithStatus);
   };
   
   const logout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('cetep_auth');
-    localStorage.removeItem('cetep_role');
+    if (currentUser) {
+      setUsers(prev => prev.map(u => 
+        u.id === currentUser.id ? { ...u, isOnline: false } : u
+      ));
+    }
+    setCurrentUser(null);
+  };
+
+  const updateUsers = (newUsersList: User[]) => {
+    setUsers(newUsersList);
+    if (currentUser) {
+      const updatedSelf = newUsersList.find(u => u.id === currentUser.id);
+      if (updatedSelf) setCurrentUser(updatedSelf);
+    }
   };
 
   return (
     <Router>
+      <Toaster position="top-center" expand={true} richColors />
       <div className="min-h-screen font-sans bg-white text-slate-900 selection:bg-indigo-600/20">
-        <Navigation isAuthenticated={isAuthenticated} logout={logout} userRole={userRole} />
+        <Navigation isAuthenticated={isAuthenticated} logout={logout} userRole={userRole} userEmail={currentUser?.email} />
         
         <main>
           <Routes>
@@ -109,21 +218,21 @@ export default function App() {
             {/* Core Public Routes */}
             <Route path="/sitemap" element={<Sitemap />} />
             <Route path="/lp-video" element={<LandingPage />} />
-            <Route path="/about" element={<Placeholder name="Sobre a CETEP" desc="Conheça a história e os valores do Centro Territorial de Educação Profissional Bacia do Rio Corrente." />} />
+            <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/auth" element={
-              isAuthenticated ? <Navigate to="/dashboard" /> : <Auth onLogin={login} />
+              isAuthenticated ? <Navigate to="/dashboard" /> : <Auth onLogin={login} onRegister={register} users={users} />
             } />
             
             {/* Protected Student Routes */}
             <Route path="/dashboard" element={
-              isAuthenticated ? <Dashboard /> : <Navigate to="/auth" />
+              isAuthenticated ? <Dashboard user={currentUser} /> : <Navigate to="/auth" />
             } />
             <Route path="/journal" element={
               isAuthenticated ? <Journal /> : <Navigate to="/auth" />
             } />
             <Route path="/classroom" element={
-              isAuthenticated ? <Classroom /> : <Navigate to="/auth" />
+              isAuthenticated ? <Classroom user={currentUser} allUsers={users} /> : <Navigate to="/auth" />
             } />
             <Route path="/extra-courses" element={
               isAuthenticated ? <ExtraCourses /> : <Navigate to="/auth" />
@@ -132,7 +241,7 @@ export default function App() {
               isAuthenticated ? <Internships /> : <Navigate to="/auth" />
             } />
             <Route path="/students" element={
-              isAuthenticated ? <Grades /> : <Navigate to="/auth" />
+              isAuthenticated ? <Grades user={currentUser} /> : <Navigate to="/auth" />
             } />
             <Route path="/assignments" element={
               isAuthenticated ? <Assignments /> : <Navigate to="/auth" />
@@ -140,10 +249,15 @@ export default function App() {
             
             {/* Protected Teacher/Admin Routes */}
             <Route path="/teachers" element={
-              isAuthenticated && userRole === 'teacher' ? <Teachers /> : <Navigate to="/auth" />
+              isAuthenticated && currentUser?.email === 'codernador12@gmail.com' ? 
+                <Teachers 
+                  allUsers={users}
+                  onUpdateUsers={updateUsers}
+                  currentUser={currentUser} 
+                /> : <Navigate to="/auth" />
             } />
             <Route path="/settings" element={
-              isAuthenticated ? <Placeholder name="Configurações" desc="Gerencie suas preferências de perfil e notificações do sistema CETEP." /> : <Navigate to="/auth" />
+              isAuthenticated ? <Settings user={currentUser} /> : <Navigate to="/auth" />
             } />
             
             {/* Catch-all Fallback */}

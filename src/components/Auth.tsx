@@ -1,34 +1,29 @@
 import { useState, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { LogIn, UserPlus, GraduationCap, ArrowRight, Mail, Lock, User, BookOpen, Calendar, AlertCircle } from 'lucide-react';
+import { LogIn, UserPlus, GraduationCap, ArrowRight, Mail, Lock, User as UserIcon, BookOpen, Calendar, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Logo from './Logo';
+import { User, COURSES, GRADES } from '../types';
 
 type AuthMode = 'login' | 'register';
 
 interface AuthProps {
-  onLogin: (role?: 'student' | 'teacher') => void;
+  onLogin: (user: User) => void;
+  onRegister: (user: User) => void;
+  users: User[];
 }
 
-export default function Auth({ onLogin }: AuthProps) {
+export default function Auth({ onLogin, onRegister, users }: AuthProps) {
   const [mode, setMode] = useState<AuthMode>('login');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    ano: '1',
-    curso: 'Informatica'
+    grade: '1º Ano',
+    course: 'Técnico em Informática'
   });
-
-  const cursos = [
-    'Informática',
-    'Análises Clínicas',
-    'Administração',
-    'Nutrição',
-    'Jurídico',
-    'Agropecuária'
-  ];
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -37,21 +32,34 @@ export default function Auth({ onLogin }: AuthProps) {
 
     // Simulação curta de carregamento
     setTimeout(() => {
-      // Simulação para o coordenador fixo
-      if (formData.email === 'codernador12@gmail.com' && formData.password === '000000') {
-        onLogin('teacher');
-        setLoading(false);
-        return;
-      }
-
-      // Login genérico
-      if (formData.email && formData.password) {
-        onLogin('student');
-        setLoading(false);
+      if (mode === 'login') {
+        const user = users.find(u => u.email === formData.email && u.password === formData.password);
+        if (user) {
+          onLogin(user);
+        } else {
+          setError('E-mail ou senha incorretos.');
+        }
       } else {
-        setError('Por favor, preencha todos os campos.');
-        setLoading(false);
+        // Registration
+        if (users.some(u => u.email === formData.email)) {
+          setError('Este e-mail já está cadastrado.');
+        } else if (formData.name && formData.email && formData.password) {
+          const newUser: User = {
+            id: Date.now().toString(),
+            email: formData.email,
+            password: formData.password,
+            name: formData.name,
+            role: 'student', // Always student by default via register
+            grade: formData.grade,
+            course: formData.course,
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.name}`
+          };
+          onRegister(newUser);
+        } else {
+          setError('Por favor, preencha todos os campos.');
+        }
       }
+      setLoading(false);
     }, 800);
   };
 
@@ -68,7 +76,7 @@ export default function Auth({ onLogin }: AuthProps) {
           </div>
 
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-serif font-medium text-slate-900">
+            <h2 className="text-3xl font-bold text-slate-900">
               {mode === 'login' ? 'Bem-vindo de volta' : 'Crie sua conta'}
             </h2>
             <p className="text-slate-500 mt-2">
@@ -94,7 +102,7 @@ export default function Auth({ onLogin }: AuthProps) {
                   className="space-y-4"
                 >
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300" />
+                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300" />
                     <input
                       type="text"
                       placeholder="Nome completo"
@@ -109,22 +117,22 @@ export default function Auth({ onLogin }: AuthProps) {
                       <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300" />
                       <select
                         className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white outline-none transition-all appearance-none"
-                        value={formData.ano}
-                        onChange={(e) => setFormData({ ...formData, ano: e.target.value })}
+                        value={formData.grade}
+                        onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
                       >
-                        <option value="1">1º Ano</option>
-                        <option value="2">2º Ano</option>
-                        <option value="3">3º Ano</option>
+                        {GRADES.filter(g => g !== 'Docente').map(g => (
+                          <option key={g} value={g}>{g}</option>
+                        ))}
                       </select>
                     </div>
                     <div className="relative">
                       <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300" />
                       <select
-                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white outline-none transition-all appearance-none text-sm"
-                        value={formData.curso}
-                        onChange={(e) => setFormData({ ...formData, curso: e.target.value })}
+                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white outline-none transition-all appearance-none text-xs font-medium"
+                        value={formData.course}
+                        onChange={(e) => setFormData({ ...formData, course: e.target.value })}
                       >
-                        {cursos.map(c => (
+                        {COURSES.map(c => (
                           <option key={c} value={c}>{c}</option>
                         ))}
                       </select>
@@ -148,12 +156,20 @@ export default function Auth({ onLogin }: AuthProps) {
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 placeholder="Senha"
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white outline-none transition-all"
+                className="w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white outline-none transition-all"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-indigo-300 hover:text-indigo-600 transition-colors"
+                title={showPassword ? 'Ocultar senha' : 'Ver senha'}
+              >
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
             </div>
 
             <button

@@ -1,7 +1,21 @@
 import { motion } from 'motion/react';
-import { CheckCircle2, Clock, AlertCircle, Calendar, Plus, Filter } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, Calendar, Plus, Filter, Upload } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function Assignments() {
+  const handleAction = (label: string) => {
+    toast.info(`Iniciando ${label}...`);
+  };
+
+  const handleTaskClick = (title: string) => {
+    toast.info(`Atividade: ${title}`, {
+      description: 'Deseja anexar um arquivo agora?',
+      action: {
+        label: 'Anexar',
+        onClick: () => toast.success('Arquivo anexado com sucesso!')
+      }
+    });
+  };
   const tasks = [
     { id: 1, title: 'Desenvolvimento Backend Node.js', due: '18 Abr', priority: 'Alta', status: 'pendente', type: 'Projeto' },
     { id: 2, title: 'Análise de Solo Rural', due: '20 Abr', priority: 'Média', status: 'concluido', type: 'Prática' },
@@ -18,10 +32,16 @@ export default function Assignments() {
             <p className="text-gray-500">Gerencie seus prazos e entregas acadêmicas.</p>
           </div>
           <div className="flex gap-4">
-             <button className="px-6 py-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-2 text-sm font-bold shadow-sm hover:bg-gray-50 transition-all">
+             <button 
+               onClick={() => handleAction('Filtragem')}
+               className="px-6 py-3 bg-white border border-gray-200 rounded-2xl flex items-center gap-2 text-sm font-bold shadow-sm hover:bg-gray-50 transition-all active:scale-95 px-8"
+             >
                 <Filter className="w-4 h-4" /> Filtrar
              </button>
-             <button className="px-6 py-3 bg-indigo-600 text-white rounded-2xl flex items-center gap-2 text-sm font-bold shadow-lg shadow-indigo-600/20 hover:bg-slate-900 transition-all">
+             <button 
+               onClick={() => handleAction('Nova Entrega')}
+               className="px-6 py-3 bg-indigo-600 text-white rounded-2xl flex items-center gap-2 text-sm font-bold shadow-lg shadow-indigo-600/20 hover:bg-slate-900 transition-all active:scale-95 px-8"
+             >
                 <Plus className="w-4 h-4" /> Nova Entrega
              </button>
           </div>
@@ -52,7 +72,8 @@ export default function Assignments() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               key={task.id}
-              className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center gap-6 group hover:border-indigo-600/20 transition-all cursor-pointer"
+              onClick={() => handleTaskClick(task.title)}
+              className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm flex flex-col md:flex-row md:items-center gap-6 group hover:border-indigo-600/20 transition-all cursor-pointer active:scale-[0.99]"
             >
               <div className="p-4 bg-gray-50 rounded-2xl group-hover:bg-indigo-50 transition-colors">
                 <Calendar className="w-6 h-6 text-gray-400 group-hover:text-indigo-600" />
