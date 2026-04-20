@@ -5,6 +5,9 @@
 
 import { BrowserRouter, HashRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { onSnapshot, collection, doc, updateDoc, onSnapshot as onDocSnapshot } from 'firebase/firestore';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { db, auth } from './lib/firebase';
 import LandingPage from './components/LandingPage';
 import Sitemap from './components/Sitemap';
 import Navigation from './components/Navigation';
@@ -75,137 +78,94 @@ function Placeholder({ name, desc }: { name: string, desc: string }) {
 export default function App() {
   const Router = isPreview ? HashRouter : BrowserRouter;
   
-  // Simulated Database
-  const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('cetep_users');
-    const initialUsers: User[] = [
-      {
-        id: '1',
-        email: 'codernador12@gmail.com',
-        password: '000000',
-        name: 'Coordenador Pedagógico',
-        role: 'teacher',
-        grade: 'Docente',
-        course: 'Coordenação',
-        isOnline: true,
-        lastSeen: new Date().toISOString()
-      },
-      {
-        id: 't2',
-        email: 'prof.ana@cetep.com',
-        name: 'Profa. Ana Costa',
-        role: 'teacher',
-        grade: 'Docente',
-        course: 'Matemática',
-        isOnline: true,
-        lastSeen: new Date().toISOString()
-      },
-      {
-        id: 't3',
-        email: 'prof.roberto@cetep.com',
-        name: 'Prof. Roberto Melo',
-        role: 'teacher',
-        grade: 'Docente',
-        course: 'Ética',
-        isOnline: false,
-        lastSeen: new Date().toISOString()
-      },
-      {
-        id: 's1',
-        email: 'joao.silva@cetep.com',
-        name: 'João Silva',
-        role: 'student',
-        grade: '1º Ano',
-        course: 'Técnico em Informática',
-        isOnline: true,
-        lastSeen: new Date().toISOString()
-      },
-      {
-        id: 's2',
-        email: 'maria.oliveira@cetep.com',
-        name: 'Maria Oliveira',
-        role: 'student',
-        grade: '1º Ano',
-        course: 'Técnico em Informática',
-        isOnline: true,
-        lastSeen: new Date().toISOString()
-      },
-      {
-        id: 's3',
-        email: 'pedro.santos@cetep.com',
-        name: 'Pedro Santos',
-        role: 'student',
-        grade: '1º Ano',
-        course: 'Administração',
-        isOnline: true,
-        lastSeen: new Date().toISOString()
+  const [users, setUsers] = useState<User[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Sync users list in real-time
+  useEffect(() => {
+    const unsubUsers = onSnapshot(collection(db, 'users'), (snapshot) => {
+      const usersList = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as User));
+      setUsers(usersList);
+    });
+
+    return () => unsubUsers();
+  }, []);
+
+  // Handle Auth State and Presence
+  useEffect(() => {
+    const unsubAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // Sync current user profile from Firestore
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        
+        const unsubUserDoc = onDocSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const userData = docSnap.data() as User;
+            setCurrentUser({ ...userData, id: docSnap.id });
+            
+            // Mark online
+            if (!userData.isOnline) {
+              updateDoc(userDocRef, { 
+                isOnline: true, 
+                lastSeen: new Date().toISOString() 
+              });
+            }
+          }
+        });
+
+        return () => unsubUserDoc();
+      } else {
+        setCurrentUser(null);
       }
-    ];
-    return saved ? JSON.parse(saved) : initialUsers;
-  });
+      setAuthLoading(false);
+    });
 
-  // Active Session
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('cetep_current_user');
-    return saved ? JSON.parse(saved) : null;
-  });
+    return () => unsubAuth();
+  }, []);
 
-  const isAuthenticated = !!currentUser;
-  const userRole = currentUser?.role || 'student';
-
+  // Browser close presence handling
   useEffect(() => {
-    localStorage.setItem('cetep_users', JSON.stringify(users));
-  }, [users]);
+    const handleUnload = () => {
+      if (auth.currentUser) {
+        const userDocRef = doc(db, 'users', auth.currentUser.uid);
+        updateDoc(userDocRef, { isOnline: false });
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, []);
 
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem('cetep_current_user', JSON.stringify(currentUser));
-      localStorage.setItem('cetep_auth', 'true');
-      localStorage.setItem('cetep_role', currentUser.role);
-      
-      // Update isOnline status for the current user in the main users list
-      setUsers(prev => prev.map(u => 
-        u.id === currentUser.id ? { ...u, isOnline: true, lastSeen: new Date().toISOString() } : u
-      ));
-    } else {
-      localStorage.removeItem('cetep_current_user');
-      localStorage.setItem('cetep_auth', 'false');
+  const handleLogout = async () => {
+    if (auth.currentUser) {
+      const userDocRef = doc(db, 'users', auth.currentUser.uid);
+      await updateDoc(userDocRef, { isOnline: false });
     }
-  }, [currentUser]);
-
-  const login = (authenticatedUser: User) => {
-    const updatedUser = { ...authenticatedUser, isOnline: true, lastSeen: new Date().toISOString() };
-    setCurrentUser(updatedUser);
-  };
-
-  const register = (newUser: User) => {
-    const userWithStatus = { ...newUser, isOnline: true, lastSeen: new Date().toISOString() };
-    setUsers(prev => [...prev, userWithStatus]);
-    setCurrentUser(userWithStatus);
-  };
-  
-  const logout = () => {
-    if (currentUser) {
-      setUsers(prev => prev.map(u => 
-        u.id === currentUser.id ? { ...u, isOnline: false } : u
-      ));
-    }
+    await signOut(auth);
     setCurrentUser(null);
   };
 
-  const updateUsers = (newUsersList: User[]) => {
-    setUsers(newUsersList);
-    if (currentUser) {
-      const updatedSelf = newUsersList.find(u => u.id === currentUser.id);
-      if (updatedSelf) setCurrentUser(updatedSelf);
-    }
-  };
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-indigo-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-16 h-16 bg-white rounded-2xl shadow-xl flex items-center justify-center animate-bounce">
+            <Logo className="w-10 h-10" />
+          </div>
+          <p className="text-indigo-900 font-bold animate-pulse">Sincronizando com a nuvem...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const isAuthenticated = !!currentUser;
+  const userRole = currentUser?.role || 'student';
 
   return (
     <Router>
       <Toaster position="top-center" expand={true} richColors />
       <div className="min-h-screen font-sans bg-white text-slate-900 selection:bg-indigo-600/20">
-        <Navigation isAuthenticated={isAuthenticated} logout={logout} userRole={userRole} userEmail={currentUser?.email} />
+        <Navigation isAuthenticated={isAuthenticated} logout={handleLogout} userRole={userRole} userEmail={currentUser?.email} />
         
         <main>
           <Routes>
@@ -221,7 +181,7 @@ export default function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/auth" element={
-              isAuthenticated ? <Navigate to="/dashboard" /> : <Auth onLogin={login} onRegister={register} users={users} />
+              isAuthenticated ? <Navigate to="/dashboard" /> : <Auth />
             } />
             
             {/* Protected Student Routes */}
@@ -252,12 +212,11 @@ export default function App() {
               isAuthenticated && currentUser?.email === 'codernador12@gmail.com' ? 
                 <Teachers 
                   allUsers={users}
-                  onUpdateUsers={updateUsers}
                   currentUser={currentUser} 
                 /> : <Navigate to="/auth" />
             } />
             <Route path="/settings" element={
-              isAuthenticated ? <Settings user={currentUser} /> : <Navigate to="/auth" />
+              isAuthenticated ? <Settings user={currentUser} onLogout={handleLogout} /> : <Navigate to="/auth" />
             } />
             
             {/* Catch-all Fallback */}

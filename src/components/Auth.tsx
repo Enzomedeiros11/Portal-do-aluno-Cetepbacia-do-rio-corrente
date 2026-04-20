@@ -1,18 +1,15 @@
 import { useState, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { LogIn, UserPlus, GraduationCap, ArrowRight, Mail, Lock, User as UserIcon, BookOpen, Calendar, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { LogIn, UserPlus, ArrowRight, Mail, Lock, User as UserIcon, BookOpen, Calendar, AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
 import Logo from './Logo';
 import { User, COURSES, GRADES } from '../types';
 
 type AuthMode = 'login' | 'register';
 
-interface AuthProps {
-  onLogin: (user: User) => void;
-  onRegister: (user: User) => void;
-  users: User[];
-}
-
-export default function Auth({ onLogin, onRegister, users }: AuthProps) {
+export default function Auth() {
   const [mode, setMode] = useState<AuthMode>('login');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,37 +27,56 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
     setError(null);
     setLoading(true);
 
-    // Simulação curta de carregamento
-    setTimeout(() => {
+    try {
       if (mode === 'login') {
-        const user = users.find(u => u.email === formData.email && u.password === formData.password);
-        if (user) {
-          onLogin(user);
-        } else {
-          setError('E-mail ou senha incorretos.');
+        const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+        const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+        
+        if (!userDoc.exists()) {
+          // If for some reason auth exists but doc doesn't, we might need to handle it
+          // But in a healthy system, this shouldn't happen often
+          setError('Perfil de usuário não encontrado. Tente se cadastrar novamente.');
+          await auth.signOut();
         }
       } else {
         // Registration
-        if (users.some(u => u.email === formData.email)) {
-          setError('Este e-mail já está cadastrado.');
-        } else if (formData.name && formData.email && formData.password) {
-          const newUser: User = {
-            id: Date.now().toString(),
-            email: formData.email,
-            password: formData.password,
-            name: formData.name,
-            role: 'student', // Always student by default via register
-            grade: formData.grade,
-            course: formData.course,
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.name}`
-          };
-          onRegister(newUser);
-        } else {
-          setError('Por favor, preencha todos os campos.');
+        if (!formData.name || !formData.email || !formData.password) {
+          throw new Error('Por favor, preencha todos os campos obrigatórios.');
         }
+
+        const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        
+        // Create user profile in Firestore
+        const newUser: User = {
+          id: userCredential.user.uid,
+          email: formData.email,
+          name: formData.name,
+          role: 'student',
+          grade: formData.grade,
+          course: formData.course,
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.name}`,
+          isOnline: true,
+          lastSeen: new Date().toISOString()
+        };
+
+        await setDoc(doc(db, 'users', userCredential.user.uid), newUser);
       }
+    } catch (err: any) {
+      console.error('Auth Error:', err);
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        setError('E-mail ou senha incorretos.');
+      } else if (err.code === 'auth/email-already-in-use') {
+        setError('Este e-mail já está em uso.');
+      } else if (err.code === 'auth/weak-password') {
+        setError('A senha deve ter pelo menos 6 caracteres.');
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError('O login por e-mail/senha não está habilitado no Firebase Console.');
+      } else {
+        setError('Ocorreu um erro ao processar. Tente novamente.');
+      }
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   return (

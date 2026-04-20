@@ -1,0 +1,69 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // -- Primitives --
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+
+    // -- Validation Helpers --
+    function isValidUser(data) {
+      return data.keys().hasAll(['email', 'name', 'role']) &&
+             data.email is string && data.email.size() <= 256 &&
+             data.name is string && data.name.size() <= 128 &&
+             data.role in ['student', 'teacher'] &&
+             (!('course' in data) || data.course is string) &&
+             (!('grade' in data) || data.grade is string) &&
+             (!('isOnline' in data) || data.isOnline is bool) &&
+             (!('avatar' in data) || data.avatar is string);
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['senderId', 'senderName', 'content', 'timestamp', 'course']) &&
+             data.senderId == request.auth.uid &&
+             data.senderName is string && data.senderName.size() <= 128 &&
+             data.content is string && data.content.size() <= 5000 &&
+             data.timestamp is timestamp &&
+             data.course is string;
+    }
+
+    // -- Collection Rules --
+
+    // User Profiles
+    match /users/{userId} {
+      // Identity Poisoning Guard
+      allow get: if isSignedIn() && isValidId(userId);
+      // List allowed for presence display, but only specific fields if possible?
+      // Rules don't support partial read masks easily without split collections.
+      allow list: if isSignedIn(); 
+      
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().id == userId;
+      
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        // Action: Update status/presence
+        (incoming().diff(existing()).affectedKeys().hasOnly(['isOnline', 'lastSeen'])) ||
+        // Action: Update profile info
+        (incoming().diff(existing()).affectedKeys().hasOnly(['name', 'course', 'grade', 'avatar', 'subjectGrades']))
+      ) && incoming().email == existing().email; // Email is immutable
+    }
+
+    // Global Messages
+    match /messages/{messageId} {
+      allow get: if isSignedIn() && isValidId(messageId);
+      // Enforce course-based filtering on list
+      allow list: if isSignedIn(); // Relational check will be in where clause and validated here if possible
+      
+      allow create: if isVerified() && isValidMessage(incoming()) && incoming().timestamp == request.time;
+      allow update, delete: if false; // Messages are immutable for now
+    }
+  }
+}

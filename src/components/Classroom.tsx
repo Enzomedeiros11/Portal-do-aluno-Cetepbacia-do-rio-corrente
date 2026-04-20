@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
+import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { 
   Layout, 
   Users, 
@@ -38,26 +40,42 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   const [selectedClass, setSelectedClass] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<Message[]>(() => {
-    const saved = localStorage.getItem('cetep_messages');
-    return saved ? JSON.parse(saved) : [
-      {
-        id: '1',
-        sender: 'ricardo_teacher',
-        senderName: 'Prof. Ricardo',
-        role: 'teacher',
-        content: 'Bem-vindos à nossa sala virtual! Aqui vocês podem tirar dúvidas e acompanhar os materiais.',
-        timestamp: '15:20'
-      }
-    ];
-  });
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Sync Messages from Firestore
   useEffect(() => {
-    localStorage.setItem('cetep_messages', JSON.stringify(messages));
+    if (!selectedClass) return;
+
+    const q = query(
+      collection(db, 'messages'),
+      where('course', '==', selectedClass.title),
+      orderBy('timestamp', 'asc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgs = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          sender: data.senderId,
+          senderName: data.senderName,
+          role: data.role,
+          content: data.content,
+          timestamp: data.timestamp?.toDate().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) || '...'
+        } as Message;
+      });
+      setMessages(msgs);
+      setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+    });
+
+    return () => unsubscribe();
+  }, [selectedClass]);
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, selectedClass]);
+  }, [messages]);
 
   const informaticsClasses = [
     { id: 1, title: 'Banco de Dados', teacher: 'Prof. Ricardo', tasks: 1, students: 28, color: 'bg-indigo-600', description: 'Modelagem e implementação de bancos de dados relacionais.' },
@@ -112,35 +130,23 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
     toast.success(`Iniciando download de: ${fileName}`);
   };
 
-  const handleSendMessage = (e: FormEvent) => {
+  const handleSendMessage = async (e: FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() || !user || !selectedClass) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      sender: user?.id || 'anonymous',
-      senderName: user?.name || 'Estudante',
-      role: user?.role || 'student',
-      content: message,
-      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMessages([...messages, newMessage]);
-    setMessage('');
-
-    // Simulate Teacher Response if it's a doubt
-    if (message.toLowerCase().includes('?') || message.toLowerCase().includes('professor') || message.toLowerCase().includes('duvida')) {
-      setTimeout(() => {
-        const teacherResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          sender: 'ricardo_teacher',
-          senderName: selectedClass?.teacher || 'Professor',
-          role: 'teacher',
-          content: `Olá ${user?.name.split(' ')[0]}, vi sua mensagem. Vou verificar isso agora mesmo para você!`,
-          timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        };
-        setMessages(prev => [...prev, teacherResponse]);
-      }, 2000);
+    try {
+      await addDoc(collection(db, 'messages'), {
+        senderId: user.id,
+        senderName: user.name,
+        role: user.role,
+        content: message,
+        course: selectedClass.title,
+        timestamp: serverTimestamp()
+      });
+      setMessage('');
+    } catch (err) {
+      console.error('Error sending message:', err);
+      toast.error('Erro ao enviar mensagem.');
     }
   };
 
