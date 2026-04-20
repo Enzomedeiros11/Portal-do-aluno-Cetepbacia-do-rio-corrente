@@ -75,18 +75,25 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   const isInformatica = user?.course?.toLowerCase().includes('informática') || user?.role === 'teacher';
   const initialClasses = isInformatica ? informaticsClasses : genericClasses;
 
-  const onlineStudents = allUsers.filter(u => 
+  const classStudents = allUsers.filter(u => 
     u.id !== user?.id && 
-    u.isOnline && 
     u.course === user?.course && 
     u.role === 'student'
-  );
+  ).sort((a, b) => {
+    // Online first, then alphabetically
+    if (a.isOnline === b.isOnline) return a.name.localeCompare(b.name);
+    return a.isOnline ? -1 : 1;
+  });
 
-  const onlineStaff = allUsers.filter(u => 
+  const officialStaff = allUsers.filter(u => 
     u.id !== user?.id && 
-    u.isOnline && 
     u.role === 'teacher'
-  );
+  ).sort((a, b) => {
+    if (a.isOnline === b.isOnline) return a.name.localeCompare(b.name);
+    return a.isOnline ? -1 : 1;
+  });
+
+  const onlineCount = allUsers.filter(u => u.isOnline).length;
 
   const displayClasses = initialClasses.filter(cls => 
     cls.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -255,56 +262,56 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
 
             <div className="bg-white p-6 rounded-[32px] border border-gray-200 shadow-sm">
                <div className="flex items-center justify-between mb-6">
-                 <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest">Membros Online</h4>
-                 <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-50 rounded-full">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                    <span className="text-[10px] font-bold text-emerald-600">{onlineStudents.length + onlineStaff.length + 1}</span>
+                 <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest">Membros da Turma</h4>
+                 <div className="flex items-center gap-1.5 px-2 py-1 bg-indigo-50 rounded-full">
+                    <Users className="w-3 h-3 text-indigo-600" />
+                    <span className="text-[10px] font-bold text-indigo-600">{classStudents.length + officialStaff.length + 1}</span>
                  </div>
                </div>
                
                <div className="space-y-6">
                   {/* Official Staff Section */}
-                  {(onlineStaff.length > 0 || user?.role === 'teacher') && (
-                    <div className="space-y-3">
-                       <h5 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
-                          <ShieldCheck className="w-3 h-3" /> Officiais
-                       </h5>
-                       
-                       {user?.role === 'teacher' && (
-                         <div className="flex items-center gap-3 bg-indigo-50/50 p-2 rounded-2xl border border-indigo-100/50">
-                            <div className="relative">
-                               <div className="w-10 h-10 rounded-full bg-indigo-900 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden">
-                                  <img src={user?.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                               </div>
-                               <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
-                            </div>
-                            <div>
-                               <p className="text-sm font-bold text-indigo-950 leading-none">Você (Professor)</p>
-                               <p className="text-[9px] text-indigo-500 font-black mt-1 uppercase">Docente Online</p>
-                            </div>
-                         </div>
-                       )}
+                  <div className="space-y-3">
+                     <h5 className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+                        <ShieldCheck className="w-3 h-3" /> Officiais
+                     </h5>
+                     
+                     {user?.role === 'teacher' && (
+                       <div className="flex items-center gap-3 bg-indigo-50/50 p-2 rounded-2xl border border-indigo-100/50">
+                          <div className="relative">
+                             <div className="w-10 h-10 rounded-full bg-indigo-900 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden">
+                                <img src={user?.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                             </div>
+                             <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
+                          </div>
+                          <div>
+                             <p className="text-sm font-bold text-indigo-950 leading-none">Você</p>
+                             <p className="text-[9px] text-indigo-500 font-black mt-1 uppercase">Docente • Online</p>
+                          </div>
+                       </div>
+                     )}
 
-                       {onlineStaff.map(staff => (
-                         <div key={staff.id} className="flex items-center gap-3">
-                            <div className="relative">
-                               <div className="w-10 h-10 rounded-full bg-indigo-900 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden text-white">
-                                  {staff.avatar ? (
-                                    <img src={staff.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                                  ) : (
-                                    <UserIcon className="w-5 h-5" />
-                                  )}
-                               </div>
-                               <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
-                            </div>
-                            <div>
-                               <p className="text-sm font-bold text-slate-900 leading-none">{staff.name}</p>
-                               <p className="text-[9px] text-indigo-500 font-black mt-1 uppercase">Equipe Pedagógica</p>
-                            </div>
-                         </div>
-                       ))}
-                    </div>
-                  )}
+                     {officialStaff.map(staff => (
+                       <div key={staff.id} className={`flex items-center gap-3 transition-opacity ${staff.isOnline ? 'opacity-100' : 'opacity-60'}`}>
+                          <div className="relative">
+                             <div className="w-10 h-10 rounded-full bg-indigo-900 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden text-white">
+                                {staff.avatar ? (
+                                  <img src={staff.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                ) : (
+                                  <UserIcon className="w-5 h-5" />
+                                )}
+                             </div>
+                             <div className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full ${staff.isOnline ? 'bg-emerald-500' : 'bg-gray-300'}`} />
+                          </div>
+                          <div>
+                             <p className="text-sm font-bold text-slate-900 leading-none">{staff.name}</p>
+                             <p className="text-[9px] text-indigo-500 font-black mt-1 uppercase">
+                                {staff.isOnline ? 'Equipe • Online' : 'Ausente'}
+                             </p>
+                          </div>
+                       </div>
+                     ))}
+                  </div>
 
                   {/* Students Section */}
                   <div className="space-y-3">
@@ -327,8 +334,8 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                         </div>
                      )}
 
-                     {onlineStudents.map(student => (
-                       <div key={student.id} className="flex items-center gap-3 opacity-90 hover:opacity-100 transition-opacity">
+                     {classStudents.map(student => (
+                       <div key={student.id} className={`flex items-center gap-3 transition-opacity ${student.isOnline ? 'opacity-100' : 'opacity-50'}`}>
                           <div className="relative">
                              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden text-gray-400">
                                 {student.avatar ? (
@@ -337,18 +344,20 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                                   <UserIcon className="w-5 h-5" />
                                 )}
                              </div>
-                             <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
+                             <div className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full ${student.isOnline ? 'bg-emerald-500' : 'bg-gray-300'}`} />
                           </div>
                           <div>
                              <p className="text-sm font-bold text-slate-700 leading-none">{student.name}</p>
-                             <p className="text-[10px] text-gray-400 font-medium mt-1">Conectado</p>
+                             <p className="text-[10px] text-gray-400 font-medium mt-1">
+                                {student.isOnline ? 'Conectado' : 'Offline'}
+                             </p>
                           </div>
                        </div>
                      ))}
                   </div>
 
-                  {onlineStudents.length === 0 && user?.role !== 'student' && onlineStaff.length === 0 && user?.role !== 'teacher' && (
-                    <p className="text-[10px] text-gray-400 font-medium italic text-center py-2">Ninguém online no momento.</p>
+                  {classStudents.length === 0 && user?.role !== 'student' && officialStaff.length === 0 && user?.role !== 'teacher' && (
+                    <p className="text-[10px] text-gray-400 font-medium italic text-center py-2">Nenhum membro encontrado.</p>
                   )}
                </div>
             </div>
