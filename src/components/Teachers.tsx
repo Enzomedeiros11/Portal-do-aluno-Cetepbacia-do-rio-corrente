@@ -1,17 +1,16 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { Users, Search, Plus, Save, Filter, Trash2, CheckCircle, BookOpen } from 'lucide-react';
 import { useState, FormEvent, useEffect } from 'react';
-import { doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
 import { User, COURSES, GRADES } from '../types';
 import { toast } from 'sonner';
 
 interface TeachersProps {
   allUsers: User[];
+  onUpdateUsers: (newUsers: User[]) => void;
   currentUser: User | null;
 }
 
-export default function Teachers({ allUsers, currentUser }: TeachersProps) {
+export default function Teachers({ allUsers, onUpdateUsers, currentUser }: TeachersProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterCourse, setFilterCourse] = useState('Todos');
@@ -44,43 +43,32 @@ export default function Teachers({ allUsers, currentUser }: TeachersProps) {
 
   const [newStudent, setNewStudent] = useState({ name: '', curso: 'Técnico em Informática', grade: '1º Ano' });
 
-  const handleAddStudent = async (e: FormEvent) => {
+  const handleAddStudent = (e: FormEvent) => {
     e.preventDefault();
     if (newStudent.name) {
-      const studentId = Date.now().toString(); // Temporary ID or let Firebase decide
-      const studentToAdd: any = { 
+      const studentToAdd: User = { 
+        id: Date.now().toString(), 
         name: newStudent.name, 
-        email: `${newStudent.name.toLowerCase().replace(' ', '.')}@cetep.com`,
+        email: `${newStudent.name.toLowerCase().replace(' ', '.')}@cetep.com`, // Simulating email
         role: 'student',
         course: newStudent.curso,
         grade: newStudent.grade,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${newStudent.name}`,
-        subjectGrades: {},
-        isOnline: false,
-        lastSeen: new Date().toISOString()
+        subjectGrades: {}
       };
-      
-      try {
-        await setDoc(doc(db, 'users', studentId), studentToAdd);
-        setNewStudent({ name: '', curso: 'Técnico em Informática', grade: '1º Ano' });
-        setIsModalOpen(false);
-        toast.success(`Estudante ${studentToAdd.name} adicionado com sucesso!`);
-      } catch (err) {
-        toast.error('Erro ao adicionar estudante.');
-      }
+      onUpdateUsers([...allUsers, studentToAdd]);
+      setNewStudent({ name: '', curso: 'Técnico em Informática', grade: '1º Ano' });
+      setIsModalOpen(false);
+      toast.success(`Estudante ${studentToAdd.name} adicionado com sucesso!`);
     } else {
       toast.error('Por favor, preencha o nome do aluno.');
     }
   };
 
-  const handleRemoveStudent = async (id: string, name: string) => {
+  const handleRemoveStudent = (id: string, name: string) => {
     if (confirm(`Tem certeza que deseja remover ${name}?`)) {
-      try {
-        await deleteDoc(doc(db, 'users', id));
-        toast.success(`${name} removido da lista.`);
-      } catch (err) {
-        toast.error('Erro ao remover estudante.');
-      }
+      onUpdateUsers(allUsers.filter(s => s.id !== id));
+      toast.success(`${name} removido da lista.`);
     }
   };
 
@@ -94,24 +82,22 @@ export default function Teachers({ allUsers, currentUser }: TeachersProps) {
     }));
   };
 
-  const handleSaveGrades = async () => {
-    toast.info('Salvando notas no banco de dados...');
-    try {
-      const promises = allUsers
-        .filter(u => u.role === 'student' && localGrades[u.id])
-        .map(u => {
-          const userDocRef = doc(db, 'users', u.id);
-          return updateDoc(userDocRef, {
-            [`subjectGrades.${selectedSubject}`]: localGrades[u.id]
-          });
-        });
-      
-      await Promise.all(promises);
-      toast.success('Todas as notas foram sincronizadas com sucesso!');
-    } catch (err) {
-      console.error('Error saving grades:', err);
-      toast.error('Erro ao salvar as notas. Verifique sua conexão.');
-    }
+  const handleSaveGrades = () => {
+    const updatedUsers = allUsers.map(u => {
+      if (u.role === 'student' && localGrades[u.id]) {
+        return {
+          ...u,
+          subjectGrades: {
+            ...(u.subjectGrades || {}),
+            [selectedSubject]: localGrades[u.id]
+          }
+        };
+      }
+      return u;
+    });
+    
+    onUpdateUsers(updatedUsers);
+    toast.success(`Notas de ${selectedSubject} salvas com sucesso!`);
   };
 
   const ALL_SUBJECTS = [

@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { User as UserIcon, Bell, Lock, Palette, Globe, Save, ChevronRight, LogOut, ShieldCheck } from 'lucide-react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
 import { User } from '../types';
 import { toast } from 'sonner';
 
 interface SettingsProps {
   user: User | null;
-  onLogout: () => void;
+  onLogout?: () => void;
 }
 
 export default function Settings({ user, onLogout }: SettingsProps) {
@@ -30,31 +28,18 @@ export default function Settings({ user, onLogout }: SettingsProps) {
     { id: 'appearance', icon: Palette, label: 'Aparência' },
   ];
 
-  const handleSave = async () => {
-    if (!user) return;
+  const handleSave = () => {
     setIsSaving(true);
-    const toastId = toast.loading('Salvando suas alterações no banco de dados...');
-    
-    try {
-      const userDocRef = doc(db, 'users', user.id);
-      await updateDoc(userDocRef, {
-        // Here we would typically have inputs for these, but since the UI is currently static 
-        // placeholders, we'll simulate a successful write to the cloud.
-        lastSeen: new Date().toISOString() 
-      });
-      
+    toast.loading('Salvando suas alterações...', { id: 'save-settings' });
+    setTimeout(() => {
       setIsSaving(false);
-      toast.success('Alterações sincronizadas em todos os aparelhos!', { id: toastId });
-    } catch (err) {
-      console.error('Error saving settings:', err);
-      setIsSaving(false);
-      toast.error('Erro ao salvar no servidor.', { id: toastId });
-    }
+      toast.success('Alterações salvas com sucesso!', { id: 'save-settings' });
+    }, 1500);
   };
 
   const handleLogoutAction = () => {
     if (confirm('Deseja realmente sair da conta?')) {
-      onLogout();
+      onLogout?.();
       toast.success('Sessão encerrada com sucesso!');
     }
   };
