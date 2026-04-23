@@ -23,7 +23,6 @@ import Settings from './components/Settings';
 import Logo from './components/Logo';
 import { User } from './types';
 import { Toaster, toast } from 'sonner';
-import { supabase } from './lib/supabase';
 
 /**
  * Detects if the current environment is a cloud-based preview/dev environment.
@@ -78,70 +77,27 @@ export default function App() {
   
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchUserProfile(session.user.id, session.user.email!);
-      } else {
-        setLoading(false);
-      }
-    });
+    // Basic simulation for session persistence
+    const savedUser = localStorage.getItem('cetep_user');
+    const savedAllUsers = localStorage.getItem('cetep_all_users');
+    
+    if (savedAllUsers) {
+      setAllUsers(JSON.parse(savedAllUsers));
+    }
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        fetchUserProfile(session.user.id, session.user.email!);
-      } else {
-        setCurrentUser(null);
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
+    }
+    
+    setLoading(false);
   }, []);
 
-  const fetchUserProfile = async (uid: string, email: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select('*')
-        .eq('id', uid)
-        .single();
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 is not found
-         console.error('Error fetching profile:', error);
-      }
-
-      if (data) {
-        setCurrentUser({
-          id: data.id,
-          email: data.email,
-          name: data.nome,
-          role: data.tipo as 'student' | 'teacher',
-          grade: data.grade || '1º Ano', // Added grade/course if they exist in schema
-          course: data.curso || 'Técnico em Informática',
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.nome}`,
-          isOnline: true,
-          lastSeen: new Date().toISOString()
-        });
-      } else {
-        // Fallback for cases where Auth user exists but profile doesn't yet
-        setCurrentUser({
-          id: uid,
-          email: email,
-          name: email.split('@')[0],
-          role: 'student',
-          isOnline: true,
-          lastSeen: new Date().toISOString()
-        });
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  const updateAllUsers = (newUsers: User[]) => {
+    setAllUsers(newUsers);
+    localStorage.setItem('cetep_all_users', JSON.stringify(newUsers));
   };
 
   useEffect(() => {
@@ -150,15 +106,18 @@ export default function App() {
 
   const login = (authenticatedUser: User) => {
     setCurrentUser(authenticatedUser);
+    localStorage.setItem('cetep_user', JSON.stringify(authenticatedUser));
   };
 
   const register = (newUser: User) => {
     setCurrentUser(newUser);
+    localStorage.setItem('cetep_user', JSON.stringify(newUser));
+    updateAllUsers([...allUsers, newUser]);
   };
   
-  const logout = async () => {
-    await supabase.auth.signOut();
+  const logout = () => {
     setCurrentUser(null);
+    localStorage.removeItem('cetep_user');
   };
 
   const isAuthenticated = !!currentUser;
@@ -195,7 +154,7 @@ export default function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/auth" element={
-              isAuthenticated ? <Navigate to="/dashboard" /> : <Auth onLogin={login} onRegister={register} users={[]} />
+              isAuthenticated ? <Navigate to="/dashboard" /> : <Auth onLogin={login} onRegister={register} users={allUsers} />
             } />
             
             {/* Protected Student Routes */}
@@ -206,7 +165,7 @@ export default function App() {
               isAuthenticated ? <Journal /> : <Navigate to="/auth" />
             } />
             <Route path="/classroom" element={
-              isAuthenticated ? <Classroom user={currentUser} allUsers={[]} /> : <Navigate to="/auth" />
+              isAuthenticated ? <Classroom user={currentUser} allUsers={allUsers} /> : <Navigate to="/auth" />
             } />
             <Route path="/extra-courses" element={
               isAuthenticated ? <ExtraCourses /> : <Navigate to="/auth" />
@@ -225,8 +184,8 @@ export default function App() {
             <Route path="/teachers" element={
               isAuthenticated && currentUser?.email === 'codernador12@gmail.com' ? 
                 <Teachers 
-                  allUsers={[]}
-                  onUpdateUsers={() => {}}
+                  allUsers={allUsers}
+                  onUpdateUsers={updateAllUsers}
                   currentUser={currentUser} 
                 /> : <Navigate to="/auth" />
             } />

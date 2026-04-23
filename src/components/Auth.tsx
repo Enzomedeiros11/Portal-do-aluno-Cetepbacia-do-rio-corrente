@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { LogIn, UserPlus, ArrowRight, Mail, Lock, User as UserIcon, BookOpen, Calendar, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Logo from './Logo';
 import { User, COURSES, GRADES } from '../types';
-import { supabase } from '../lib/supabase';
 
 type AuthMode = 'login' | 'register';
 
