@@ -19,6 +19,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { User } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface ClassroomProps {
   user: User | null;
@@ -38,24 +39,53 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   const [selectedClass, setSelectedClass] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<Message[]>(() => {
-    const saved = localStorage.getItem('cetep_messages');
-    return saved ? JSON.parse(saved) : [
-      {
-        id: '1',
-        sender: 'ricardo_teacher',
-        senderName: 'Prof. Ricardo',
-        role: 'teacher',
-        content: 'Bem-vindos à nossa sala virtual! Aqui vocês podem tirar dúvidas e acompanhar os materiais.',
-        timestamp: '15:20'
-      }
-    ];
-  });
-
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    localStorage.setItem('cetep_messages', JSON.stringify(messages));
+    if (user) {
+      fetchEnrollments();
+      fetchMessages();
+      
+      // Subscribe to real-time messages
+      const channel = supabase
+        .channel('classroom_messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens' }, (payload) => {
+          setMessages(prev => [...prev, payload.new as Message]);
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
+
+  const fetchEnrollments = async () => {
+    const { data, error } = await supabase
+      .from('matriculas')
+      .select('curso')
+      .eq('usuario_id', user?.id);
+    
+    if (data) {
+      setEnrolledCourses(data.map(m => m.curso));
+    }
+  };
+
+  const fetchMessages = async () => {
+    const { data, error } = await supabase
+      .from('mensagens')
+      .select('*')
+      .order('timestamp', { ascending: true })
+      .limit(50);
+    
+    if (data) {
+      setMessages(data as any);
+    }
+  };
+
+  useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, selectedClass]);
 
@@ -112,35 +142,24 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
     toast.success(`Iniciando download de: ${fileName}`);
   };
 
-  const handleSendMessage = (e: FormEvent) => {
+  const handleSendMessage = async (e: FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
+    const newMessage = {
       sender: user?.id || 'anonymous',
       senderName: user?.name || 'Estudante',
       role: user?.role || 'student',
       content: message,
-      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toISOString()
     };
 
-    setMessages([...messages, newMessage]);
-    setMessage('');
-
-    // Simulate Teacher Response if it's a doubt
-    if (message.toLowerCase().includes('?') || message.toLowerCase().includes('professor') || message.toLowerCase().includes('duvida')) {
-      setTimeout(() => {
-        const teacherResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          sender: 'ricardo_teacher',
-          senderName: selectedClass?.teacher || 'Professor',
-          role: 'teacher',
-          content: `Olá ${user?.name.split(' ')[0]}, vi sua mensagem. Vou verificar isso agora mesmo para você!`,
-          timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        };
-        setMessages(prev => [...prev, teacherResponse]);
-      }, 2000);
+    const { error } = await supabase.from('mensagens').insert([newMessage]);
+    
+    if (error) {
+      toast.error('Erro ao enviar mensagem');
+    } else {
+      setMessage('');
     }
   };
 

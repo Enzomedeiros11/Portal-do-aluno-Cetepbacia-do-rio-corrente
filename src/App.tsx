@@ -23,6 +23,7 @@ import Settings from './components/Settings';
 import Logo from './components/Logo';
 import { User } from './types';
 import { Toaster, toast } from 'sonner';
+import { supabase } from './lib/supabase';
 
 /**
  * Detects if the current environment is a cloud-based preview/dev environment.
@@ -75,80 +76,104 @@ function Placeholder({ name, desc }: { name: string, desc: string }) {
 export default function App() {
   const Router = isPreview ? HashRouter : BrowserRouter;
   
-  const [users, setUsers] = useState<User[]>(() => {
-    const saved = localStorage.getItem('cetep_users');
-    const initialUsers: User[] = [
-      {
-        id: '1',
-        email: 'codernador12@gmail.com',
-        name: 'Coordenador Pedagógico',
-        role: 'teacher',
-        grade: 'Docente',
-        course: 'Coordenação',
-        isOnline: true,
-        lastSeen: new Date().toISOString()
-      },
-      {
-        id: 's1',
-        email: 'joao.silva@cetep.com',
-        name: 'João Silva',
-        role: 'student',
-        grade: '1º Ano',
-        course: 'Técnico em Informática',
-        isOnline: true,
-        lastSeen: new Date().toISOString()
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchUserProfile(session.user.id, session.user.email!);
+      } else {
+        setLoading(false);
       }
-    ];
-    return saved ? JSON.parse(saved) : initialUsers;
-  });
+    });
 
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('cetep_current_user');
-    return saved ? JSON.parse(saved) : null;
-  });
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        fetchUserProfile(session.user.id, session.user.email!);
+      } else {
+        setCurrentUser(null);
+        setLoading(false);
+      }
+    });
 
-  useEffect(() => {
-    localStorage.setItem('cetep_users', JSON.stringify(users));
-  }, [users]);
+    return () => subscription.unsubscribe();
+  }, []);
 
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem('cetep_current_user', JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem('cetep_current_user');
+  const fetchUserProfile = async (uid: string, email: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('id', uid)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is not found
+         console.error('Error fetching profile:', error);
+      }
+
+      if (data) {
+        setCurrentUser({
+          id: data.id,
+          email: data.email,
+          name: data.nome,
+          role: data.tipo as 'student' | 'teacher',
+          grade: data.grade || '1º Ano', // Added grade/course if they exist in schema
+          course: data.curso || 'Técnico em Informática',
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.nome}`,
+          isOnline: true,
+          lastSeen: new Date().toISOString()
+        });
+      } else {
+        // Fallback for cases where Auth user exists but profile doesn't yet
+        setCurrentUser({
+          id: uid,
+          email: email,
+          name: email.split('@')[0],
+          role: 'student',
+          isOnline: true,
+          lastSeen: new Date().toISOString()
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  }, [currentUser]);
+  };
 
   useEffect(() => {
     document.title = "PORTAL DO ALUNO CETEP";
   }, []);
 
   const login = (authenticatedUser: User) => {
-    const updatedUser = { ...authenticatedUser, isOnline: true, lastSeen: new Date().toISOString() };
-    setCurrentUser(updatedUser);
+    setCurrentUser(authenticatedUser);
   };
 
   const register = (newUser: User) => {
-    const userWithStatus = { ...newUser, isOnline: true, lastSeen: new Date().toISOString() };
-    setUsers(prev => [...prev, userWithStatus]);
-    setCurrentUser(userWithStatus);
+    setCurrentUser(newUser);
   };
   
-  const logout = () => {
-    if (currentUser) {
-      setUsers(prev => prev.map(u => 
-        u.id === currentUser.id ? { ...u, isOnline: false } : u
-      ));
-    }
+  const logout = async () => {
+    await supabase.auth.signOut();
     setCurrentUser(null);
-  };
-
-  const updateUsers = (newList: User[]) => {
-    setUsers(newList);
   };
 
   const isAuthenticated = !!currentUser;
   const userRole = currentUser?.role || 'student';
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-600/10 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6" />
+          <p className="text-indigo-600 font-black uppercase tracking-widest text-[10px]">Conectando ao Portal...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Router>
@@ -170,7 +195,7 @@ export default function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/auth" element={
-              isAuthenticated ? <Navigate to="/dashboard" /> : <Auth onLogin={login} onRegister={register} users={users} />
+              isAuthenticated ? <Navigate to="/dashboard" /> : <Auth onLogin={login} onRegister={register} users={[]} />
             } />
             
             {/* Protected Student Routes */}
@@ -181,7 +206,7 @@ export default function App() {
               isAuthenticated ? <Journal /> : <Navigate to="/auth" />
             } />
             <Route path="/classroom" element={
-              isAuthenticated ? <Classroom user={currentUser} allUsers={users} /> : <Navigate to="/auth" />
+              isAuthenticated ? <Classroom user={currentUser} allUsers={[]} /> : <Navigate to="/auth" />
             } />
             <Route path="/extra-courses" element={
               isAuthenticated ? <ExtraCourses /> : <Navigate to="/auth" />
@@ -200,8 +225,8 @@ export default function App() {
             <Route path="/teachers" element={
               isAuthenticated && currentUser?.email === 'codernador12@gmail.com' ? 
                 <Teachers 
-                  allUsers={users}
-                  onUpdateUsers={updateUsers}
+                  allUsers={[]}
+                  onUpdateUsers={() => {}}
                   currentUser={currentUser} 
                 /> : <Navigate to="/auth" />
             } />
