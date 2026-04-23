@@ -20,12 +20,6 @@ export default function Journal() {
       date: '16 Mai 2024',
       category: 'Educação',
       desc: 'Nossa instituição continua transformando vidas através da educação profissional de excelência na região.'
-    },
-    {
-      title: '1º Simulado da Escola - CETEP',
-      date: '14 Abr 2024',
-      category: 'Avaliação',
-      desc: 'Realizamos nosso primeiro simulado preparatório do ano. Clique para ver o vídeo da cobertura completa.'
     }
   ];
 
