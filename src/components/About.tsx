@@ -4,13 +4,13 @@ import Logo from './Logo';
 
 export default function About() {
   const values = [
-    { icon: Target, title: 'Missão', desc: 'Promover educação profissional integrada ao trabalho, ciência e tecnologia, visando o desenvolvimento humano e socioeconômico.' },
-    { icon: Eye, title: 'Visão', desc: 'Ser referência na Bacia do Rio Corrente em excelência educacional e formação técnica de jovens e adultos.' },
-    { icon: Shield, title: 'Valores', desc: 'Transparência, ética, compromisso social, inovação e sustentabilidade em todas as nossas ações educativas.' }
+    { icon: Target, title: 'Missão', desc: 'Promover educação profissional integrada ao trabalho, ciência e tecnologia, visando o desenvolvimento humano.' },
+    { icon: Eye, title: 'Visão', desc: 'Ser referência na Bacia do Rio Corrente em excelência educacional e formação técnica de qualidade.' },
+    { icon: Shield, title: 'Valores', desc: 'Ética, compromisso social, inovação e sustentabilidade em todas as nossas ações educativas.' }
   ];
 
   return (
-    <div className="min-h-screen bg-white pt-24 pb-20">
+    <div className="min-h-screen bg-slate-100 pt-24 pb-20">
       <div className="container mx-auto px-6 max-w-6xl">
         {/* Hero Section */}
         <section className="text-center mb-24">

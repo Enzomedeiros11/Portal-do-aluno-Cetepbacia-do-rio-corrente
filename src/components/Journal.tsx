@@ -16,6 +16,12 @@ export default function Journal() {
 
   const news = [
     {
+      title: 'CETEP - Bacia do Rio Corrente',
+      date: '16 Mai 2024',
+      category: 'Educação',
+      desc: 'Nossa instituição continua transformando vidas através da educação profissional de excelência na região.'
+    },
+    {
       title: '1º Simulado da Escola - CETEP',
       date: '14 Abr 2024',
       category: 'Avaliação',
