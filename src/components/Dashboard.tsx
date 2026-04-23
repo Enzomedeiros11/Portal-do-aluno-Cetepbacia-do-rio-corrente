@@ -28,6 +28,7 @@ export default function Dashboard({ user }: DashboardProps) {
   };
 
   const handleDownload = (doc: string) => {
+    // ... existing download logic ...
     if (doc === 'Boletim') {
       toast.info('Gerando seu Boletim Escolar Profissional...');
       
@@ -134,129 +135,238 @@ PARA FINS OFICIAIS, SOLICITE O DOCUMENTO ASSINADO NA SECRETARIA.
     }, 1500);
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1 }
+  };
+
   return (
-    <div className="min-h-screen bg-[#F8F9FA] pt-24 pb-12 px-6 font-sans">
-      <div className="container mx-auto max-w-7xl">
-        {/* Simplified Header */}
-        <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+    <div className="min-h-screen bg-slate-50 pt-28 pb-12 px-6 font-sans relative overflow-hidden">
+      {/* Dynamic Background elements optimized */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[80px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-[60px] pointer-events-none" />
+
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="container mx-auto max-w-7xl relative z-10"
+      >
+        {/* Modern Header */}
+        <motion.header variants={itemVariants} className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-12">
           <div>
-            <h1 className="text-4xl font-bold text-slate-900 tracking-tight">
-              Olá, {displayUser.name}! 👋
+            <motion.div 
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-600/10 text-indigo-600 text-xs font-bold uppercase tracking-wider mb-4"
+            >
+              <Zap className="w-3 h-3 fill-current" />
+              <span>Painel do Aluno</span>
+            </motion.div>
+            <h1 className="text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter leading-none font-display">
+              Olá, {displayUser.name.split(' ')[0]}!
             </h1>
-            <p className="text-slate-500 mt-1 font-medium italic">
-              {displayUser.course} • {displayUser.grade}
+            <p className="text-lg text-slate-500 mt-4 font-medium max-w-lg">
+              Bem-vindo ao seu portal. Você tem <span className="text-indigo-600 font-bold">3 novas notificações</span> e suas tarefas estão em dia.
             </p>
           </div>
           
-          <div className="flex items-center gap-4">
-            <Link to="/settings" className="p-3 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all shadow-sm relative group active:scale-95">
-              <Bell className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-indigo-600 rounded-full border-2 border-white"></span>
-            </Link>
-            <div className="flex items-center gap-4 pl-4 border-l border-slate-200">
-               <div className="text-right hidden sm:block">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest leading-none mb-1">Presença</p>
-                  <p className="text-sm font-bold text-emerald-600">94.5%</p>
-               </div>
-               <Link to="/settings" className="h-12 w-12 rounded-xl bg-indigo-900 text-white flex items-center justify-center font-bold shadow-lg hover:scale-105 transition-all text-xs">
-                 {displayUser.name.substring(0, 2).toUpperCase()}
-               </Link>
-            </div>
+          <div className="flex flex-wrap items-center gap-4 bg-white/50 backdrop-blur-sm p-4 rounded-[40px] border border-white shadow-xl shadow-indigo-900/5">
+             <div className="flex -space-x-3">
+                {[1,2,3].map(i => (
+                  <div key={i} className="w-10 h-10 rounded-full border-4 border-white bg-indigo-200"></div>
+                ))}
+                <div className="w-10 h-10 rounded-full border-4 border-white bg-indigo-900 text-white flex items-center justify-center text-[10px] font-bold">+12</div>
+             </div>
+             <div className="h-10 w-px bg-slate-200 mx-2 hidden sm:block"></div>
+             <div className="text-right">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Presença</p>
+                <p className="text-lg font-black text-emerald-600 tracking-tighter font-display leading-none">94.5%</p>
+             </div>
+             <Link to="/settings" className="h-14 w-14 rounded-2xl bg-indigo-900 text-white flex items-center justify-center font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all">
+               {displayUser.name.substring(0, 2).toUpperCase()}
+             </Link>
           </div>
-        </header>
+        </motion.header>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Main Content */}
+          {/* Main Content Area */}
           <div className="lg:col-span-8 space-y-8">
-            {/* Quick Actions Bar - Clean and direct like before */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <button onClick={() => handleQuickAction('Novo Trabalho')} className="flex flex-col items-center justify-center p-6 bg-indigo-600 text-white rounded-[32px] hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/20 active:scale-95 group">
-                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
-                  <Zap className="w-5 h-5 fill-current" />
+            {/* Bento Grid - Quick Actions */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <motion.button 
+                variants={itemVariants}
+                whileHover={{ y: -5 }}
+                onClick={() => handleQuickAction('Novo Trabalho')}
+                className="group relative flex flex-col items-center justify-center p-8 bg-indigo-600 text-white rounded-[40px] shadow-2xl shadow-indigo-600/20 active:scale-95 overflow-hidden transition-all"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-150 transition-transform duration-500" />
+                <Zap className="w-8 h-8 mb-4 lg:mb-6 fill-current" />
+                <span className="text-[11px] font-black uppercase tracking-widest leading-none">Novo Trabalho</span>
+              </motion.button>
+
+              <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
+                <Link to="/extra-courses" className="group relative flex flex-col items-center justify-center p-8 bg-white border border-slate-200 rounded-[40px] shadow-sm hover:shadow-xl hover:border-indigo-600/20 transition-all text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 lg:mb-6 group-hover:scale-110 transition-transform">
+                    <BookOpen className="w-6 h-6" />
+                  </div>
+                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-500 leading-none">Cursos Extra</span>
+                </Link>
+              </motion.div>
+
+              <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
+                <Link to="/internships" className="group relative flex flex-col items-center justify-center p-8 bg-slate-900 text-white rounded-[40px] shadow-xl hover:bg-black transition-all text-center">
+                   <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4 lg:mb-6 group-hover:scale-110 transition-transform">
+                      <Zap className="w-6 h-6 text-indigo-400 fill-current" />
+                   </div>
+                   <span className="text-[11px] font-black uppercase tracking-widest leading-none">Estágios</span>
+                </Link>
+              </motion.div>
+
+              <motion.button 
+                variants={itemVariants}
+                whileHover={{ y: -5 }}
+                onClick={() => handleDownload('Boletim')}
+                className="group relative flex flex-col items-center justify-center p-8 bg-white border border-slate-200 rounded-[40px] shadow-sm hover:shadow-xl hover:border-indigo-600/20 transition-all text-center"
+              >
+                <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4 lg:mb-6 group-hover:scale-110 transition-transform">
+                  <Download className="w-6 h-6" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest">Trabalho</span>
-              </button>
-              <Link to="/extra-courses" className="flex flex-col items-center justify-center p-6 bg-white border-2 border-indigo-50 rounded-[32px] hover:border-indigo-600 transition-all shadow-sm active:scale-95 group">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Cursos</span>
-              </Link>
-              <Link to="/internships" className="flex flex-col items-center justify-center p-6 bg-indigo-900 text-white rounded-[32px] hover:bg-slate-900 transition-all shadow-lg active:scale-95 group">
-                <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
-                  <Zap className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest">Estágios</span>
-              </Link>
-              <button onClick={() => handleDownload('Boletim')} className="flex flex-col items-center justify-center p-6 bg-white border-2 border-slate-100 rounded-[32px] hover:border-indigo-600 transition-all shadow-sm active:scale-95 group">
-                <div className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center mb-4 transition-transform group-hover:scale-110">
-                  <Download className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Boletim</span>
-              </button>
+                <span className="text-[11px] font-black uppercase tracking-widest text-slate-500 leading-none">Boletim</span>
+              </motion.button>
             </div>
 
-            <div className="bg-white p-12 rounded-[60px] border border-gray-100 shadow-sm flex flex-col items-center justify-center min-h-[350px] text-center relative overflow-hidden group">
-               <div className="relative z-10">
-                  <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-8 transition-transform group-hover:scale-110 duration-500">
-                     <BookOpen className="text-indigo-600 w-12 h-12" />
-                  </div>
-                  <h3 className="text-3xl font-bold text-slate-900 mb-4">Sala de Aula Virtual</h3>
-                  <p className="text-gray-500 max-w-sm mb-10 mx-auto">Participe das interações no mural e envie seus trabalhos diretamente pelo portal.</p>
-                  <Link to="/classroom" className="inline-flex px-12 py-5 bg-indigo-900 text-white rounded-full font-bold hover:bg-slate-900 transition-all shadow-xl hover:-translate-y-1">
-                    Entrar agora
+            {/* Feature Hero Card */}
+            <motion.div 
+              variants={itemVariants}
+              whileHover={{ y: -8 }}
+              className="relative bg-white p-12 rounded-[60px] border border-slate-200 shadow-2xl shadow-indigo-900/5 group overflow-hidden"
+            >
+              <div className="relative z-10 grid md:grid-cols-2 items-center gap-12">
+                <div className="text-center md:text-left">
+                  <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-black uppercase tracking-widest mb-6">
+                    Acesso Rápido
+                  </span>
+                  <h3 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter leading-tight font-display">
+                    Sala de Aula Virtual
+                  </h3>
+                  <p className="text-slate-500 text-lg mb-8 leading-relaxed">
+                    Acesse materiais exclusivos, participe de discussões e envie seus trabalhos de forma prática e modernizada.
+                  </p>
+                  <Link to="/classroom" className="inline-flex items-center gap-3 px-10 py-5 bg-indigo-900 text-white rounded-full font-bold hover:bg-black transition-all shadow-2xl shadow-indigo-900/20 active:scale-95 group/btn">
+                    Entrar na Sala <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                   </Link>
-               </div>
-               <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full -translate-y-32 translate-x-32 transition-transform duration-700 group-hover:scale-110" />
-            </div>
+                </div>
+                <div className="relative flex items-center justify-center">
+                  <div className="w-64 h-64 bg-indigo-50 rounded-[40px] flex items-center justify-center relative overflow-hidden group-hover:scale-105 transition-transform duration-700">
+                     <Layout className="w-32 h-32 text-indigo-200 absolute -bottom-8 -right-8" />
+                     <BookOpen className="w-24 h-24 text-indigo-600 relative z-10" />
+                  </div>
+                  {/* Decorative floaters */}
+                  <div className="absolute -top-4 -left-4 w-12 h-12 bg-emerald-100 rounded-2xl animate-bounce" style={{ animationDuration: '3s' }} />
+                  <div className="absolute -bottom-8 -right-2 w-16 h-16 bg-rose-100 rounded-full animate-pulse" />
+                </div>
+              </div>
+              
+              {/* Background gradient mask */}
+              <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-br from-indigo-50 to-transparent rounded-full translate-x-1/4 -translate-y-1/4 -z-1" />
+            </motion.div>
           </div>
 
-          {/* Sidebar */}
+          {/* Sidebar Area */}
           <div className="lg:col-span-4 space-y-8">
-            {/* Small Notification Summary */}
-            <section className="bg-white border border-slate-200 rounded-[32px] p-8">
-              <div className="flex items-center gap-2 mb-6">
-                 <Bell className="w-4 h-4 text-indigo-600" />
-                 <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Notificações</h4>
+            {/* Real-time Notifications / Feed */}
+            <motion.section variants={itemVariants} className="bg-white border border-slate-200 rounded-[40px] p-8 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                 <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600">
+                     <Bell className="w-4 h-4" />
+                   </div>
+                   <h4 className="text-[11px] font-black uppercase tracking-widest text-slate-400">Atividades</h4>
+                 </div>
+                 <span className="w-2 h-2 bg-rose-500 rounded-full animate-ping" />
               </div>
-              <div className="space-y-4">
-                <div className="p-10 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                  <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Tudo em dia!</p>
+              
+              <div className="space-y-6">
+                {[
+                  { title: "Nota Postada", time: "Há 10 min", color: "indigo" },
+                  { title: "Novo Trabalho", time: "Há 2h", color: "emerald" },
+                  { title: "Evento Escolar", time: "Amanhã", color: "rose" }
+                ].map((notif, i) => (
+                  <div key={i} className="flex items-center gap-4 group cursor-pointer">
+                    <div className={`w-2 h-10 rounded-full bg-${notif.color}-500/20 group-hover:bg-${notif.color}-500 transition-all`} />
+                    <div>
+                      <p className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{notif.title}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{notif.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Link to="/journal" className="w-full mt-8 py-5 bg-slate-100 text-slate-600 rounded-[30px] font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 hover:text-white transition-all flex items-center justify-center gap-3">
+                Explorar Jornal <ChevronRight className="w-4 h-4" />
+              </Link>
+            </motion.section>
+
+            {/* Futuristic Calendar */}
+            <motion.section 
+              variants={itemVariants}
+              whileHover={{ scale: 1.02 }}
+              className="bg-slate-900 rounded-[40px] p-8 text-white shadow-2xl shadow-indigo-900/40 relative overflow-hidden"
+            >
+              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-500/10 via-transparent to-emerald-500/10 pointer-events-none" />
+              
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-8">
+                   <div>
+                     <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1">Cronograma</p>
+                     <h4 className="text-2xl font-black tracking-tighter">Abril 2024</h4>
+                   </div>
+                   <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                     <CalendarIcon className="w-6 h-6 text-white" />
+                   </div>
+                </div>
+                
+                <div className="grid grid-cols-7 gap-2 text-center text-[9px] font-black text-white/20 mb-4 tracking-widest">
+                   {['D','S','T','Q','Q','S','S'].map(d => <span key={d}>{d}</span>)}
+                </div>
+                
+                <div className="grid grid-cols-7 gap-2">
+                   {[...Array(30)].map((_, idx) => {
+                     const d = idx + 1;
+                     const isToday = d === 17;
+                     const hasEvent = [12, 18, 25].includes(d);
+                     return (
+                       <div key={idx} className={`aspect-square flex items-center justify-center rounded-xl text-xs font-bold transition-all ${
+                         isToday ? 'bg-indigo-500 text-white shadow-xl shadow-indigo-500/40 scale-110 ring-2 ring-white/20' : 
+                         hasEvent ? 'bg-white/5 text-indigo-400' : 'text-white/30 hover:bg-white/10'
+                       } cursor-pointer`}>
+                         {d}
+                       </div>
+                     );
+                   })}
                 </div>
               </div>
-              <Link to="/journal" className="w-full mt-6 py-4 bg-slate-50 text-slate-600 rounded-2xl font-bold text-xs hover:bg-indigo-50 hover:text-indigo-600 transition-all flex items-center justify-center gap-2">
-                Ver Jornal Escolar <ChevronRight className="w-4 h-4" />
-              </Link>
-            </section>
-
-            {/* Compact Calendar */}
-            <section className="bg-slate-900 rounded-[32px] p-8 text-white">
-              <div className="flex items-center justify-between mb-6">
-                 <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">Abril 2024</span>
-                 <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse" />
-              </div>
-              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-white/20 mb-4 tracking-widest">
-                 <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
-              </div>
-              <div className="grid grid-cols-7 gap-1">
-                 {[...Array(30)].map((_, idx) => {
-                   const d = idx + 1;
-                   const isToday = d === 17;
-                   const hasEvent = [12, 18, 25].includes(d);
-                   return (
-                     <div key={idx} className={`aspect-square flex items-center justify-center rounded-lg text-xs font-bold transition-all ${
-                       isToday ? 'bg-white text-indigo-900 shadow-xl' : 
-                       hasEvent ? 'text-indigo-400' : 'text-white/20'
-                     }`}>
-                       {d}
-                     </div>
-                   );
-                 })}
-              </div>
-            </section>
+            </motion.section>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
+
+const ArrowRight = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+  </svg>
+);

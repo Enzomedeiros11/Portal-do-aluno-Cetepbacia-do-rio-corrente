@@ -33,7 +33,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
     // Simulação curta de carregamento
     setTimeout(() => {
       if (mode === 'login') {
-        const user = users.find(u => u.email === formData.email && u.password === (formData as any).password); // In a real app password wouldn't be in User type if secured
+        const user = users.find(u => u.email === formData.email && (u as any).password === formData.password);
         if (user) {
           onLogin(user);
         } else {
@@ -65,35 +65,89 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F5F0] flex items-center justify-center p-6 pt-32">
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-white rounded-[32px] shadow-xl border border-indigo-100 overflow-hidden"
-      >
-        <div className="p-8">
-          <div className="flex justify-center mb-8">
-            <Logo className="w-16 h-16" />
-          </div>
+    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row overflow-hidden font-sans">
+      {/* Left Side: Dynamic Visuals */}
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative items-center justify-center p-20 overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-600/5 rounded-full blur-[60px] translate-y-1/4 -translate-x-1/4" />
+        
+        <div className="relative z-10 max-w-lg">
+           <motion.div 
+             initial={{ opacity: 0, scale: 0.8 }}
+             animate={{ opacity: 1, scale: 1 }}
+             className="w-24 h-24 bg-white/10 backdrop-blur-xl rounded-[32px] border border-white/20 flex items-center justify-center mb-12 shadow-2xl"
+           >
+              <Logo className="w-16 h-16" />
+           </motion.div>
+           <motion.h2 
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.2 }}
+             className="text-6xl font-black text-white leading-none tracking-tighter mb-8 font-display"
+           >
+             Sua jornada rumo ao <span className="text-indigo-400 italic">futuro</span> começa aqui.
+           </motion.h2>
+           <motion.p 
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.3 }}
+             className="text-xl text-white/50 leading-relaxed font-medium"
+           >
+             Acesse o Portal Acadêmico do CETEP e conecte-se com sua educação profissional de forma moderna e simplificada.
+           </motion.p>
 
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-slate-900">
-              {mode === 'login' ? 'Bem-vindo de volta' : 'Crie sua conta'}
-            </h2>
-            <p className="text-slate-500 mt-2">
+           <motion.div 
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.4 }}
+             className="mt-16 grid grid-cols-2 gap-4"
+           >
+              <div className="p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10">
+                 <p className="text-4xl font-black text-white font-display mb-1 tracking-tighter">1.2k+</p>
+                 <p className="text-xs font-black text-white/40 uppercase tracking-widest">Alunos Ativos</p>
+              </div>
+              <div className="p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10">
+                 <p className="text-4xl font-black text-white font-display mb-1 tracking-tighter">98%</p>
+                 <p className="text-xs font-black text-white/40 uppercase tracking-widest">Aprovação</p>
+              </div>
+           </motion.div>
+        </div>
+      </div>
+
+      {/* Right Side: Auth Form */}
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-20 bg-slate-50 relative">
+        <div className="lg:hidden absolute top-10 left-10">
+           <Logo className="w-12 h-12" />
+        </div>
+
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="max-w-md w-full"
+        >
+          <div className="mb-12">
+            <h1 className="text-4xl font-black text-slate-900 tracking-tighter font-display">
+              {mode === 'login' ? 'Bem-vindo de volta!' : 'Criar minha conta'}
+            </h1>
+            <p className="text-slate-500 mt-2 font-medium">
               {mode === 'login' 
-                ? 'Acesse o portal do aluno e professor' 
-                : 'Junte-se à nossa comunidade acadêmica'}
+                ? 'Insira suas credenciais corporativas do CETEP.' 
+                : 'Preencha os dados abaixo para iniciar seu cadastro.'}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 text-sm">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 text-sm font-bold"
+              >
                 <AlertCircle className="w-5 h-5 shrink-0" />
                 <p>{error}</p>
-              </div>
+              </motion.div>
             )}
+
             <AnimatePresence mode="wait">
               {mode === 'register' && (
                 <motion.div
@@ -102,22 +156,22 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                   exit={{ opacity: 0, height: 0 }}
                   className="space-y-4"
                 >
-                  <div className="relative">
-                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300" />
+                  <div className="relative group">
+                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
                     <input
                       type="text"
                       placeholder="Nome completo"
-                      className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white outline-none transition-all"
+                      className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="relative">
-                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300" />
+                    <div className="relative group">
+                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
                       <select
-                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white outline-none transition-all appearance-none"
+                        className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all appearance-none font-bold text-xs uppercase"
                         value={formData.grade}
                         onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
                       >
@@ -126,10 +180,10 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                         ))}
                       </select>
                     </div>
-                    <div className="relative">
-                      <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300" />
+                    <div className="relative group">
+                      <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
                       <select
-                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white outline-none transition-all appearance-none text-xs font-medium"
+                        className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all appearance-none text-[10px] uppercase font-black tracking-widest"
                         value={formData.course}
                         onChange={(e) => setFormData({ ...formData, course: e.target.value })}
                       >
@@ -143,31 +197,30 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
               )}
             </AnimatePresence>
 
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300" />
+            <div className="relative group">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
               <input
                 type="email"
                 placeholder="E-mail institucional"
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white outline-none transition-all"
+                className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
 
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-300" />
+            <div className="relative group">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
               <input
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Senha"
-                className="w-full pl-12 pr-12 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-600 focus:bg-white outline-none transition-all"
+                className="w-full pl-12 pr-12 py-4 bg-white border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-indigo-300 hover:text-indigo-600 transition-colors"
-                title={showPassword ? 'Ocultar senha' : 'Ver senha'}
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-indigo-600 transition-colors"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -176,25 +229,34 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-indigo-900 text-white rounded-xl font-medium hover:bg-slate-900 transition-all flex items-center justify-center gap-2 group shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-5 bg-indigo-900 text-white rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-black transition-all flex items-center justify-center gap-3 group shadow-2xl shadow-indigo-900/40 active:scale-95 disabled:opacity-50"
             >
-              {loading ? 'Processando...' : (mode === 'login' ? 'Entrar' : 'Cadastrar')}
-              {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
+              {loading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+                  <span>Processando...</span>
+                </>
+              ) : (
+                <>
+                  <span>{mode === 'login' ? 'Acessar Portal' : 'Finalizar Cadastro'}</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
             </button>
           </form>
 
-          <div className="mt-8 text-center border-t border-gray-100 pt-6">
+          <div className="mt-12 text-center">
             <button
               onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors"
+              className="px-6 py-3 bg-white text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all"
             >
               {mode === 'login' 
-                ? 'Não tem uma conta? Cadastre-se' 
-                : 'Já tem uma conta? Faça login'}
+                ? 'Não possui conta? Registre-se agora' 
+                : 'Já possui uma conta? Faça login aqui'}
             </button>
           </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }

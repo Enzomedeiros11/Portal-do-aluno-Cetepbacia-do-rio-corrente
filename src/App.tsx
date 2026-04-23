@@ -157,7 +157,7 @@ export default function App() {
             {/* Intelligent Root Redirect */}
             <Route 
               path="/" 
-              element={<Navigate to="/lp-video" replace />} 
+              element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/lp-video" replace />} 
             />
             
             {/* Core Public Routes */}

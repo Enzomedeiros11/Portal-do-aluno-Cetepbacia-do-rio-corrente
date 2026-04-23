@@ -368,62 +368,75 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] pt-24 pb-12 px-6 shadow-inner">
-      <div className="container mx-auto max-w-6xl">
-        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="min-h-screen bg-slate-50 pt-28 pb-12 px-6 shadow-inner font-sans relative overflow-hidden">
+      {/* Background accents optimized */}
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[60px] pointer-events-none" />
+      
+      <div className="container mx-auto max-w-6xl relative z-10">
+        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="md:flex-1">
-            <div className="flex items-center gap-3 mb-2">
-              <Layout className="text-indigo-600 w-10 h-10" />
-              <h1 className="text-4xl font-serif font-medium text-slate-900">Minhas Turmas</h1>
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                <Layout className="text-white w-6 h-6" />
+              </div>
+              <h1 className="text-5xl font-black text-slate-900 tracking-tighter font-display">Minhas Turmas</h1>
             </div>
-            <p className="text-gray-500">Acesse seus materiais de estudo e interaja com os professores.</p>
+            <p className="text-slate-500 text-lg font-medium max-w-md">Acesse seus materiais de estudo e interaja com os professores em tempo real.</p>
           </div>
           <div className="flex items-center gap-4">
-             <div className="relative">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300 w-4 h-4" />
+             <div className="relative group">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4 group-focus-within:text-indigo-600 transition-colors" />
                <input 
                  type="text" 
                  placeholder="Pesquisar salas..." 
                  value={searchTerm}
                  onChange={(e) => setSearchTerm(e.target.value)}
-                 className="pl-10 pr-4 py-3 bg-gray-50 rounded-2xl border border-transparent focus:bg-white focus:border-indigo-100 outline-none transition-all text-sm font-medium w-full md:w-64" 
+                 className="pl-12 pr-6 py-4 bg-white rounded-[30px] border border-slate-200 focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-600 outline-none transition-all text-sm font-bold w-full md:w-72 shadow-sm" 
                />
              </div>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {displayClasses.map((cls, i) => (
             <motion.div
               key={i}
-              whileHover={{ y: -10 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ y: -8, scale: 1.02 }}
               onClick={() => setSelectedClass(cls)}
-              className="bg-white rounded-[40px] border border-gray-100 shadow-xl shadow-indigo-900/[0.03] overflow-hidden flex flex-col group cursor-pointer transition-all"
+              className="bg-white rounded-[48px] border border-slate-200 shadow-2xl shadow-indigo-900/[0.03] overflow-hidden flex flex-col group cursor-pointer transition-all"
             >
-              <div className={`h-32 ${cls.color} p-8 relative flex flex-col justify-end`}>
-                 <h3 className="text-xl text-white font-serif font-medium leading-tight group-hover:underline">{cls.title}</h3>
-                 <p className="text-white/70 text-xs mt-1 italic font-medium">{cls.teacher}</p>
-                 <div className="absolute top-6 right-6 w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md">
-                    <ChevronRight className="text-white w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              <div className={`h-40 ${cls.color} p-10 relative flex flex-col justify-end overflow-hidden`}>
+                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-black/20 to-transparent pointer-events-none" />
+                 <h3 className="text-2xl text-white font-black tracking-tighter leading-tight font-display relative z-10">{cls.title}</h3>
+                 <p className="text-white/70 text-xs mt-2 uppercase font-black tracking-widest relative z-10">{cls.teacher}</p>
+                 <div className="absolute top-8 right-8 w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-white/20 group-hover:bg-white group-hover:text-indigo-600 transition-all">
+                    <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
                  </div>
-                 <div className="absolute -top-12 -left-12 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
               </div>
-              <div className="p-8 flex-1 flex flex-col">
-                 <div className="flex items-center justify-between mb-8">
-                    <div className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-wider">
-                       Turma Ativa
+              <div className="p-10 flex-1 flex flex-col">
+                 <div className="flex flex-wrap items-center gap-2 mb-8">
+                    <div className="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest">
+                       Matriculado
                     </div>
-                    {cls.tasks > 0 && (
-                      <div className="px-3 py-1 bg-rose-50 text-rose-600 rounded-full text-[10px] font-black uppercase tracking-wider">
-                         {cls.tasks} tarefas
+                    {cls.tasks > 0 ? (
+                      <div className="px-4 py-1.5 bg-rose-50 text-rose-600 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                         <div className="w-1.5 h-1.5 bg-rose-600 rounded-full animate-pulse" />
+                         {cls.tasks} pendentes
+                      </div>
+                    ) : (
+                      <div className="px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest">
+                        Em dia
                       </div>
                     )}
                  </div>
                  
-                 <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-50">
-                    <div className="flex items-center gap-2 text-indigo-600">
-                       <MessageSquare className="w-4 h-4" />
-                       <span className="text-[10px] font-black uppercase tracking-widest">Mural de Avisos</span>
+                 <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-50">
+                    <div className="flex items-center gap-3 text-slate-400 group-hover:text-indigo-600 transition-colors">
+                       <MessageSquare className="w-5 h-5" />
+                       <span className="text-[10px] font-black uppercase tracking-widest">Mural Interativo</span>
                     </div>
                  </div>
               </div>
@@ -431,28 +444,38 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
           ))}
         </div>
 
-        <section className="mt-20 bg-[#F9F9FB] p-10 rounded-[56px] border border-gray-100 relative overflow-hidden group">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-20 bg-slate-900 p-12 lg:p-16 rounded-[64px] text-white relative overflow-hidden group shadow-2xl shadow-indigo-900/40"
+        >
            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-8">
-                 <Pin className="text-indigo-600 w-8 h-8 rotate-45 group-hover:scale-110 transition-transform" />
-                 <h2 className="text-3xl font-serif font-medium text-slate-900">Mural Acadêmico</h2>
+              <div className="flex items-center gap-4 mb-10">
+                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
+                    <Pin className="text-indigo-400 w-6 h-6 rotate-45 group-hover:scale-110 transition-transform" />
+                 </div>
+                 <h2 className="text-4xl font-black tracking-tighter font-display uppercase">Canal da Coordenação</h2>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  {[
-                   { author: 'Coordenação', msg: 'Lembre-se: O portal acadêmico é sua ferramenta oficial de estudos.', date: 'Hoje' },
+                   { author: 'Coordenação Pedagógica', msg: 'Atenção alunos: confiram as datas das provas do segundo bimestre no calendário oficial do portal.', date: 'Há 2 dias' },
+                   { author: 'Coordenação Profissional', msg: 'Novas parcerias de estágio foram firmadas para alunos do curso de Informática e Administração.', date: 'Hoje' },
                  ].map((m, idx) => (
-                   <div key={idx} className="p-8 bg-white rounded-[32px] border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-xs font-black uppercase text-indigo-600 tracking-[0.2em]">{m.author}</span>
-                        <span className="text-[10px] font-bold text-gray-300">{m.date}</span>
+                   <div key={idx} className="p-10 bg-white/5 backdrop-blur-xl rounded-[40px] border border-white/10 hover:bg-white/10 transition-all group/msg">
+                      <div className="flex items-center justify-between mb-6">
+                        <span className="text-[11px] font-black uppercase text-indigo-400 tracking-widest">{m.author}</span>
+                        <span className="text-[10px] font-bold text-white/20">{m.date}</span>
                       </div>
-                      <p className="text-slate-600 leading-relaxed font-medium">"{m.msg}"</p>
+                      <p className="text-lg text-white/70 leading-relaxed font-medium transition-colors group-hover/msg:text-white">"{m.msg}"</p>
                    </div>
                  ))}
               </div>
            </div>
-           <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/5 rounded-full -translate-y-32 translate-x-32" />
-        </section>
+           
+           {/* Decorative elements */}
+           <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-gradient-to-tl from-indigo-500/20 to-transparent rounded-full translate-x-1/4 translate-y-1/4 blur-3xl pointer-events-none" />
+        </motion.section>
       </div>
     </div>
   );
