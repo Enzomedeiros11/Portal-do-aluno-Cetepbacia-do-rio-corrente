@@ -119,6 +119,10 @@ export default function App() {
     }
   }, [currentUser]);
 
+  useEffect(() => {
+    document.title = "PORTAL DO ALUNO CETEP";
+  }, []);
+
   const login = (authenticatedUser: User) => {
     const updatedUser = { ...authenticatedUser, isOnline: true, lastSeen: new Date().toISOString() };
     setCurrentUser(updatedUser);
@@ -211,7 +215,7 @@ export default function App() {
         </main>
         
         <footer style={{ position: 'fixed', bottom: '10px', width: '100%', textAlign: 'center', color: '#aaa', zIndex: 100, pointerEvents: 'none' }}>
-          Site feito por ENZO em beta 🚀
+          PORTAL DO ALUNO CETEP 🚀
         </footer>
       </div>
     </Router>
