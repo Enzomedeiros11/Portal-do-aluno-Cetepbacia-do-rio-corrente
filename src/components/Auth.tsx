@@ -111,7 +111,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
             id: signUpData.user.id,
             nome: formData.name,
             email: formData.email,
-            tipo: 'aluno', // Custom field from user schema
+            tipo: 'student', // Use 'student' consistently with UserRole type
             grade: formData.grade, // Extra fields
             curso: formData.course
           }]);

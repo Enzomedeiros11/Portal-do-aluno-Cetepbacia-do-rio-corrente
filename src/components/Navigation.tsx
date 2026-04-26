@@ -38,11 +38,25 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
   return (
     <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl">
       <div className="bg-white/80 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.08)] rounded-[32px] px-6 lg:px-10 h-20 flex items-center justify-between transition-colors duration-300">
-        <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-3 group">
-          <Logo className="w-12 h-12 group-hover:scale-110 transition-transform duration-500" />
+        <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-4 group perspective-1000">
+          <div className="relative transform group-hover:rotate-12 transition-transform duration-500">
+            <div className="w-14 h-14 bg-indigo-600 rounded-[22px] flex items-center justify-center shadow-lg shadow-indigo-600/20 group-hover:shadow-indigo-600/40 transition-all overflow-hidden">
+               <Logo className="w-10 h-10 text-white fill-white" />
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-4 border-white shadow-sm" title="Portal Ativo" />
+          </div>
           <div className="flex flex-col">
-            <span className="text-xl font-black tracking-tighter text-indigo-950 leading-none font-display">CETEP</span>
-            <span className="text-[9px] font-black text-indigo-600/70 tracking-widest uppercase leading-none mt-1">Bacia do Rio Corrente</span>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-black tracking-tighter text-indigo-950 font-display leading-none group-hover:text-indigo-600 transition-colors">
+                CETEP
+              </span>
+              <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 text-[8px] font-black rounded-full border border-indigo-100 tracking-tighter uppercase">
+                Portal
+              </span>
+            </div>
+            <span className="text-[10px] font-bold text-slate-400 tracking-[0.25em] uppercase leading-none mt-1.5 opacity-70">
+              Bacia do Rio Corrente
+            </span>
           </div>
         </Link>
         

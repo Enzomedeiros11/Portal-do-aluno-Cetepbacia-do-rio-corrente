@@ -35,16 +35,26 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
       .select('*');
     
     if (data) {
-      const mapped: User[] = data.map(d => ({
-        id: d.id,
-        name: d.nome,
-        email: d.email,
-        role: d.tipo as any,
-        grade: d.grade,
-        course: d.curso,
-        subjectGrades: d.notas || {},
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.id}`
-      }));
+      const mapped: User[] = data.map(d => {
+        // Resolve role correctly
+        let resolvedRole: 'student' | 'teacher' = 'student';
+        if (d.tipo === 'teacher' || d.tipo === 'professor' || d.id === 'admin') {
+          resolvedRole = 'teacher';
+        } else if (d.email === 'codernador12@gmail.com') {
+          resolvedRole = 'teacher';
+        }
+
+        return {
+          id: d.id,
+          name: d.nome || 'Usuário',
+          email: d.email,
+          role: resolvedRole,
+          grade: d.grade,
+          course: d.curso,
+          subjectGrades: d.notas || {},
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.id}`
+        };
+      });
       setDbUsers(mapped);
       onUpdateUsers(mapped);
     }
