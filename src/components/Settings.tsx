@@ -1,238 +1,171 @@
-import { useState } from 'react';
 import { motion } from 'motion/react';
-import { User as UserIcon, Bell, Lock, Palette, Globe, Save, ChevronRight, LogOut, ShieldCheck } from 'lucide-react';
-import { User } from '../types';
+import { User, Bell, Mail, Shield, Smartphone, Globe, Cloud, LogOut, ChevronRight } from 'lucide-react';
+import { User as UserType } from '../types';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 interface SettingsProps {
-  user: User | null;
-  onLogout?: () => void;
+  currentUser: UserType | null;
+  onLogout: () => void;
 }
 
-export default function Settings({ user, onLogout }: SettingsProps) {
-  const [activeTab, setActiveTab] = useState('profile');
-  const [isSaving, setIsSaving] = useState(false);
+export default function Settings({ currentUser, onLogout }: SettingsProps) {
+  const [settings, setSettings] = useState({
+    emailNotif: true,
+    pushNotif: true,
+    publicProfile: false,
+    twoFactor: false,
+    language: 'Português (BR)'
+  });
 
-  const displayUser = user || {
-    name: 'Estudante Modelo',
-    email: 'estudante@email.com',
-    course: 'Técnico em Informática',
-    id: '202455981',
-    avatar: ''
+  const toggleSetting = (key: keyof typeof settings) => {
+    setSettings(prev => {
+      const newVal = !prev[key];
+      const newSettings = { ...prev, [key]: newVal };
+      localStorage.setItem('cetep_settings', JSON.stringify(newSettings));
+      toast.success(`Configuração alterada com sucesso!`);
+      return newSettings;
+    });
   };
 
-  const tabs = [
-    { id: 'profile', icon: UserIcon, label: 'Meu Perfil' },
-    { id: 'notifications', icon: Bell, label: 'Notificações' },
-    { id: 'security', icon: Lock, label: 'Segurança' },
-    { id: 'appearance', icon: Palette, label: 'Aparência' },
-  ];
-
-  const handleSave = () => {
-    setIsSaving(true);
-    toast.loading('Salvando suas alterações...', { id: 'save-settings' });
-    setTimeout(() => {
-      setIsSaving(false);
-      toast.success('Alterações salvas com sucesso!', { id: 'save-settings' });
-    }, 1500);
-  };
-
-  const handleLogoutAction = () => {
-    if (confirm('Deseja realmente sair da conta?')) {
-      onLogout?.();
-      toast.success('Sessão encerrada com sucesso!');
-    }
-  };
-
-  const handleAction = (action: string) => {
-    toast.info(`Funcionalidade em desenvolvimento: ${action}`);
-  };
+  if (!currentUser) return null;
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] pt-24 pb-12 px-6">
-      <div className="container mx-auto max-w-5xl">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-28 pb-12 px-6 font-sans transition-colors duration-300">
+      <div className="container mx-auto max-w-4xl">
         <header className="mb-12">
-          <h1 className="text-4xl font-serif font-medium text-slate-900 mb-2">Configurações</h1>
-          <p className="text-gray-500">Gerencie sua conta e preferências do sistema CETEP.</p>
+           <h1 className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter font-display mb-2">Configurações</h1>
+           <p className="text-slate-500 dark:text-slate-400 font-medium">Gerencie sua conta e preferências de notificação.</p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
-          {/* Tabs Sidebar */}
-          <div className="lg:col-span-1 border-r border-gray-100 pr-8">
-            <nav className="space-y-2">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-bold transition-all ${
-                    activeTab === tab.id 
-                      ? 'bg-indigo-900 text-white shadow-lg shadow-indigo-900/10' 
-                      : 'text-gray-500 hover:bg-gray-50'
-                  }`}
-                >
-                  <tab.icon className="w-5 h-5" />
-                  {tab.label}
-                  {activeTab === tab.id && <ChevronRight className="w-4 h-4 ml-auto" />}
-                </button>
-              ))}
-            </nav>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          {/* Sidebar */}
+          <div className="md:col-span-4 space-y-2">
+            {[
+              { label: 'Perfil', icon: User, active: true },
+              { label: 'Notificações', icon: Bell },
+              { label: 'Privacidade', icon: Shield },
+              { label: 'Conexões', icon: Cloud }
+            ].map((item, i) => (
+              <button 
+                key={i} 
+                className={`w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-bold transition-all ${
+                  item.active 
+                    ? 'bg-indigo-900 dark:bg-indigo-600 text-white shadow-lg shadow-indigo-900/20' 
+                    : 'text-slate-500 dark:text-slate-400 hover:bg-white dark:hover:bg-slate-900 hover:text-indigo-600'
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                {item.label}
+              </button>
+            ))}
             
-            <div className="mt-20 pt-8 border-t border-gray-100">
-               <button 
-                 onClick={handleLogoutAction}
-                 className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl text-sm font-bold text-rose-500 hover:bg-rose-50 transition-all"
-               >
-                  <LogOut className="w-5 h-5" /> Sair da Conta
-               </button>
+            <div className="pt-8">
+              <button 
+                onClick={onLogout}
+                className="w-full flex items-center gap-3 px-6 py-4 rounded-2xl font-black text-xs uppercase tracking-widest text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all"
+              >
+                <LogOut className="w-5 h-5" />
+                Sair da Conta
+              </button>
             </div>
           </div>
 
-          {/* Settings Canvas */}
-          <div className="lg:col-span-3">
-             <motion.div
-               key={activeTab}
-               initial={{ opacity: 0, x: 20 }}
-               animate={{ opacity: 1, x: 0 }}
-               className="bg-white p-10 rounded-[48px] border border-gray-100 shadow-sm min-h-[500px] flex flex-col"
-             >
-                {activeTab === 'profile' && (
-                  <div className="space-y-8 flex-1">
-                     <div className="flex items-center gap-8 mb-12">
-                        <div className="w-24 h-24 bg-indigo-50 rounded-[32px] flex items-center justify-center border-4 border-white shadow-xl relative group cursor-pointer overflow-hidden">
-                           {displayUser.avatar ? (
-                             <img src={displayUser.avatar} alt="Avatar" className="w-full h-full object-cover" />
-                           ) : (
-                             <UserIcon className="text-indigo-600 w-10 h-10 group-hover:scale-110 transition-transform" />
-                           )}
-                           <div className="absolute inset-0 bg-indigo-900/10 rounded-[28px] opacity-0 group-hover:opacity-100 transition-opacity" />
+          {/* Main Panel */}
+          <div className="md:col-span-8 space-y-6">
+            {/* User Profile Card */}
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-[40px] border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div className="flex items-center gap-6">
+                    <div className="w-24 h-24 rounded-[32px] bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center overflow-hidden border-4 border-white dark:border-slate-800 shadow-xl">
+                        <img src={currentUser.avatar} alt={currentUser.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">{currentUser.name}</h2>
+                        <p className="text-slate-400 dark:text-slate-500 font-bold uppercase text-[10px] tracking-widest">{currentUser.email}</p>
+                        <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase">
+                            Conta Ativa
                         </div>
-                        <div>
-                           <h3 className="text-2xl font-bold text-slate-950">{displayUser.name}</h3>
-                           <p className="text-gray-400 font-medium">Matrícula: {displayUser.id}</p>
-                           <button 
-                             onClick={() => handleAction('Alterar Foto')}
-                             className="text-indigo-600 font-bold text-xs mt-2 uppercase tracking-widest hover:underline"
-                           >
-                             Alterar foto
-                           </button>
-                        </div>
-                     </div>
-
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                           <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Nome Completo</label>
-                           <input type="text" defaultValue={displayUser.name} className="w-full px-6 py-3 bg-gray-50 rounded-2xl border border-transparent focus:border-indigo-600 outline-none transition-all font-medium" />
-                        </div>
-                        <div className="space-y-2">
-                           <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">E-mail</label>
-                           <input type="email" defaultValue={displayUser.email} className="w-full px-6 py-3 bg-gray-50 rounded-2xl border border-transparent focus:border-indigo-600 outline-none transition-all font-medium" />
-                        </div>
-                        <div className="space-y-2">
-                           <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Curso</label>
-                           <input type="text" defaultValue={displayUser.course} disabled className="w-full px-6 py-3 bg-gray-50 rounded-2xl border border-transparent outline-none font-medium opacity-60" />
-                        </div>
-                        <div className="space-y-2">
-                           <label className="text-xs font-black text-gray-400 uppercase tracking-widest ml-1">Telefone</label>
-                           <input type="text" placeholder="(77) 99999-9999" className="w-full px-6 py-3 bg-gray-50 rounded-2xl border border-transparent focus:border-indigo-600 outline-none transition-all font-medium" />
-                        </div>
-                     </div>
-                  </div>
-                )}
-
-                {activeTab === 'notifications' && (
-                  <div className="space-y-8 flex-1">
-                     <div className="space-y-6">
-                        {[
-                           { title: 'Avisos da Coordenação', desc: 'Receba alertas sobre eventos e comunicados oficiais.' },
-                           { title: 'Datas de Provas', desc: 'Sempre avisado 2 dias antes das avaliações agendadas.' },
-                           { title: 'Novas Notas Lançadas', desc: 'Notificação imediata quando o professor publicar notas.' },
-                           { title: 'Mensagens de Professores', desc: 'Alertas de comentários em tarefas e comunicados de sala.' }
-                        ].map((item, i) => (
-                           <div key={i} className="flex items-center justify-between p-6 bg-gray-50 rounded-3xl group hover:bg-white hover:shadow-sm transition-all border border-transparent hover:border-indigo-50 cursor-pointer" onClick={() => handleAction('Alternar Notificação')}>
-                              <div>
-                                 <h4 className="font-bold text-slate-900 mb-1">{item.title}</h4>
-                                 <p className="text-xs text-gray-400 font-medium">{item.desc}</p>
-                              </div>
-                              <div className="w-12 h-6 bg-indigo-900 rounded-full relative">
-                                 <div className="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm" />
-                              </div>
-                           </div>
-                        ))}
-                     </div>
-                  </div>
-                )}
-
-                {activeTab === 'security' && (
-                  <div className="space-y-8 flex-1">
-                     <div className="flex items-center gap-4 p-6 bg-emerald-50 border border-emerald-100 rounded-3xl mb-8">
-                        <ShieldCheck className="text-emerald-600 w-8 h-8" />
-                        <div>
-                           <h4 className="font-bold text-emerald-900 leading-tight">Sua conta está segura</h4>
-                           <p className="text-xs text-emerald-600/70 font-medium italic">Última troca de senha há 3 meses.</p>
-                        </div>
-                     </div>
-                     <div className="space-y-6">
-                        <button 
-                          onClick={() => handleAction('Alterar Senha')}
-                          className="w-full p-6 text-left border border-gray-100 rounded-3xl hover:border-indigo-600/20 hover:bg-indigo-50/10 transition-all group flex items-center justify-between"
-                        >
-                           <div>
-                              <h4 className="font-bold text-slate-900">Alterar Senha</h4>
-                              <p className="text-xs text-gray-400 mt-1 font-medium">Mude sua senha de acesso ao portal.</p>
-                           </div>
-                           <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-indigo-600" />
-                        </button>
-                        <button 
-                          onClick={() => handleAction('Verificar Dispositivos')}
-                          className="w-full p-6 text-left border border-gray-100 rounded-3xl hover:border-indigo-600/20 hover:bg-indigo-50/10 transition-all group flex items-center justify-between"
-                        >
-                           <div>
-                              <h4 className="font-bold text-slate-900">Verificar Dispositivos</h4>
-                              <p className="text-xs text-gray-400 mt-1 font-medium">Veja onde você está conectado agora.</p>
-                           </div>
-                           <ChevronRight className="w-5 h-5 text-gray-300 group-hover:text-indigo-600" />
-                        </button>
-                     </div>
-                  </div>
-                )}
-
-                {activeTab === 'appearance' && (
-                   <div className="space-y-8 flex-1">
-                      <div className="grid grid-cols-2 gap-6">
-                         <div 
-                           onClick={() => handleAction('Ativar Modo Claro')}
-                           className="p-6 border-2 border-indigo-600 rounded-[32px] bg-white text-center cursor-pointer"
-                         >
-                            <div className="aspect-video bg-gray-50 rounded-2xl mb-4 border border-gray-100 flex items-center justify-center">
-                               <Palette className="text-indigo-600 w-8 h-8" />
-                            </div>
-                            <span className="font-bold text-slate-950">Modo Claro</span>
-                         </div>
-                         <div 
-                           onClick={() => handleAction('Ativar Modo Escuro')}
-                           className="p-6 border border-gray-100 rounded-[32px] bg-[#1A1A1A] text-center cursor-pointer opacity-50"
-                         >
-                            <div className="aspect-video bg-white/5 rounded-2xl mb-4 flex items-center justify-center">
-                               <Palette className="text-white/20 w-8 h-8" />
-                            </div>
-                            <span className="font-bold text-white/40">Modo Escuro (Em breve)</span>
-                         </div>
-                      </div>
-                   </div>
-                )}
-
-                <div className="mt-12 pt-8 border-t border-gray-50 flex justify-end">
-                   <button 
-                     onClick={handleSave}
-                     disabled={isSaving}
-                     className="px-10 py-4 bg-indigo-900 text-white rounded-2xl font-black text-sm shadow-xl shadow-indigo-900/20 hover:bg-slate-950 transition-all flex items-center gap-3 active:scale-95 disabled:opacity-50"
-                   >
-                      {isSaving ? 'Salvando...' : (
-                        <><Save className="w-5 h-5" /> Salvar Alterações</>
-                      )}
-                   </button>
+                    </div>
                 </div>
-             </motion.div>
+            </div>
+
+            {/* Notification Sections */}
+            <div className="bg-white dark:bg-slate-900 p-10 rounded-[40px] border border-slate-200 dark:border-slate-800 shadow-sm space-y-10">
+                <section>
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                           <Mail className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Comunicados por E-mail</h3>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between group">
+                            <div>
+                                <p className="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">Novidades e Avisos</p>
+                                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Receba avisos importantes da coordenação no seu e-mail.</p>
+                            </div>
+                            <button 
+                                onClick={() => toggleSetting('emailNotif')}
+                                className={`w-14 h-8 rounded-full relative transition-all duration-300 ${settings.emailNotif ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-800'}`}
+                            >
+                                <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all duration-300 ${settings.emailNotif ? 'left-7 shadow-lg' : 'left-1'}`} />
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <hr className="border-slate-100 dark:border-slate-800" />
+
+                <section>
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-10 h-10 bg-emerald-50 dark:bg-emerald-950 rounded-2xl flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                           <Smartphone className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Preferências de App</h3>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="flex items-center justify-between group">
+                            <div>
+                                <p className="font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">Notificações em Tempo Real</p>
+                                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Alertas visuais e sonoros para novas mensagens no chat.</p>
+                            </div>
+                            <button 
+                                onClick={() => toggleSetting('pushNotif')}
+                                className={`w-14 h-8 rounded-full relative transition-all duration-300 ${settings.pushNotif ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-slate-800'}`}
+                            >
+                                <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all duration-300 ${settings.pushNotif ? 'left-7 shadow-lg' : 'left-1'}`} />
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-50 dark:border-slate-800/50">
+                            <div>
+                                <p className="font-bold text-slate-900 dark:text-white">Idioma do Sistema</p>
+                                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">O portal será exibido no idioma selecionado.</p>
+                            </div>
+                            <div className="px-5 py-3 bg-slate-50 dark:bg-slate-950 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 flex items-center gap-2 cursor-pointer border border-transparent hover:border-indigo-600/20 transition-all">
+                                <Globe className="w-4 h-4" />
+                                {settings.language}
+                                <ChevronRight className="w-4 h-4 ml-2" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div className="p-8 bg-slate-900 dark:bg-slate-800 rounded-[40px] text-white flex items-center justify-between">
+                <div>
+                    <h4 className="font-black text-lg">Segurança de Acesso</h4>
+                    <p className="text-white/40 text-xs font-medium">Mantenha sua conta sempre protegida.</p>
+                </div>
+                <button 
+                    onClick={() => toggleSetting('twoFactor')}
+                    className={`px-8 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${settings.twoFactor ? 'bg-emerald-500 text-white' : 'bg-white/10 text-white/50 hover:bg-white/20'}`}
+                >
+                    {settings.twoFactor ? '2FA ATIVO' : 'ATIVAR 2FA'}
+                </button>
+            </div>
           </div>
         </div>
       </div>
