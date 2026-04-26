@@ -170,6 +170,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
 
   const handleSaveGrades = async () => {
     setLoading(true);
+    let updatedCount = 0;
     try {
       for (const studentId of Object.keys(localGrades)) {
         const student = dbUsers.find(u => u.id === studentId);
@@ -179,17 +180,29 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
             [selectedSubject]: localGrades[studentId]
           };
 
-          await supabase
+          const { error } = await supabase
             .from('usuarios')
             .update({ notas: updatedSubjectGrades })
             .eq('id', studentId);
+
+          if (!error) {
+            updatedCount++;
+            // Notify student via Gmail
+            await sendEmail({
+              to_name: student.name,
+              to_email: student.email,
+              subject: `Novas notas em ${selectedSubject}`,
+              message: `Olá ${student.name},\r\n\r\nSuas notas na matéria de ${selectedSubject} foram atualizadas.\r\n1º Bimestre: ${localGrades[studentId]?.n1 || '-'}\r\n2º Bimestre: ${localGrades[studentId]?.n2 || '-'}\r\n3º Bimestre: ${localGrades[studentId]?.n3 || '-'}\r\n\r\nAcesse o portal para conferir.\r\n\r\nAtenciosamente,\r\nCoordenação CETEP`,
+              type: 'grade_update'
+            });
+          }
         }
       }
       
-      toast.success(`Notas de ${selectedSubject} salvas no banco real!`);
+      toast.success(`${updatedCount} notas de ${selectedSubject} salvas e alunos notificados!`);
       fetchUsers();
     } catch (err) {
-      toast.error('Erro ao salvar algumas notas.');
+      toast.error('Erro ao salvar algumas notas ou enviar notificações.');
     } finally {
       setLoading(false);
     }

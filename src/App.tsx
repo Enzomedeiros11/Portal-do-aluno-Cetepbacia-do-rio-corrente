@@ -138,26 +138,43 @@ export default function App() {
           id: data.id,
           email: data.email,
           name: data.nome,
-          role: data.tipo as 'student' | 'teacher',
+          role: (data.tipo === 'teacher' || data.email === 'codernador12@gmail.com') ? 'teacher' : 'student',
           grade: data.grade || '1º Ano',
           course: data.curso || 'Técnico em Informática',
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.nome}`,
+          avatar: data.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.nome}`,
           isOnline: true,
           lastSeen: new Date().toISOString()
         });
       } else {
-        // Fallback profile if record doesn't exist yet
-        setCurrentUser({
+        // Create profile if it doesn't exist
+        const newUserProfile = {
           id: uid,
+          nome: email.split('@')[0],
           email: email,
-          name: email.split('@')[0],
-          role: 'student',
+          tipo: email === 'codernador12@gmail.com' ? 'teacher' : 'student',
           grade: '1º Ano',
-          course: 'Técnico em Informática',
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`,
-          isOnline: true,
-          lastSeen: new Date().toISOString()
-        });
+          curso: 'Técnico em Informática',
+          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`,
+          notas: {}
+        };
+
+        const { error: insertError } = await supabase
+          .from('usuarios')
+          .insert([newUserProfile]);
+
+        if (!insertError) {
+          setCurrentUser({
+            id: uid,
+            email: email,
+            name: newUserProfile.nome,
+            role: newUserProfile.tipo as 'student' | 'teacher',
+            grade: newUserProfile.grade,
+            course: newUserProfile.curso,
+            avatar: newUserProfile.avatar_url,
+            isOnline: true,
+            lastSeen: new Date().toISOString()
+          });
+        }
       }
     } catch (err) {
       console.error(err);
