@@ -38,7 +38,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
       const mapped: User[] = data.map(d => {
         // Resolve role correctly
         let resolvedRole: 'student' | 'teacher' = 'student';
-        if (d.tipo === 'teacher' || d.tipo === 'professor' || d.id === 'admin') {
+        if (d.tipo === 'teacher' || d.tipo === 'professor' || d.id === 'admin' || d.email === 'enzomedeirosdasilva6@gmail.com') {
           resolvedRole = 'teacher';
         } else if (d.email === 'codernador12@gmail.com') {
           resolvedRole = 'teacher';
