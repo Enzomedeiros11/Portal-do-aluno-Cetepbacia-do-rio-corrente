@@ -23,7 +23,7 @@ import Settings from './components/Settings';
 import Logo from './components/Logo';
 import { User } from './types';
 import { Toaster, toast } from 'sonner';
-import { supabase } from './lib/supabase';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 
 /**
  * Detects if the current environment is a cloud-based preview/dev environment.
@@ -83,6 +83,10 @@ export default function App() {
   useEffect(() => {
     // Check active session
     const getSession = async () => {
+      if (!isSupabaseConfigured) {
+        setLoading(false);
+        return;
+      }
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         fetchUserProfile(session.user.id, session.user.email!);

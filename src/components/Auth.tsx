@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { LogIn, UserPlus, ArrowRight, Mail, Lock, User as UserIcon, BookOpen, Calendar, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Logo from './Logo';
 import { User, COURSES, GRADES } from '../types';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 type AuthMode = 'login' | 'register';
 
@@ -30,6 +30,12 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
     e.preventDefault();
     setError(null);
     setLoading(true);
+
+    if (!isSupabaseConfigured) {
+      setError('Configuração do Supabase não encontrada. Adicione as chaves VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY nas configurações do projeto.');
+      setLoading(false);
+      return;
+    }
 
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 800));
