@@ -81,33 +81,44 @@ export default function App() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    // Check active session
-    const getSession = async () => {
-      if (!isSupabaseConfigured) {
-        setLoading(false);
-        return;
+    // Session state management
+    const checkState = async () => {
+      // 1. If Supabase is configured, use it
+      if (isSupabaseConfigured) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          fetchUserProfile(session.user.id, session.user.email!);
+        } else {
+          setLoading(false);
+        }
+        
+        // Listen for auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+          if (session?.user) {
+            fetchUserProfile(session.user.id, session.user.email!);
+          } else {
+            setCurrentUser(null);
+            setLoading(false);
+          }
+        });
+        
+        return () => subscription.unsubscribe();
+      } 
+      
+      // 2. Fallback: Simulation mode using LocalStorage
+      const savedUser = localStorage.getItem('cetep_user');
+      const savedAllUsers = localStorage.getItem('cetep_all_users');
+      
+      if (savedAllUsers) {
+        setAllUsers(JSON.parse(savedAllUsers));
       }
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        fetchUserProfile(session.user.id, session.user.email!);
-      } else {
-        setLoading(false);
+      if (savedUser) {
+        setCurrentUser(JSON.parse(savedUser));
       }
+      setLoading(false);
     };
 
-    getSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        fetchUserProfile(session.user.id, session.user.email!);
-      } else {
-        setCurrentUser(null);
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    checkState();
   }, []);
 
   const fetchUserProfile = async (uid: string, email: string) => {
@@ -165,15 +176,25 @@ export default function App() {
 
   const login = (authenticatedUser: User) => {
     setCurrentUser(authenticatedUser);
+    if (!isSupabaseConfigured) {
+      localStorage.setItem('cetep_user', JSON.stringify(authenticatedUser));
+    }
   };
 
   const register = (newUser: User) => {
     setCurrentUser(newUser);
+    if (!isSupabaseConfigured) {
+      localStorage.setItem('cetep_user', JSON.stringify(newUser));
+      updateAllUsers([...allUsers, newUser]);
+    }
   };
   
   const logout = async () => {
-    await supabase.auth.signOut();
+    if (isSupabaseConfigured) {
+      await supabase.auth.signOut();
+    }
     setCurrentUser(null);
+    localStorage.removeItem('cetep_user');
   };
 
   const isAuthenticated = !!currentUser;
