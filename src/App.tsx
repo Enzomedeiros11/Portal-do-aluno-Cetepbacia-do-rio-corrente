@@ -192,6 +192,15 @@ export default function App() {
           .insert([newUserProfile]);
 
         if (!insertError) {
+          // Notify student via Gmail on first login
+          await sendEmail({
+            to_name: newUserProfile.nome,
+            to_email: newUserProfile.email,
+            subject: 'Bem-vindo ao Portal CETEP!',
+            message: `Olá ${newUserProfile.nome},\r\n\r\nSua conta no Portal CETEP foi criada com sucesso hoje.\r\n\r\nAgora você pode acessar suas notas, materiais e o mural da turma diretamente pelo portal.\r\n\r\nSeja bem-vindo(a)!`,
+            type: 'announcement'
+          });
+
           setCurrentUser({
             id: uid,
             email: email,

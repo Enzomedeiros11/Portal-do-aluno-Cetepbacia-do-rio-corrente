@@ -223,21 +223,12 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
   return (
     <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6 transition-colors duration-300">
       <div className="container mx-auto max-w-6xl">
-        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Users className="text-indigo-600 w-10 h-10" />
-              <h1 className="text-4xl font-bold text-slate-900 font-display">Gestão de Alunos</h1>
-            </div>
-            <p className="text-slate-500 font-medium">Coordene notas, turmas e frequências de forma centralizada.</p>
+        <header className="mb-12">
+          <div className="flex items-center gap-3 mb-2">
+            <Users className="text-indigo-600 w-10 h-10" />
+            <h1 className="text-4xl font-black text-slate-900 font-display tracking-tighter">Gestão de Alunos</h1>
           </div>
-          
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-3 px-8 py-4 bg-indigo-900 text-white rounded-2xl font-bold shadow-xl shadow-indigo-900/10 hover:bg-slate-900 transition-all active:scale-95 text-sm uppercase tracking-widest"
-          >
-            <Plus className="w-5 h-5" /> Adicionar Aluno
-          </button>
+          <p className="text-slate-500 font-medium">Controle de notas e turmas de forma centralizada.</p>
         </header>
 
         <div className="bg-white p-8 rounded-[48px] border border-slate-200 mb-8 shadow-sm transition-colors">
