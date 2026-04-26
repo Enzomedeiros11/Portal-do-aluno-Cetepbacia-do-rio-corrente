@@ -15,6 +15,7 @@ export interface User {
   n2?: string;
   n3?: string;
   subjectGrades?: Record<string, { n1: string; n2: string; n3: string }>;
+  frequencia?: number;
 }
 
 export const COURSES = [

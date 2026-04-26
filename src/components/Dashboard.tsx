@@ -153,6 +153,28 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
               </motion.button>
             </div>
 
+            {/* Performance Stats */}
+            <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm flex items-center justify-between group">
+                 <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Média Geral</p>
+                    <h4 className="text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors">9.2</h4>
+                 </div>
+                 <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                    <Trophy className="w-6 h-6" />
+                 </div>
+              </div>
+              <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm flex items-center justify-between group">
+                 <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Frequência</p>
+                    <h4 className="text-3xl font-black text-slate-900 group-hover:text-emerald-600 transition-colors">{user.frequencia || 100}%</h4>
+                 </div>
+                 <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                    <Zap className="w-6 h-6 fill-current" />
+                 </div>
+              </div>
+            </motion.div>
+
             {/* Feature Hero Card */}
             <motion.div 
               variants={itemVariants}

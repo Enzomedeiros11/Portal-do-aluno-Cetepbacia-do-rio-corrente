@@ -20,6 +20,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
   const [selectedSubject, setSelectedSubject] = useState('Português');
   
   const [localGrades, setLocalGrades] = useState<Record<string, { n1: string; n2: string; n3: string }>>({});
+  const [localFrequency, setLocalFrequency] = useState<Record<string, number>>({});
   const [dbUsers, setDbUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -30,31 +31,46 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
   }, []);
 
   const fetchUsers = async () => {
-    const { data, error } = await supabase
-      .from('usuarios')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (data) {
-      const mapped: User[] = data.map(d => {
-        let resolvedRole: 'student' | 'teacher' = 'student';
-        if (d.tipo === 'teacher' || d.email === 'codernador12@gmail.com' || d.email === 'enzomedeirosdasilva6@gmail.com') {
-          resolvedRole = 'teacher';
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) {
+        if (error.code === 'PGRST116' || error.message.includes('relation "public.usuarios" does not exist')) {
+          toast.error('Erro técnico: A tabela "usuarios" ainda não foi criada no seu Supabase. Siga as instruções do tutorial.');
+        } else {
+          toast.error(`Erro ao carregar usuários: ${error.message}`);
         }
+        return;
+      }
+      
+      if (data) {
+        const mapped: User[] = data.map(d => {
+          let resolvedRole: 'student' | 'teacher' = 'student';
+          if (d.tipo === 'teacher' || d.email === 'codernador12@gmail.com' || d.email === 'enzomedeirosdasilva6@gmail.com') {
+            resolvedRole = 'teacher';
+          }
 
-        return {
-          id: d.id,
-          name: d.nome || d.email.split('@')[0],
-          email: d.email,
-          role: resolvedRole,
-          grade: d.grade || 'Não informada',
-          course: d.curso || 'Não informado',
-          subjectGrades: d.notas || {},
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.id}`
-        };
-      });
-      setDbUsers(mapped);
-      onUpdateUsers(mapped);
+          return {
+            id: d.id,
+            name: d.nome || d.email.split('@')[0],
+            email: d.email,
+            role: resolvedRole,
+            grade: d.grade || 'Não informada',
+            course: d.curso || 'Não informado',
+            subjectGrades: d.notas || {},
+            frequencia: d.frequencia || 100,
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.id}`
+          };
+        });
+        setDbUsers(mapped);
+        onUpdateUsers(mapped);
+        toast.success('Lista de alunos atualizada!');
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
     }
   };
 
@@ -94,15 +110,18 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
   };
 
   useEffect(() => {
-    // Sync local grades with the current subject when subject or users change
+    // Sync local grades and frequency
     const grades: Record<string, { n1: string; n2: string; n3: string }> = {};
+    const freqs: Record<string, number> = {};
     dbUsers.forEach(u => {
       if (u.role === 'student') {
         const studentGrades = u.subjectGrades?.[selectedSubject] || { n1: '', n2: '', n3: '' };
         grades[u.id] = studentGrades;
+        freqs[u.id] = u.frequencia || 100;
       }
     });
     setLocalGrades(grades);
+    setLocalFrequency(freqs);
   }, [dbUsers, selectedSubject]);
 
   const studentsOnly = dbUsers.filter(u => u.role === 'student');
@@ -178,29 +197,36 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
             [selectedSubject]: localGrades[studentId]
           };
 
+          const freq = localFrequency[studentId];
+
           const { error } = await supabase
             .from('usuarios')
-            .update({ notas: updatedSubjectGrades })
+            .update({ 
+              notas: updatedSubjectGrades,
+              frequencia: freq 
+            })
             .eq('id', studentId);
 
           if (!error) {
             updatedCount++;
-            // Notify student via Gmail
-            await sendEmail({
-              to_name: student.name,
-              to_email: student.email,
-              subject: `Novas notas em ${selectedSubject}`,
-              message: `Olá ${student.name},\r\n\r\nSuas notas na matéria de ${selectedSubject} foram atualizadas.\r\n1º Bimestre: ${localGrades[studentId]?.n1 || '-'}\r\n2º Bimestre: ${localGrades[studentId]?.n2 || '-'}\r\n3º Bimestre: ${localGrades[studentId]?.n3 || '-'}\r\n\r\nAcesse o portal para conferir.\r\n\r\nAtenciosamente,\r\nCoordenação CETEP`,
-              type: 'grade_update'
-            });
+            // Only notify if it was an assignment update
+            if (localGrades[studentId]?.n1 || localGrades[studentId]?.n2 || localGrades[studentId]?.n3) {
+              await sendEmail({
+                to_name: student.name,
+                to_email: student.email,
+                subject: `Atualização de Notas/Frequência em ${selectedSubject}`,
+                message: `Olá ${student.name},\r\n\r\nSeus dados acadêmicos foram atualizados.\r\nFrequência Base: ${freq}%\r\n\r\nMatéria: ${selectedSubject}\r\n1º Bimestre: ${localGrades[studentId]?.n1 || '-'}\r\n2º Bimestre: ${localGrades[studentId]?.n2 || '-'}\r\n3º Bimestre: ${localGrades[studentId]?.n3 || '-'}\r\n\r\nAcesse o portal para conferir detalhes.\r\n\r\nAtenciosamente,\r\nCoordenação CETEP`,
+                type: 'grade_update'
+              });
+            }
           }
         }
       }
       
-      toast.success(`${updatedCount} notas de ${selectedSubject} salvas e alunos notificados!`);
+      toast.success(`${updatedCount} registros salvos e alunos notificados!`);
       fetchUsers();
     } catch (err) {
-      toast.error('Erro ao salvar algumas notas ou enviar notificações.');
+      toast.error('Erro ao salvar algumas informações.');
     } finally {
       setLoading(false);
     }
@@ -223,12 +249,20 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
   return (
     <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6 transition-colors duration-300">
       <div className="container mx-auto max-w-6xl">
-        <header className="mb-12">
-          <div className="flex items-center gap-3 mb-2">
-            <Users className="text-indigo-600 w-10 h-10" />
-            <h1 className="text-4xl font-black text-slate-900 font-display tracking-tighter">Gestão de Alunos</h1>
+        <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <Users className="text-indigo-600 w-10 h-10" />
+              <h1 className="text-4xl font-black text-slate-900 font-display tracking-tighter">Gestão de Alunos</h1>
+            </div>
+            <p className="text-slate-500 font-medium italic">Os alunos aparecem aqui automaticamente após o primeiro login.</p>
           </div>
-          <p className="text-slate-500 font-medium">Controle de notas e turmas de forma centralizada.</p>
+          <button 
+            onClick={fetchUsers}
+            className="px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all flex items-center gap-2 shadow-xl"
+          >
+            <Users className="w-4 h-4" /> Atualizar Lista
+          </button>
         </header>
 
         <div className="bg-white p-8 rounded-[48px] border border-slate-200 mb-8 shadow-sm transition-colors">
@@ -308,6 +342,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
                  <thead>
                     <tr className="bg-slate-50">
                        <th className="px-8 py-5 text-xs font-black uppercase text-slate-400 tracking-widest border-b border-slate-200">Estudante</th>
+                       <th className="px-4 py-5 text-xs font-black uppercase text-slate-400 tracking-widest text-center border-b border-slate-200">Freq %</th>
                        <th className="px-4 py-5 text-xs font-black uppercase text-slate-400 tracking-widest text-center border-b border-slate-200">1º Bim</th>
                        <th className="px-4 py-5 text-xs font-black uppercase text-slate-400 tracking-widest text-center border-b border-slate-200">2º Bim</th>
                        <th className="px-4 py-5 text-xs font-black uppercase text-slate-400 tracking-widest text-center border-b border-slate-200">3º Bim</th>
@@ -320,6 +355,16 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
                          <td className="px-8 py-5">
                             <h4 className="font-bold text-slate-900 leading-none">{s.name}</h4>
                             <p className="text-[10px] text-slate-400 mt-1 font-bold">{s.course} • {s.grade}</p>
+                         </td>
+                         <td className="px-4 py-5 text-center">
+                            <input 
+                              type="number" 
+                              min="0" 
+                              max="100"
+                              value={localFrequency[s.id] || 100} 
+                              onChange={(e) => setLocalFrequency(prev => ({...prev, [s.id]: parseInt(e.target.value)}))}
+                              className="w-16 h-10 bg-slate-50 border border-slate-200 rounded-lg text-center font-bold text-slate-900 focus:bg-white transition-colors outline-none focus:ring-2 focus:ring-indigo-600" 
+                            />
                          </td>
                          <td className="px-4 py-5 text-center">
                             <input 
@@ -442,91 +487,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
         </div>
       </div>
 
-      <AnimatePresence>
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-50 flex items-center justify-center p-6">
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-white rounded-[48px] w-full max-w-2xl p-12 shadow-2xl overflow-hidden relative border border-slate-200"
-            >
-              <div className="absolute top-0 left-0 right-0 h-2 bg-indigo-600" />
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                className="absolute top-8 right-8 p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all"
-              >
-                <Trash2 className="w-6 h-6" />
-              </button>
-              <h3 className="text-4xl font-black text-slate-900 mb-10 tracking-tighter font-display">Novo Registro</h3>
-              
-              <form onSubmit={handleAddStudent} className="space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Nome Completo</label>
-                      <input 
-                        type="text" 
-                        placeholder="Ex: João da Silva"
-                        className="w-full px-8 py-5 bg-slate-50 rounded-3xl border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-bold"
-                        value={newStudent.name}
-                        onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-3">
-                       <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">E-mail Acadêmico</label>
-                       <input 
-                        type="email" 
-                        placeholder="Ex: joao@cetep.com"
-                        className="w-full px-8 py-5 bg-slate-50 rounded-3xl border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-bold"
-                        value={newStudent.email}
-                        onChange={(e) => setNewStudent({...newStudent, email: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Modalidade / Curso</label>
-                    <select 
-                      className="w-full px-8 py-5 bg-slate-50 rounded-3xl border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-black text-xs uppercase tracking-tight"
-                      value={newStudent.curso}
-                      onChange={(e) => setNewStudent({...newStudent, curso: e.target.value})}
-                    >
-                      {COURSES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Série / Período</label>
-                    <select 
-                      className="w-full px-8 py-5 bg-slate-50 rounded-3xl border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-black text-xs uppercase tracking-tight"
-                      value={newStudent.grade}
-                      onChange={(e) => setNewStudent({...newStudent, grade: e.target.value})}
-                    >
-                      {GRADES.filter(g => g !== 'Docente').map(g => <option key={g} value={g}>{g}</option>)}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex gap-4 pt-10">
-                  <button 
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="flex-1 px-10 py-6 bg-slate-100 text-slate-500 rounded-3xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all"
-                  >
-                    Descartar
-                  </button>
-                  <button 
-                    type="submit"
-                    className="flex-1 px-10 py-6 bg-indigo-900 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest hover:bg-black shadow-2xl shadow-indigo-900/40 transition-all"
-                  >
-                    Confirmar Cadastro
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* Removed AnimatePresence and modal for adding students */}
     </div>
   );
 }

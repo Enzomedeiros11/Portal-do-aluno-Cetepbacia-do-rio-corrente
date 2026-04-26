@@ -128,18 +128,26 @@ export default function App() {
         .select('*');
       
       if (data) {
-        const mapped: User[] = data.map(d => ({
-          id: d.id,
-          name: d.nome,
-          email: d.email,
-          role: (d.tipo === 'teacher' || d.email === 'codernador12@gmail.com') ? 'teacher' : 'student',
-          grade: d.grade,
-          course: d.curso,
-          avatar: d.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.nome}`,
-          isOnline: false,
-          lastSeen: d.created_at,
-          subjectGrades: d.notas || {}
-        }));
+        const mapped: User[] = data.map(d => {
+          let role: 'student' | 'teacher' = 'student';
+          if (d.tipo === 'teacher' || d.email === 'codernador12@gmail.com' || d.email === 'enzomedeirosdasilva6@gmail.com') {
+            role = 'teacher';
+          }
+          
+          return {
+            id: d.id,
+            name: d.nome || d.email.split('@')[0],
+            email: d.email,
+            role,
+            grade: d.grade || '1º Ano',
+            course: d.curso || 'Técnico em Informática',
+            avatar: d.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.id}`,
+            isOnline: false,
+            lastSeen: d.created_at,
+            subjectGrades: d.notas || {},
+            frequencia: d.frequencia || 100
+          };
+        });
         setAllUsers(mapped);
       }
     } catch (err) {
@@ -163,14 +171,17 @@ export default function App() {
       }
 
       if (data) {
+        const role: 'student' | 'teacher' = (data.tipo === 'teacher' || data.email === 'codernador12@gmail.com' || data.email === 'enzomedeirosdasilva6@gmail.com') ? 'teacher' : 'student';
+        
         setCurrentUser({
           id: data.id,
           email: data.email,
           name: data.nome,
-          role: (data.tipo === 'teacher' || data.email === 'codernador12@gmail.com' || data.email === 'enzomedeirosdasilva6@gmail.com') ? 'teacher' : 'student',
+          role,
           grade: data.grade || '1º Ano',
           course: data.curso || 'Técnico em Informática',
           avatar: data.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.nome}`,
+          frequencia: data.frequencia ?? 100,
           isOnline: true,
           lastSeen: new Date().toISOString()
         });
@@ -184,12 +195,13 @@ export default function App() {
           grade: '1º Ano',
           curso: 'Técnico em Informática',
           avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`,
-          notas: {}
+          notas: {},
+          frequencia: 100
         };
 
         const { error: insertError } = await supabase
           .from('usuarios')
-          .insert([newUserProfile]);
+          .upsert([newUserProfile]); // Using upsert for better reliability
 
         if (!insertError) {
           // Notify student via Gmail on first login
@@ -212,6 +224,11 @@ export default function App() {
             isOnline: true,
             lastSeen: new Date().toISOString()
           });
+        } else {
+           console.error('Insert error:', insertError);
+           if (insertError.message.includes('relation "public.usuarios" does not exist')) {
+             toast.error('Banco de dados não configurado. Por favor, execute o script SQL no Supabase.');
+           }
         }
       }
     } catch (err) {
@@ -319,7 +336,7 @@ export default function App() {
             
             {/* Protected Teacher/Admin Routes */}
             <Route path="/teachers" element={
-              isAuthenticated && currentUser?.email === 'codernador12@gmail.com' ? 
+              isAuthenticated && (currentUser?.email === 'codernador12@gmail.com' || currentUser?.email === 'enzomedeirosdasilva6@gmail.com') ? 
                 <Teachers 
                   allUsers={allUsers}
                   onUpdateUsers={updateAllUsers}

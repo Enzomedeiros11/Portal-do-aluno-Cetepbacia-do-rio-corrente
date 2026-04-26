@@ -213,11 +213,25 @@ PARA FINS OFICIAIS, SOLICITE O DOCUMENTO ASSINADO NA SECRETARIA.
                 <div className="w-full bg-white/20 h-1.5 rounded-full mt-4">
                   <div className="bg-white h-full rounded-full transition-all duration-1000" style={{ width: `${(Number(ira) / 10) * 100}%` }} />
                 </div>
-                <p className="text-[10px] mt-4 font-bold opacity-60">
-                  {Number(ira) === 0 ? 'AGUARDANDO LANÇAMENTO DE NOTAS' : 'RENDIMENTO ACADÊMICO ATUAL'}
+                <p className="text-[10px] mt-4 font-bold opacity-60 uppercase tracking-widest">
+                  {Number(ira) === 0 ? 'AGUARDANDO NOTAS' : 'RENDIMENTO ACADÊMICO'}
                 </p>
               </div>
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-16 translate-x-16" />
+            </div>
+
+            <div className="bg-emerald-600 text-white p-8 rounded-[40px] shadow-xl shadow-emerald-600/20 relative overflow-hidden">
+               <div className="relative z-10 text-center">
+                 <Zap className="w-10 h-10 mx-auto mb-4 opacity-80 text-emerald-200 fill-current" />
+                 <p className="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Frequência Global</p>
+                 <h2 className="text-6xl font-black mb-2 tracking-tighter">{user?.frequencia || 100}%</h2>
+                 <div className="w-full bg-white/20 h-1.5 rounded-full mt-4">
+                   <div className="bg-white h-full rounded-full transition-all duration-1000" style={{ width: `${user?.frequencia || 100}%` }} />
+                 </div>
+                 <p className="text-[10px] mt-4 font-bold opacity-60 uppercase tracking-widest">
+                   { (user?.frequencia || 100) < 75 ? 'ALERTA DE FREQUÊNCIA BAIXA' : 'PRESENÇA EM DIA' }
+                 </p>
+               </div>
             </div>
 
             <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm">
