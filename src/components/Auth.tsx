@@ -32,7 +32,40 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
     setLoading(true);
 
     if (!isSupabaseConfigured) {
-      setError('Configuração do Supabase não encontrada. Adicione as chaves VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY nas configurações do projeto.');
+      setError('Banco de dados real não conectado. Usando simulação local (LocalStorage).');
+      // Simulate local login/register
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      if (mode === 'login') {
+        const user = users.find(u => u.email === formData.email);
+        if (user) {
+          onLogin(user);
+        } else if (formData.email === 'codernador12@gmail.com' && formData.password === '123') {
+           onLogin({
+             id: 'admin',
+             name: 'Coordenador',
+             email: 'codernador12@gmail.com',
+             role: 'teacher',
+             course: 'Todos',
+             grade: 'Docente',
+             avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
+           });
+        } else {
+          setError('E-mail ou senha incorretos (Modo Local).');
+        }
+      } else {
+        const newUser: User = {
+          id: Math.random().toString(36).substring(2),
+          name: formData.name,
+          email: formData.email,
+          role: 'student',
+          grade: formData.grade,
+          course: formData.course,
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.name}`,
+          subjectGrades: {}
+        };
+        onRegister(newUser);
+      }
       setLoading(false);
       return;
     }
