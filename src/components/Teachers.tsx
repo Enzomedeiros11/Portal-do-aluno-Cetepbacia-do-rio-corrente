@@ -200,47 +200,47 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-6 transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6 transition-colors duration-300">
       <div className="container mx-auto max-w-6xl">
         <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <Users className="text-indigo-600 dark:text-indigo-400 w-10 h-10" />
-              <h1 className="text-4xl font-bold text-slate-900 dark:text-white font-display">Gestão de Alunos</h1>
+              <Users className="text-indigo-600 w-10 h-10" />
+              <h1 className="text-4xl font-bold text-slate-900 font-display">Gestão de Alunos</h1>
             </div>
-            <p className="text-slate-500 dark:text-slate-400 font-medium">Coordene notas, turmas e frequências de forma centralizada.</p>
+            <p className="text-slate-500 font-medium">Coordene notas, turmas e frequências de forma centralizada.</p>
           </div>
           
           <button 
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-3 px-8 py-4 bg-indigo-900 dark:bg-indigo-600 text-white rounded-2xl font-bold shadow-xl shadow-indigo-900/10 hover:bg-slate-900 dark:hover:bg-indigo-700 transition-all active:scale-95 text-sm uppercase tracking-widest"
+            className="flex items-center gap-3 px-8 py-4 bg-indigo-900 text-white rounded-2xl font-bold shadow-xl shadow-indigo-900/10 hover:bg-slate-900 transition-all active:scale-95 text-sm uppercase tracking-widest"
           >
             <Plus className="w-5 h-5" /> Adicionar Aluno
           </button>
         </header>
 
-        <div className="bg-white dark:bg-slate-900 p-8 rounded-[48px] border border-slate-200 dark:border-slate-800 mb-8 shadow-sm transition-colors">
+        <div className="bg-white p-8 rounded-[48px] border border-slate-200 mb-8 shadow-sm transition-colors">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
               <div className="lg:col-span-4 relative">
-                  <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest mb-2 block ml-1">Pesquisar</label>
-                  <Search className="absolute left-4 bottom-4 translate-y-0 text-slate-400 dark:text-slate-500 w-4 h-4" />
+                  <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 block ml-1">Pesquisar</label>
+                  <Search className="absolute left-4 bottom-4 translate-y-0 text-slate-400 w-4 h-4" />
                   <input 
                     type="text" 
                     placeholder="Nome do aluno..." 
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-indigo-600 outline-none transition-all shadow-sm text-sm dark:text-white"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-indigo-600 outline-none transition-all shadow-sm text-sm"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
               </div>
               <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">Matéria Atual</label>
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Matéria Atual</label>
                     <div className="relative">
                       <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-indigo-400 underline" />
                       <select 
                         value={selectedSubject}
                         onChange={(e) => setSelectedSubject(e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 outline-none text-xs font-bold shadow-sm appearance-none focus:ring-2 focus:ring-indigo-600 dark:text-white"
+                        className="w-full pl-11 pr-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 outline-none text-xs font-bold shadow-sm appearance-none focus:ring-2 focus:ring-indigo-600"
                       >
                         {ALL_SUBJECTS.map(s => (
                           <option key={s} value={s}>{s}</option>
@@ -249,11 +249,11 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">Série</label>
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Série</label>
                     <select 
                       value={filterGrade}
                       onChange={(e) => setFilterGrade(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 outline-none text-xs font-bold shadow-sm focus:ring-2 focus:ring-indigo-600 dark:text-white"
+                      className="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 outline-none text-xs font-bold shadow-sm focus:ring-2 focus:ring-indigo-600"
                     >
                       <option value="Todos">Todas as Séries</option>
                       {GRADES.filter(g => g !== 'Docente').map(g => (
@@ -262,11 +262,11 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">Curso</label>
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Curso</label>
                     <select 
                       value={filterCourse}
                       onChange={(e) => setFilterCourse(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 outline-none text-xs font-bold shadow-sm focus:ring-2 focus:ring-indigo-600 dark:text-white"
+                      className="w-full px-4 py-3 bg-slate-50 rounded-2xl border border-slate-200 outline-none text-xs font-bold shadow-sm focus:ring-2 focus:ring-indigo-600"
                     >
                       <option value="Todos">Todos os Cursos</option>
                       {COURSES.map(c => (
@@ -281,7 +281,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
                         setFilterCourse('Todos');
                         setFilterGrade('Todos');
                       }}
-                      className="w-full py-3 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-300 dark:hover:bg-slate-700 transition-all"
+                      className="w-full py-3 bg-slate-200 text-slate-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-300 transition-all"
                     >
                       Limpar Filtros
                     </button>
@@ -290,31 +290,31 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
             </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-[40px] border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-12 transition-colors">
+        <div className="bg-white rounded-[40px] border border-slate-200 shadow-sm overflow-hidden mb-12 transition-colors">
            <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                  <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-950">
-                       <th className="px-8 py-5 text-xs font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest border-b border-slate-200 dark:border-slate-800">Estudante</th>
-                       <th className="px-4 py-5 text-xs font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest text-center border-b border-slate-200 dark:border-slate-800">1º Bim</th>
-                       <th className="px-4 py-5 text-xs font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest text-center border-b border-slate-200 dark:border-slate-800">2º Bim</th>
-                       <th className="px-4 py-5 text-xs font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest text-center border-b border-slate-200 dark:border-slate-800">3º Bim</th>
-                       <th className="px-8 py-5 text-xs font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest text-right whitespace-nowrap border-b border-slate-200 dark:border-slate-800">Ação</th>
+                    <tr className="bg-slate-50">
+                       <th className="px-8 py-5 text-xs font-black uppercase text-slate-400 tracking-widest border-b border-slate-200">Estudante</th>
+                       <th className="px-4 py-5 text-xs font-black uppercase text-slate-400 tracking-widest text-center border-b border-slate-200">1º Bim</th>
+                       <th className="px-4 py-5 text-xs font-black uppercase text-slate-400 tracking-widest text-center border-b border-slate-200">2º Bim</th>
+                       <th className="px-4 py-5 text-xs font-black uppercase text-slate-400 tracking-widest text-center border-b border-slate-200">3º Bim</th>
+                       <th className="px-8 py-5 text-xs font-black uppercase text-slate-400 tracking-widest text-right whitespace-nowrap border-b border-slate-200">Ação</th>
                     </tr>
                  </thead>
-                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                 <tbody className="divide-y divide-slate-100">
                     {filteredStudents.length > 0 ? filteredStudents.map((s) => (
-                      <tr key={s.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-950/50 transition-colors group">
+                      <tr key={s.id} className="hover:bg-slate-50/50 transition-colors group">
                          <td className="px-8 py-5">
-                            <h4 className="font-bold text-slate-900 dark:text-white leading-none">{s.name}</h4>
-                            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-bold">{s.course} • {s.grade}</p>
+                            <h4 className="font-bold text-slate-900 leading-none">{s.name}</h4>
+                            <p className="text-[10px] text-slate-400 mt-1 font-bold">{s.course} • {s.grade}</p>
                          </td>
                          <td className="px-4 py-5 text-center">
                             <input 
                               type="text" 
                               value={localGrades[s.id]?.n1 || ''} 
                               onChange={(e) => handleGradeChange(s.id, 'n1', e.target.value)}
-                              className="w-12 h-10 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-lg text-center font-bold text-indigo-900 dark:text-indigo-400 focus:bg-white dark:focus:bg-slate-950 transition-colors outline-none focus:ring-2 focus:ring-indigo-600" 
+                              className="w-12 h-10 bg-indigo-50 border border-indigo-100 rounded-lg text-center font-bold text-indigo-900 focus:bg-white transition-colors outline-none focus:ring-2 focus:ring-indigo-600" 
                             />
                          </td>
                          <td className="px-4 py-5 text-center">
@@ -322,7 +322,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
                               type="text" 
                               value={localGrades[s.id]?.n2 || ''} 
                               onChange={(e) => handleGradeChange(s.id, 'n2', e.target.value)}
-                              className="w-12 h-10 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded-lg text-center font-bold text-indigo-900 dark:text-indigo-400 focus:bg-white dark:focus:bg-slate-950 transition-colors outline-none focus:ring-2 focus:ring-indigo-600" 
+                              className="w-12 h-10 bg-indigo-50 border border-indigo-100 rounded-lg text-center font-bold text-indigo-900 focus:bg-white transition-colors outline-none focus:ring-2 focus:ring-indigo-600" 
                             />
                          </td>
                          <td className="px-4 py-5 text-center">
@@ -330,13 +330,13 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
                               type="text" 
                               value={localGrades[s.id]?.n3 || ''} 
                               onChange={(e) => handleGradeChange(s.id, 'n3', e.target.value)}
-                              className="w-12 h-10 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg text-center font-bold text-slate-400 dark:text-slate-500 focus:bg-white dark:focus:bg-slate-800 transition-colors outline-none focus:ring-2 focus:ring-indigo-600" 
+                              className="w-12 h-10 bg-slate-50 border border-slate-200 rounded-lg text-center font-bold text-slate-400 focus:bg-white transition-colors outline-none focus:ring-2 focus:ring-indigo-600" 
                             />
                          </td>
                          <td className="px-8 py-5 text-right whitespace-nowrap">
                             <button 
                               onClick={() => handleRemoveStudent(s.id, s.name)}
-                              className="p-2.5 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-xl hover:bg-rose-600 hover:text-white transition-all opacity-100 md:opacity-0 group-hover:opacity-100 shadow-sm"
+                              className="p-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-600 hover:text-white transition-all opacity-100 md:opacity-0 group-hover:opacity-100 shadow-sm"
                               title="Remover aluno"
                             >
                                <Trash2 className="w-4 h-4" />
@@ -347,8 +347,8 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
                       <tr>
                         <td colSpan={6} className="px-8 py-20 text-center">
                            <div className="flex flex-col items-center gap-4">
-                              <Users className="w-12 h-12 text-slate-200 dark:text-slate-800" />
-                              <p className="text-slate-400 dark:text-slate-600 font-medium italic">Nenhum estudante encontrado com os filtros selecionados.</p>
+                              <Users className="w-12 h-12 text-slate-200" />
+                              <p className="text-slate-400 font-medium italic">Nenhum estudante encontrado com os filtros selecionados.</p>
                            </div>
                         </td>
                       </tr>
@@ -360,7 +360,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Save Grades Card */}
-          <div className="bg-indigo-900 dark:bg-indigo-600 p-10 rounded-[48px] shadow-2xl shadow-indigo-900/20 flex flex-col justify-between gap-8 relative overflow-hidden">
+          <div className="bg-indigo-900 p-10 rounded-[48px] shadow-2xl shadow-indigo-900/20 flex flex-col justify-between gap-8 relative overflow-hidden">
               <div className="relative z-10 flex items-center gap-6">
                  <div className="w-18 h-18 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center border border-white/10 shadow-sm">
                     <CheckCircle className="text-white w-10 h-10" />
@@ -389,33 +389,33 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
           </div>
 
           {/* Announcement Card (Email Integration) */}
-          <div className="bg-white dark:bg-slate-900 p-10 rounded-[48px] border border-slate-200 dark:border-slate-800 shadow-sm transition-colors relative overflow-hidden">
+          <div className="bg-white p-10 rounded-[48px] border border-slate-200 shadow-sm transition-colors relative overflow-hidden">
              <div className="flex items-center gap-4 mb-8">
-                <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                <div className="w-12 h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600">
                   <Mail className="w-6 h-6" />
                 </div>
-                <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Aviso Geral</h4>
+                <h4 className="text-2xl font-black text-slate-900 tracking-tighter">Aviso Geral</h4>
              </div>
 
              <form onSubmit={handleSendAnnouncement} className="space-y-4">
                 <input 
                   type="text" 
                   placeholder="Assunto do comunicado"
-                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 rounded-[24px] border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-indigo-600 transition-all font-bold dark:text-white"
+                  className="w-full px-6 py-4 bg-slate-50 rounded-[24px] border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-600 transition-all font-bold"
                   value={announcement.subject}
                   onChange={(e) => setAnnouncement({...announcement, subject: e.target.value})}
                 />
                 <textarea 
                   placeholder="Descreva o comunicado importante para todos os alunos..."
                   rows={3}
-                  className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950 rounded-[24px] border border-slate-200 dark:border-slate-800 outline-none focus:ring-2 focus:ring-indigo-600 transition-all font-medium resize-none dark:text-white"
+                  className="w-full px-6 py-4 bg-slate-50 rounded-[24px] border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-600 transition-all font-medium resize-none"
                   value={announcement.message}
                   onChange={(e) => setAnnouncement({...announcement, message: e.target.value})}
                 />
                 <button 
                   type="submit"
                   disabled={sendingEmail}
-                  className="w-full py-5 bg-slate-900 dark:bg-indigo-900 text-white rounded-[24px] font-black uppercase tracking-widest text-[10px] hover:bg-black transition-all flex items-center justify-center gap-3 shadow-lg disabled:opacity-50"
+                  className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-black uppercase tracking-widest text-[10px] hover:bg-black transition-all flex items-center justify-center gap-3 shadow-lg disabled:opacity-50"
                 >
                   {sendingEmail ? (
                     <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
@@ -437,35 +437,35 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-white dark:bg-slate-900 rounded-[48px] w-full max-w-2xl p-12 shadow-2xl overflow-hidden relative border border-slate-200 dark:border-slate-800"
+              className="bg-white rounded-[48px] w-full max-w-2xl p-12 shadow-2xl overflow-hidden relative border border-slate-200"
             >
               <div className="absolute top-0 left-0 right-0 h-2 bg-indigo-600" />
               <button 
                 onClick={() => setIsModalOpen(false)}
-                className="absolute top-8 right-8 p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-2xl transition-all"
+                className="absolute top-8 right-8 p-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-2xl transition-all"
               >
                 <Trash2 className="w-6 h-6" />
               </button>
-              <h3 className="text-4xl font-black text-slate-900 dark:text-white mb-10 tracking-tighter font-display">Novo Registro</h3>
+              <h3 className="text-4xl font-black text-slate-900 mb-10 tracking-tighter font-display">Novo Registro</h3>
               
               <form onSubmit={handleAddStudent} className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">Nome Completo</label>
+                      <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Nome Completo</label>
                       <input 
                         type="text" 
                         placeholder="Ex: João da Silva"
-                        className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 rounded-3xl border border-slate-100 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-bold dark:text-white"
+                        className="w-full px-8 py-5 bg-slate-50 rounded-3xl border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-bold"
                         value={newStudent.name}
                         onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
                       />
                     </div>
                     <div className="space-y-3">
-                       <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">E-mail Acadêmico</label>
+                       <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">E-mail Acadêmico</label>
                        <input 
                         type="email" 
                         placeholder="Ex: joao@cetep.com"
-                        className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 rounded-3xl border border-slate-100 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-bold dark:text-white"
+                        className="w-full px-8 py-5 bg-slate-50 rounded-3xl border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-bold"
                         value={newStudent.email}
                         onChange={(e) => setNewStudent({...newStudent, email: e.target.value})}
                       />
@@ -474,9 +474,9 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">Modalidade / Curso</label>
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Modalidade / Curso</label>
                     <select 
-                      className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 rounded-3xl border border-slate-100 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-black text-xs uppercase tracking-tight dark:text-white"
+                      className="w-full px-8 py-5 bg-slate-50 rounded-3xl border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-black text-xs uppercase tracking-tight"
                       value={newStudent.curso}
                       onChange={(e) => setNewStudent({...newStudent, curso: e.target.value})}
                     >
@@ -484,9 +484,9 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
                     </select>
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest ml-1">Série / Período</label>
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Série / Período</label>
                     <select 
-                      className="w-full px-8 py-5 bg-slate-50 dark:bg-slate-950 rounded-3xl border border-slate-100 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-black text-xs uppercase tracking-tight dark:text-white"
+                      className="w-full px-8 py-5 bg-slate-50 rounded-3xl border border-slate-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-black text-xs uppercase tracking-tight"
                       value={newStudent.grade}
                       onChange={(e) => setNewStudent({...newStudent, grade: e.target.value})}
                     >
@@ -499,13 +499,13 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
                   <button 
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="flex-1 px-10 py-6 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-3xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                    className="flex-1 px-10 py-6 bg-slate-100 text-slate-500 rounded-3xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-200 transition-all"
                   >
                     Descartar
                   </button>
                   <button 
                     type="submit"
-                    className="flex-1 px-10 py-6 bg-indigo-900 dark:bg-indigo-600 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest hover:bg-black dark:hover:bg-indigo-700 shadow-2xl shadow-indigo-900/40 transition-all"
+                    className="flex-1 px-10 py-6 bg-indigo-900 text-white rounded-3xl font-black text-[10px] uppercase tracking-widest hover:bg-black shadow-2xl shadow-indigo-900/40 transition-all"
                   >
                     Confirmar Cadastro
                   </button>

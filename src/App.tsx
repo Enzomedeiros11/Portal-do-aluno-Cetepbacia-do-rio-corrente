@@ -79,17 +79,6 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [allUsers, setAllUsers] = useState<User[]>([]);
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    const saved = localStorage.getItem('cetep_theme');
-    return (saved as 'light' | 'dark') || 'light';
-  });
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem('cetep_theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
   useEffect(() => {
     // Session state management
@@ -225,14 +214,12 @@ export default function App() {
   return (
     <Router>
       <Toaster position="top-center" expand={true} richColors />
-      <div className={`min-h-screen font-sans transition-colors duration-300 ${theme === 'dark' ? 'dark bg-slate-950 text-slate-50' : 'bg-white text-slate-900'} selection:bg-indigo-600/20`}>
+      <div className="min-h-screen font-sans bg-white text-slate-900 selection:bg-indigo-600/20">
         <Navigation 
           isAuthenticated={isAuthenticated} 
           logout={logout} 
           userRole={userRole} 
           userEmail={currentUser?.email}
-          theme={theme}
-          toggleTheme={toggleTheme}
         />
         
         <main>
