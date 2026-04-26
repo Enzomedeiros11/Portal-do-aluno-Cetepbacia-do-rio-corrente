@@ -30,14 +30,15 @@ interface ClassroomProps {
 
 interface Message {
   id: string;
-  sender: string;
-  senderName: string;
+  texto: string;
+  usuario_nome: string;
+  usuario_email: string;
   role: 'student' | 'teacher';
-  content: string;
-  timestamp: string;
-  file_url?: string;
-  file_name?: string;
-  file_type?: string;
+  turma_id: string;
+  arquivo_url?: string;
+  arquivo_nome?: string;
+  arquivo_tipo?: string;
+  created_at: string;
 }
 
 export default function Classroom({ user, allUsers }: ClassroomProps) {
@@ -69,10 +70,10 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
           const newMessage = payload.new as Message;
           setMessages(prev => [...prev, newMessage]);
           
-          if (newMessage.sender !== user.id) {
+          if (newMessage.usuario_email !== user.email) {
             setUnreadCount(prev => prev + 1);
             notificationSound.current?.play().catch(() => {});
-            toast.info(`Nova mensagem de ${newMessage.senderName}`);
+            toast.info(`Nova mensagem de ${newMessage.usuario_nome}`);
           }
         })
         .subscribe();

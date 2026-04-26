@@ -121,7 +121,36 @@ export default function App() {
     checkState();
   }, []);
 
+  const fetchAllUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('*');
+      
+      if (data) {
+        const mapped: User[] = data.map(d => ({
+          id: d.id,
+          name: d.nome,
+          email: d.email,
+          role: (d.tipo === 'teacher' || d.email === 'codernador12@gmail.com') ? 'teacher' : 'student',
+          grade: d.grade,
+          course: d.curso,
+          avatar: d.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.nome}`,
+          isOnline: false,
+          lastSeen: d.created_at,
+          subjectGrades: d.notas || {}
+        }));
+        setAllUsers(mapped);
+      }
+    } catch (err) {
+      console.error('Error fetching all users:', err);
+    }
+  };
+
   const fetchUserProfile = async (uid: string, email: string) => {
+    // Fetch all users first so we have the list
+    fetchAllUsers();
+    
     try {
       const { data, error } = await supabase
         .from('usuarios')
@@ -258,7 +287,7 @@ export default function App() {
             
             {/* Protected Student Routes */}
             <Route path="/dashboard" element={
-              isAuthenticated ? <Dashboard user={currentUser} /> : <Navigate to="/auth" />
+              isAuthenticated ? <Dashboard user={currentUser} allUsers={allUsers} /> : <Navigate to="/auth" />
             } />
             <Route path="/journal" element={
               isAuthenticated ? <Journal /> : <Navigate to="/auth" />

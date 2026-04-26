@@ -14,15 +14,20 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { User } from '../types';
 
-export default function Dashboard() {
+interface DashboardProps {
+  user: User | null;
+  allUsers: User[];
+}
+
+export default function Dashboard({ user, allUsers }: DashboardProps) {
   const [searchTerm, setSearchTerm] = useState('');
   
-  const displayUser = {
-    name: 'João Silva',
-    course: 'Técnico em Informática',
-    avatar: null
-  };
+  if (!user) return null;
+
+  const onlineUsersCount = allUsers.filter(u => u.isOnline).length;
+  const classmates = allUsers.filter(u => u.course === user.course && u.id !== user.id);
 
   const handleQuickAction = (action: string) => {
     toast.success(`${action} iniciado com sucesso!`);
@@ -69,7 +74,7 @@ export default function Dashboard() {
               <span>Painel do Aluno</span>
             </motion.div>
             <h1 className="text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter leading-none font-display">
-              Olá, {displayUser.name.split(' ')[0]}!
+              Olá, {user.name.split(' ')[0]}!
             </h1>
             
             {/* Gamification Bar */}
@@ -98,21 +103,27 @@ export default function Dashboard() {
           
           <div className="flex flex-wrap items-center gap-4 bg-white/50 backdrop-blur-sm p-4 rounded-[40px] border border-white shadow-xl shadow-indigo-900/5 transition-colors">
              <div className="flex -space-x-3">
-                {[1,2,3].map(i => (
-                  <div key={i} className="w-10 h-10 rounded-full border-4 border-white bg-indigo-200"></div>
+                {classmates.slice(0, 3).map((student, i) => (
+                  <div key={i} className="w-10 h-10 rounded-full border-4 border-white bg-indigo-200 overflow-hidden">
+                    <img src={student.avatar} alt={student.name} className="w-full h-full object-cover" />
+                  </div>
                 ))}
-                <div className="w-10 h-10 rounded-full border-4 border-white bg-indigo-900 text-white flex items-center justify-center text-[10px] font-bold">+12</div>
+                {classmates.length > 3 && (
+                  <div className="w-10 h-10 rounded-full border-4 border-white bg-indigo-900 text-white flex items-center justify-center text-[10px] font-bold">
+                    +{classmates.length - 3}
+                  </div>
+                )}
              </div>
              <div className="h-10 w-px bg-slate-200 mx-2 hidden sm:block"></div>
              <div className="text-right">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Presença</p>
-                <p className="text-lg font-black text-emerald-600 tracking-tighter font-display leading-none">94.5%</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Online</p>
+                <p className="text-lg font-black text-emerald-600 tracking-tighter font-display leading-none">{onlineUsersCount}</p>
              </div>
              <Link 
                to="/settings" 
-               className="h-14 w-14 rounded-2xl bg-indigo-900 text-white flex items-center justify-center font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all"
+               className="h-14 w-14 rounded-2xl bg-indigo-900 text-white flex items-center justify-center font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all overflow-hidden"
              >
-               {displayUser.name.substring(0, 2).toUpperCase()}
+               <img src={user.avatar} alt="Seu Perfil" className="w-full h-full object-cover" />
              </Link>
           </div>
         </motion.header>
