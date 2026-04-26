@@ -24,6 +24,7 @@ import Logo from './components/Logo';
 import { User } from './types';
 import { Toaster, toast } from 'sonner';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { sendEmail } from './services/emailService';
 
 /**
  * Detects if the current environment is a cloud-based preview/dev environment.
@@ -83,27 +84,37 @@ export default function App() {
   useEffect(() => {
     // Session state management
     const checkState = async () => {
-      // 1. If Supabase is configured, use it
-      if (isSupabaseConfigured) {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          fetchUserProfile(session.user.id, session.user.email!);
-        } else {
-          setLoading(false);
-        }
-        
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-          if (session?.user) {
+      try {
+        // 1. If Supabase is configured, use it
+        if (isSupabaseConfigured) {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          
+          if (error) {
+            console.error('Supabase Auth error:', error);
+            // Fallback to simulation if auth fetch fails
+          } else if (session?.user) {
             fetchUserProfile(session.user.id, session.user.email!);
           } else {
-            setCurrentUser(null);
             setLoading(false);
           }
-        });
-        
-        return () => subscription.unsubscribe();
-      } 
+          
+          // Listen for auth changes
+          const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (session?.user) {
+              fetchUserProfile(session.user.id, session.user.email!);
+            } else {
+              setCurrentUser(null);
+              setLoading(false);
+            }
+          });
+          
+          return () => subscription.unsubscribe();
+        } else {
+          console.warn('Supabase not configured. Using local simulation mode.');
+        }
+      } catch (err) {
+        console.error('State check failed:', err);
+      }
       
       // 2. Fallback: Simulation mode using LocalStorage
       const savedUser = localStorage.getItem('cetep_user');
@@ -122,6 +133,7 @@ export default function App() {
   }, []);
 
   const fetchAllUsers = async () => {
+    if (!isSupabaseConfigured) return;
     try {
       const { data, error } = await supabase
         .from('usuarios')
@@ -152,6 +164,9 @@ export default function App() {
       }
     } catch (err) {
       console.error('Error fetching all users:', err);
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        toast.error('Erro de conexão com o banco de dados Supabase.');
+      }
     }
   };
 

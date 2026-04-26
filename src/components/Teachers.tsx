@@ -39,9 +39,9 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
       
       if (error) {
         if (error.code === 'PGRST116' || error.message.includes('relation "public.usuarios" does not exist')) {
-          toast.error('Erro técnico: A tabela "usuarios" ainda não foi criada no seu Supabase. Siga as instruções do tutorial.');
+          toast.error('Banco de Dados: Tabela "usuarios" não encontrada. Execute o script SQL no Supabase.');
         } else {
-          toast.error(`Erro ao carregar usuários: ${error.message}`);
+          toast.error(`Erro: ${error.message}`);
         }
         return;
       }
@@ -67,10 +67,12 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
         });
         setDbUsers(mapped);
         onUpdateUsers(mapped);
-        toast.success('Lista de alunos atualizada!');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Fetch error:', err);
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        toast.error('Erro de Conexão: O site não conseguiu falar com o Supabase. Verifique sua chave API e URL nas configurações.');
+      }
     }
   };
 
@@ -133,44 +135,19 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
     return matchesSearch && matchesCourse && matchesGrade;
   });
 
-  const [newStudent, setNewStudent] = useState({ name: '', email: '', curso: 'Técnico em Informática', grade: '1º Ano' });
-
-  const handleAddStudent = async (e: FormEvent) => {
-    e.preventDefault();
-    if (newStudent.name && newStudent.email) {
-      const { data, error } = await supabase
-        .from('usuarios')
-        .insert([{
-          id: Math.random().toString(36).substring(2),
-          nome: newStudent.name,
-          email: newStudent.email,
-          tipo: 'student',
-          curso: newStudent.curso,
-          grade: newStudent.grade,
-          notas: {}
-        }]);
-
-      if (error) {
-        toast.error('Erro ao adicionar aluno');
-      } else {
-        toast.success(`Estudante ${newStudent.name} adicionado com sucesso!`);
-        fetchUsers();
-        setNewStudent({ name: '', email: '', curso: 'Técnico em Informática', grade: '1º Ano' });
-        setIsModalOpen(false);
-      }
-    } else {
-      toast.error('Por favor, preencha nome e e-mail.');
-    }
-  };
-
   const handleRemoveStudent = async (id: string, name: string) => {
-    if (confirm(`Tem certeza que deseja remover ${name}?`)) {
-      const { error } = await supabase.from('usuarios').delete().eq('id', id);
-      if (error) {
-        toast.error('Erro ao remover aluno');
-      } else {
-        toast.success(`${name} removido.`);
+    if (confirm(`Remover permanentemente o aluno ${name}?`)) {
+      try {
+        const { error } = await supabase
+          .from('usuarios')
+          .delete()
+          .eq('id', id);
+        
+        if (error) throw error;
+        toast.success('Aluno removido com sucesso.');
         fetchUsers();
+      } catch (err) {
+        toast.error('Erro ao remover aluno.');
       }
     }
   };
@@ -264,6 +241,39 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
             <Users className="w-4 h-4" /> Atualizar Lista
           </button>
         </header>
+
+        {/* Centralized Summary Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm flex items-center gap-4">
+                <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                    <Users className="w-6 h-6" />
+                </div>
+                <div>
+                    <h3 className="text-2xl font-black text-slate-900 leading-none">{studentsOnly.length}</h3>
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Alunos Ativos</p>
+                </div>
+            </div>
+            <div className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm flex items-center gap-4">
+                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                    <CheckCircle className="w-6 h-6" />
+                </div>
+                <div>
+                    <h3 className="text-2xl font-black text-slate-900 leading-none">
+                        {(studentsOnly.reduce((acc, s) => acc + (s.frequencia || 0), 0) / (studentsOnly.length || 1)).toFixed(1)}%
+                    </h3>
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Frequência Média</p>
+                </div>
+            </div>
+            <div className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
+                    <BookOpen className="w-6 h-6" />
+                </div>
+                <div>
+                    <h3 className="text-2xl font-black text-slate-900 leading-none">{selectedSubject}</h3>
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Matéria em Foco</p>
+                </div>
+            </div>
+        </div>
 
         <div className="bg-white p-8 rounded-[48px] border border-slate-200 mb-8 shadow-sm transition-colors">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">

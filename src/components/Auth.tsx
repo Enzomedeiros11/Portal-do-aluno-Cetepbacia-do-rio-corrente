@@ -122,7 +122,12 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
         }
       }
     } catch (err: any) {
-      setError(err.message || 'Ocorreu um erro inesperado.');
+      console.error('Auth error:', err);
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError('Erro de conexão: Não foi possível alcançar o servidor de autenticação. Verifique sua chave API e URL do Supabase.');
+      } else {
+        setError(err.message || 'Ocorreu um erro inesperado.');
+      }
       setLoading(false);
     }
   };

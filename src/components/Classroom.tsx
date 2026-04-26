@@ -85,13 +85,9 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   }, [user]);
 
   const fetchEnrollments = async () => {
-    const { data, error } = await supabase
-      .from('matriculas')
-      .select('curso')
-      .eq('usuario_id', user?.id);
-    
-    if (data) {
-      setEnrolledCourses(data.map(m => m.curso));
+    // For agora, baseamos no curso do perfil do usuário
+    if (user?.course) {
+      setEnrolledCourses([user.course]);
     }
   };
 
