@@ -24,8 +24,8 @@ export default function Contact() {
             <div className="space-y-6">
               {[
                 { icon: Mail, label: 'E-mail', value: 'contato@cetep-brc.edu.br' },
-                { icon: Phone, label: 'Telefone', value: '(77) 3481-0000' },
-                { icon: MapPin, label: 'Localização', value: 'Bacia do Rio Corrente, Bahia' },
+                { icon: Phone, label: 'Telefone', value: '(77) 3483-3525' },
+                { icon: MapPin, label: 'Localização', value: 'Av. Gov. Roberto Santos, 54 - Sambaíba, Santa Maria da Vitória - BA' },
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-5 p-4 rounded-3xl hover:bg-gray-50 transition-colors cursor-pointer border border-transparent hover:border-gray-100">
                   <div className="w-12 h-12 bg-white shadow-md rounded-2xl flex items-center justify-center text-indigo-600">

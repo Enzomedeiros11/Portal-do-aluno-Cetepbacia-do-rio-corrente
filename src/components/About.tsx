@@ -47,12 +47,12 @@ export default function About() {
             className="space-y-8"
           >
             <h2 className="text-4xl font-serif font-medium text-slate-900 leading-tight">Excelência no Coração da <span className="text-indigo-600">Bacia do Rio Corrente</span></h2>
-            <div className="space-y-6 text-gray-600 leading-relaxed">
+            <div className="space-y-6 text-gray-600 leading-relaxed text-justify">
               <p>
-                Fundado para atender à demanda crescente por mão de obra qualificada em Santa Maria da Vitória e cidades circunvizinhas, o CETEP tem se destacado por oferecer cursos alinhados com a realidade econômica local.
+                O Centro Territorial de Educação Profissional da Bacia do Rio Corrente (CETEP) é uma instituição de ensino estadual localizada no município de Santa Maria da Vitória, no Extremo Oeste Baiano. Fundada em 1979, inicialmente como Colégio Estadual Joaquim da Rocha Medeiros, a escola passou por uma transformação significativa em 2009, tornando-se o CETEP para atender à crescente demanda por educação profissional na região.
               </p>
               <p>
-                Nossa infraestrutura conta com laboratórios de informática, nutrição, agropecuária e administração, permitindo que o aluno aprenda na prática as competências necessárias para o mercado de trabalho moderno.
+                Nossa infraestrutura dispõe de 14 salas de aula modernas, biblioteca, laboratórios especializados em informática, nutrição, agropecuária e administração, além de quadra de esportes e espaços administrativos dedicados. Com uma equipe de mais de 80 professores e profissionais comprometidos, atendemos estudantes de diversos municípios do território, incluindo Canápolis, Correntina, Santana e São Félix do Coribe.
               </p>
             </div>
             <div className="flex gap-12 pt-4">
@@ -120,10 +120,10 @@ export default function About() {
                  <p className="text-white/60 leading-relaxed mb-8">Venha nos visitar e conhecer nossa estrutura de perto. Estamos prontos para te receber.</p>
                  <div className="space-y-4">
                     <div className="flex items-center gap-4 text-sm font-medium">
-                       <MapPin className="text-indigo-400 w-5 h-5" /> Rua das Acácias, S/N - Centro
+                       <MapPin className="text-indigo-400 w-5 h-5" /> Av. Gov. Roberto Santos, 54 - Sambaíba, CEP 47640-000
                     </div>
                     <div className="flex items-center gap-4 text-sm font-medium">
-                       <Phone className="text-indigo-400 w-5 h-5" /> (77) 3483-XXXX
+                       <Phone className="text-indigo-400 w-5 h-5" /> (77) 3483-3525
                     </div>
                     <div className="flex items-center gap-4 text-sm font-medium">
                        <Mail className="text-indigo-400 w-5 h-5" /> cetep.bacia@educacao.ba.gov.br

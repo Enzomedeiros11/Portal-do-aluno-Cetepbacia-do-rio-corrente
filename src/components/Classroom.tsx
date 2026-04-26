@@ -78,7 +78,7 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   }, [messages, selectedClass]);
 
   const informaticsClasses = [
-    { id: 1, title: 'Banco de Dados', teacher: 'Prof. Ricardo', tasks: 1, students: 28, color: 'bg-indigo-600', description: 'Modelagem e implementação de bancos de dados relacionais.' },
+    { id: 1, title: 'Lógica de Programação', teacher: 'Prof. Ricardo', tasks: 1, students: 28, color: 'bg-indigo-600', description: 'Fundamentos de algoritmos e estruturas de dados.' },
     { id: 2, title: 'Robótica', teacher: 'Prof. Ricardo', tasks: 0, students: 15, color: 'bg-emerald-600', description: 'Programação de microcontroladores e montagem de circuitos.' },
     { id: 3, title: 'Prática Profissional', teacher: 'Prof. Ricardo', tasks: 2, students: 30, color: 'bg-amber-600', description: 'Vivência em projetos reais e mercado de trabalho.' },
     { id: 4, title: 'Fundamentos e Arquitetura', teacher: 'Prof. Ricardo', tasks: 1, students: 25, color: 'bg-rose-600', description: 'Estrutura física e lógica de computadores.' },
