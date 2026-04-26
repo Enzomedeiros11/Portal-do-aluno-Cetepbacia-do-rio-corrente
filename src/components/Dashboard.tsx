@@ -76,54 +76,32 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
             <h1 className="text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter leading-none font-display">
               Olá, {user.name.split(' ')[0]}!
             </h1>
-            
-            {/* Gamification Bar */}
-            <div className="max-w-md w-full bg-slate-100 p-4 rounded-3xl border border-slate-200 mt-4">
-              <div className="flex items-center justify-between mb-2">
-                 <div className="flex items-center gap-2">
-                    <Trophy className="w-4 h-4 text-amber-500" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Nível 12</span>
-                 </div>
-                 <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">75% para Nível 13</span>
-              </div>
-              <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                 <motion.div 
-                   initial={{ width: 0 }}
-                   animate={{ width: "75%" }}
-                   transition={{ duration: 1.5, ease: "easeOut" }}
-                   className="h-full bg-gradient-to-r from-amber-400 via-orange-500 to-indigo-600"
-                 />
-              </div>
-            </div>
-
-            <p className="text-lg text-slate-500 font-medium max-w-lg">
-              Bem-vindo ao seu portal. Você tem <span className="text-indigo-600 font-bold">3 novas notificações</span> e suas tarefas estão em dia.
+            <p className="text-lg text-slate-500 font-medium max-w-lg mt-4">
+              Bem-vindo ao seu portal. Suas tarefas e notas estão em dia.
             </p>
           </div>
           
-          <div className="flex flex-wrap items-center gap-4 bg-white/50 backdrop-blur-sm p-4 rounded-[40px] border border-white shadow-xl shadow-indigo-900/5 transition-colors">
+          <div className="flex items-center gap-6 bg-white p-4 rounded-[32px] border border-slate-100 shadow-sm transition-all hover:shadow-md">
              <div className="flex -space-x-3">
                 {classmates.slice(0, 3).map((student, i) => (
-                  <div key={i} className="w-10 h-10 rounded-full border-4 border-white bg-indigo-200 overflow-hidden">
+                  <div key={i} className="w-10 h-10 rounded-full border-4 border-white bg-slate-50 overflow-hidden shadow-sm">
                     <img src={student.avatar} alt={student.name} className="w-full h-full object-cover" />
                   </div>
                 ))}
-                {classmates.length > 3 && (
-                  <div className="w-10 h-10 rounded-full border-4 border-white bg-indigo-900 text-white flex items-center justify-center text-[10px] font-bold">
-                    +{classmates.length - 3}
-                  </div>
-                )}
              </div>
-             <div className="h-10 w-px bg-slate-200 mx-2 hidden sm:block"></div>
+             <div className="h-10 w-px bg-slate-100"></div>
              <div className="text-right">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Online</p>
-                <p className="text-lg font-black text-emerald-600 tracking-tighter font-display leading-none">{onlineUsersCount}</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</p>
+                <div className="flex items-center gap-1.5">
+                   <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                   <p className="text-[11px] font-black text-slate-900 tracking-tighter uppercase leading-none">{onlineUsersCount} Online</p>
+                </div>
              </div>
              <Link 
                to="/settings" 
-               className="h-14 w-14 rounded-2xl bg-indigo-900 text-white flex items-center justify-center font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all overflow-hidden"
+               className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center overflow-hidden hover:ring-4 hover:ring-indigo-50 transition-all shadow-inner"
              >
-               <img src={user.avatar} alt="Seu Perfil" className="w-full h-full object-cover" />
+               <img src={user.avatar} alt="Perfil" className="w-full h-full object-cover" />
              </Link>
           </div>
         </motion.header>

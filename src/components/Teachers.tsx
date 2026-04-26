@@ -32,25 +32,23 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
   const fetchUsers = async () => {
     const { data, error } = await supabase
       .from('usuarios')
-      .select('*');
+      .select('*')
+      .order('created_at', { ascending: false });
     
     if (data) {
       const mapped: User[] = data.map(d => {
-        // Resolve role correctly
         let resolvedRole: 'student' | 'teacher' = 'student';
-        if (d.tipo === 'teacher' || d.tipo === 'professor' || d.id === 'admin' || d.email === 'enzomedeirosdasilva6@gmail.com') {
-          resolvedRole = 'teacher';
-        } else if (d.email === 'codernador12@gmail.com') {
+        if (d.tipo === 'teacher' || d.email === 'codernador12@gmail.com' || d.email === 'enzomedeirosdasilva6@gmail.com') {
           resolvedRole = 'teacher';
         }
 
         return {
           id: d.id,
-          name: d.nome || 'Usuário',
+          name: d.nome || d.email.split('@')[0],
           email: d.email,
           role: resolvedRole,
-          grade: d.grade,
-          course: d.curso,
+          grade: d.grade || 'Não informada',
+          course: d.curso || 'Não informado',
           subjectGrades: d.notas || {},
           avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.id}`
         };

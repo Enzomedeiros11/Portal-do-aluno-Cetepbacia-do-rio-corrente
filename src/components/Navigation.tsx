@@ -15,23 +15,20 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const isCoordinator = userEmail === 'codernador12@gmail.com';
+  const isCoordinator = userEmail === 'codernador12@gmail.com' || userEmail === 'enzomedeirosdasilva6@gmail.com';
 
   const navItems = isAuthenticated 
     ? [
-        { name: 'Início', path: '/dashboard', icon: Layout },
-        { name: 'Jornal', path: '/journal' },
+        { name: 'Dashboard', path: '/dashboard', icon: Layout },
         { name: 'Sala de Aula', path: '/classroom' },
-        { name: 'Notas', path: '/students' },
-        { name: 'Cursos', path: '/extra-courses' },
-        { name: 'Estágios', path: '/internships' },
-        { name: 'Sobre', path: '/about' },
-        { name: 'Ajustes', path: '/settings' },
-        ...(isCoordinator ? [{ name: 'Coordenação', path: '/teachers' }] : []),
+        { name: 'Boletim', path: '/students' },
+        { name: 'Jornal', path: '/journal' },
+        ...(isCoordinator ? [{ name: 'Secretaria', path: '/teachers' }] : []),
+        { name: 'Perfil', path: '/settings' },
       ]
     : [
-        { name: 'Início', path: '/lp-video' },
-        { name: 'Sobre', path: '/about' },
+        { name: 'Página Inicial', path: '/lp-video' },
+        { name: 'Sobre Nós', path: '/about' },
         { name: 'Suporte', path: '/contact' },
       ];
 
@@ -60,17 +57,17 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
           </div>
         </Link>
         
-        <div className="hidden lg:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-6">
           {navItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className={`text-xs font-black uppercase tracking-widest transition-all hover:text-indigo-600 relative group/link ${
-                location.pathname === item.path ? 'text-indigo-600' : 'text-slate-500'
+              className={`text-[10px] font-black uppercase tracking-widest transition-all hover:text-indigo-600 relative group/link ${
+                location.pathname === item.path ? 'text-indigo-600' : 'text-slate-400'
               }`}
             >
               {item.name}
-              <span className={`absolute -bottom-1 left-0 h-0.5 bg-indigo-600 transition-all duration-300 ${
+              <span className={`absolute -bottom-2 left-0 h-0.5 bg-indigo-600 transition-all duration-300 ${
                 location.pathname === item.path ? 'w-full' : 'w-0 group-hover/link:w-full'
               }`}></span>
             </Link>
@@ -82,14 +79,14 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
             {isAuthenticated ? (
               <button 
                 onClick={logout}
-                className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-indigo-900/10 active:scale-95"
+                className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-indigo-900/10 active:scale-95"
               >
-                <LogOut className="w-4 h-4" /> Sair
+                <LogOut className="w-3.5 h-3.5" /> Sair
               </button>
             ) : (
               <Link 
                 to="/auth"
-                className="px-8 py-3 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/20 active:scale-95"
+                className="px-8 py-3 bg-indigo-600 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/20 active:scale-95"
               >
                 Acessar Portal
               </Link>
