@@ -3,6 +3,7 @@ import { Users, Search, Plus, Save, Filter, Trash2, CheckCircle, BookOpen } from
 import { useState, FormEvent, useEffect } from 'react';
 import { User, COURSES, GRADES } from '../types';
 import { toast } from 'sonner';
+import { supabase } from '../lib/supabase';
 
 interface TeachersProps {
   allUsers: User[];
@@ -17,58 +18,95 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
   const [filterGrade, setFilterGrade] = useState('Todos');
   const [selectedSubject, setSelectedSubject] = useState('Português');
   
-  // Local state for editing grades before saving globally
   const [localGrades, setLocalGrades] = useState<Record<string, { n1: string; n2: string; n3: string }>>({});
+  const [dbUsers, setDbUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('*');
+    
+    if (data) {
+      const mapped: User[] = data.map(d => ({
+        id: d.id,
+        name: d.nome,
+        email: d.email,
+        role: d.tipo as any,
+        grade: d.grade,
+        course: d.curso,
+        subjectGrades: d.notas || {},
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.id}`
+      }));
+      setDbUsers(mapped);
+      onUpdateUsers(mapped);
+    }
+  };
 
   useEffect(() => {
     // Sync local grades with the current subject when subject or users change
     const grades: Record<string, { n1: string; n2: string; n3: string }> = {};
-    allUsers.forEach(u => {
+    dbUsers.forEach(u => {
       if (u.role === 'student') {
         const studentGrades = u.subjectGrades?.[selectedSubject] || { n1: '', n2: '', n3: '' };
         grades[u.id] = studentGrades;
       }
     });
     setLocalGrades(grades);
-  }, [allUsers, selectedSubject]);
+  }, [dbUsers, selectedSubject]);
 
-  const studentsOnly = allUsers.filter(u => u.role === 'student');
+  const studentsOnly = dbUsers.filter(u => u.role === 'student');
 
   const filteredStudents = studentsOnly.filter(s => {
-    const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (s.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCourse = filterCourse === 'Todos' || s.course === filterCourse;
     const matchesGrade = filterGrade === 'Todos' || s.grade === filterGrade;
     return matchesSearch && matchesCourse && matchesGrade;
   });
 
-  const [newStudent, setNewStudent] = useState({ name: '', curso: 'Técnico em Informática', grade: '1º Ano' });
+  const [newStudent, setNewStudent] = useState({ name: '', email: '', curso: 'Técnico em Informática', grade: '1º Ano' });
 
-  const handleAddStudent = (e: FormEvent) => {
+  const handleAddStudent = async (e: FormEvent) => {
     e.preventDefault();
-    if (newStudent.name) {
-      const studentToAdd: User = { 
-        id: Date.now().toString(), 
-        name: newStudent.name, 
-        email: `${newStudent.name.toLowerCase().replace(' ', '.')}@cetep.com`, // Simulating email
-        role: 'student',
-        course: newStudent.curso,
-        grade: newStudent.grade,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${newStudent.name}`,
-        subjectGrades: {}
-      };
-      onUpdateUsers([...allUsers, studentToAdd]);
-      setNewStudent({ name: '', curso: 'Técnico em Informática', grade: '1º Ano' });
-      setIsModalOpen(false);
-      toast.success(`Estudante ${studentToAdd.name} adicionado com sucesso!`);
+    if (newStudent.name && newStudent.email) {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .insert([{
+          id: Math.random().toString(36).substring(2),
+          nome: newStudent.name,
+          email: newStudent.email,
+          tipo: 'student',
+          curso: newStudent.curso,
+          grade: newStudent.grade,
+          notas: {}
+        }]);
+
+      if (error) {
+        toast.error('Erro ao adicionar aluno');
+      } else {
+        toast.success(`Estudante ${newStudent.name} adicionado com sucesso!`);
+        fetchUsers();
+        setNewStudent({ name: '', email: '', curso: 'Técnico em Informática', grade: '1º Ano' });
+        setIsModalOpen(false);
+      }
     } else {
-      toast.error('Por favor, preencha o nome do aluno.');
+      toast.error('Por favor, preencha nome e e-mail.');
     }
   };
 
-  const handleRemoveStudent = (id: string, name: string) => {
+  const handleRemoveStudent = async (id: string, name: string) => {
     if (confirm(`Tem certeza que deseja remover ${name}?`)) {
-      onUpdateUsers(allUsers.filter(s => s.id !== id));
-      toast.success(`${name} removido da lista.`);
+      const { error } = await supabase.from('usuarios').delete().eq('id', id);
+      if (error) {
+        toast.error('Erro ao remover aluno');
+      } else {
+        toast.success(`${name} removido.`);
+        fetchUsers();
+      }
     }
   };
 
@@ -82,22 +120,31 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
     }));
   };
 
-  const handleSaveGrades = () => {
-    const updatedUsers = allUsers.map(u => {
-      if (u.role === 'student' && localGrades[u.id]) {
-        return {
-          ...u,
-          subjectGrades: {
-            ...(u.subjectGrades || {}),
-            [selectedSubject]: localGrades[u.id]
-          }
-        };
+  const handleSaveGrades = async () => {
+    setLoading(true);
+    try {
+      for (const studentId of Object.keys(localGrades)) {
+        const student = dbUsers.find(u => u.id === studentId);
+        if (student) {
+          const updatedSubjectGrades = {
+            ...(student.subjectGrades || {}),
+            [selectedSubject]: localGrades[studentId]
+          };
+
+          await supabase
+            .from('usuarios')
+            .update({ notas: updatedSubjectGrades })
+            .eq('id', studentId);
+        }
       }
-      return u;
-    });
-    
-    onUpdateUsers(updatedUsers);
-    toast.success(`Notas de ${selectedSubject} salvas com sucesso!`);
+      
+      toast.success(`Notas de ${selectedSubject} salvas no banco real!`);
+      fetchUsers();
+    } catch (err) {
+      toast.error('Erro ao salvar algumas notas.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const ALL_SUBJECTS = [
@@ -314,16 +361,28 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
               <h3 className="text-3xl font-bold text-slate-900 mb-8">Novo Aluno</h3>
               
               <form onSubmit={handleAddStudent} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Nome do Estudante</label>
-                  <input 
-                    type="text" 
-                    placeholder="Ex: João Silva"
-                    className="w-full px-6 py-4 bg-gray-50 rounded-2xl border border-gray-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-medium"
-                    value={newStudent.name}
-                    onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
-                  />
-                </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">Nome do Estudante</label>
+                      <input 
+                        type="text" 
+                        placeholder="Ex: João Silva"
+                        className="w-full px-6 py-4 bg-gray-50 rounded-2xl border border-gray-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-medium"
+                        value={newStudent.name}
+                        onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                       <label className="text-[10px] font-black uppercase text-gray-400 tracking-widest ml-1">E-mail</label>
+                       <input 
+                        type="email" 
+                        placeholder="Ex: joao@email.com"
+                        className="w-full px-6 py-4 bg-gray-50 rounded-2xl border border-gray-100 focus:bg-white focus:ring-2 focus:ring-indigo-600 outline-none transition-all font-medium"
+                        value={newStudent.email}
+                        onChange={(e) => setNewStudent({...newStudent, email: e.target.value})}
+                      />
+                    </div>
+                  </div>
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">

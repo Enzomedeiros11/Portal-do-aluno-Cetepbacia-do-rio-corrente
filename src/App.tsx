@@ -23,6 +23,7 @@ import Settings from './components/Settings';
 import Logo from './components/Logo';
 import { User } from './types';
 import { Toaster, toast } from 'sonner';
+import { supabase } from './lib/supabase';
 
 /**
  * Detects if the current environment is a cloud-based preview/dev environment.
@@ -80,24 +81,78 @@ export default function App() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    // Basic simulation for session persistence
-    const savedUser = localStorage.getItem('cetep_user');
-    const savedAllUsers = localStorage.getItem('cetep_all_users');
-    
-    if (savedAllUsers) {
-      setAllUsers(JSON.parse(savedAllUsers));
-    }
+    // Check active session
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        fetchUserProfile(session.user.id, session.user.email!);
+      } else {
+        setLoading(false);
+      }
+    };
 
-    if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
-    }
-    
-    setLoading(false);
+    getSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        fetchUserProfile(session.user.id, session.user.email!);
+      } else {
+        setCurrentUser(null);
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  const fetchUserProfile = async (uid: string, email: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('id', uid)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+         console.error('Error fetching profile:', error);
+      }
+
+      if (data) {
+        setCurrentUser({
+          id: data.id,
+          email: data.email,
+          name: data.nome,
+          role: data.tipo as 'student' | 'teacher',
+          grade: data.grade || '1º Ano',
+          course: data.curso || 'Técnico em Informática',
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.nome}`,
+          isOnline: true,
+          lastSeen: new Date().toISOString()
+        });
+      } else {
+        // Fallback profile if record doesn't exist yet
+        setCurrentUser({
+          id: uid,
+          email: email,
+          name: email.split('@')[0],
+          role: 'student',
+          grade: '1º Ano',
+          course: 'Técnico em Informática',
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`,
+          isOnline: true,
+          lastSeen: new Date().toISOString()
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const updateAllUsers = (newUsers: User[]) => {
     setAllUsers(newUsers);
-    localStorage.setItem('cetep_all_users', JSON.stringify(newUsers));
   };
 
   useEffect(() => {
@@ -106,18 +161,15 @@ export default function App() {
 
   const login = (authenticatedUser: User) => {
     setCurrentUser(authenticatedUser);
-    localStorage.setItem('cetep_user', JSON.stringify(authenticatedUser));
   };
 
   const register = (newUser: User) => {
     setCurrentUser(newUser);
-    localStorage.setItem('cetep_user', JSON.stringify(newUser));
-    updateAllUsers([...allUsers, newUser]);
   };
   
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     setCurrentUser(null);
-    localStorage.removeItem('cetep_user');
   };
 
   const isAuthenticated = !!currentUser;

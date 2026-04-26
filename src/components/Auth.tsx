@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { LogIn, UserPlus, ArrowRight, Mail, Lock, User as UserIcon, BookOpen, Calendar, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Logo from './Logo';
 import { User, COURSES, GRADES } from '../types';
+import { supabase } from '../lib/supabase';
 
 type AuthMode = 'login' | 'register';
 
@@ -35,45 +36,51 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
 
     try {
       if (mode === 'login') {
-        const user = users.find(u => u.email === formData.email);
-        if (user) {
-          onLogin(user);
-        } else if (formData.email === 'codernador12@gmail.com' && formData.password === '123') {
-           onLogin({
-             id: 'admin',
-             name: 'Coordenador',
-             email: 'codernador12@gmail.com',
-             role: 'teacher',
-             course: 'Todos',
-             grade: 'Docente',
-             avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
-           });
-        } else {
-          setError('E-mail ou senha incorretos.');
-          setLoading(false);
-        }
+        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        if (authError) throw authError;
+
+        // The session update will be handled by App.tsx listener
+        // But we can trigger immediate onLogin if we fetch here or just let the listener do its job.
+        // Actually, App.tsx is already listening, we just need to wait for it or redirect.
       } else {
         // Registration
         if (!formData.name || !formData.email || !formData.password) {
           throw new Error('Por favor, preencha todos os campos.');
         }
-        
-        const emailExists = users.some(u => u.email === formData.email);
-        if (emailExists) {
-          throw new Error('Este e-mail já está em uso.');
-        }
 
-        const newUser: User = {
-          id: Math.random().toString(36).substring(2),
-          name: formData.name,
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: formData.email,
-          role: 'student',
-          grade: formData.grade,
-          course: formData.course,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.name}`,
-          subjectGrades: {}
-        };
-        onRegister(newUser);
+          password: formData.password,
+          options: {
+            data: {
+              full_name: formData.name
+            }
+          }
+        });
+
+        if (signUpError) throw signUpError;
+        if (!signUpData.user) throw new Error('Erro ao criar usuário.');
+
+        // Insert into our custom profiles table (usuarios)
+        const { error: profileError } = await supabase
+          .from('usuarios')
+          .insert([{
+            id: signUpData.user.id,
+            nome: formData.name,
+            email: formData.email,
+            tipo: 'aluno', // Custom field from user schema
+            grade: formData.grade, // Extra fields
+            curso: formData.course
+          }]);
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          // Even if profile fails, user is created in Auth
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Ocorreu um erro inesperado.');

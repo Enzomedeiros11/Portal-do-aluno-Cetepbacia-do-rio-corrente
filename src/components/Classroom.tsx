@@ -19,6 +19,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { User } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface ClassroomProps {
   user: User | null;
@@ -43,34 +44,45 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Simulation: load messages from localStorage
-    const savedMessages = localStorage.getItem('cetep_classroom_messages');
-    if (savedMessages) {
-      setMessages(JSON.parse(savedMessages));
-    } else {
-      // Demo initial messages
-      setMessages([
-        { id: '1', sender: 'teacher', senderName: 'Prof. Ricardo', role: 'teacher', content: 'Bom dia turma! Sejam bem-vindos.', timestamp: '08:00' },
-        { id: '2', sender: 'system', senderName: 'Coordenação', role: 'teacher', content: 'As atividades foram atualizadas.', timestamp: '09:30' }
-      ]);
-    }
-  }, []);
+    if (user) {
+      fetchEnrollments();
+      fetchMessages();
+      
+      // Subscribe to real-time messages
+      const channel = supabase
+        .channel('classroom_messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens' }, (payload) => {
+          setMessages(prev => [...prev, payload.new as Message]);
+        })
+        .subscribe();
 
-  useEffect(() => {
-    // Simulation: load enrollments from localStorage
-    const savedEnrollments = localStorage.getItem('cetep_enrollments');
-    if (savedEnrollments) {
-      setEnrolledCourses(JSON.parse(savedEnrollments));
-    } else if (user) {
-      const initial = [user.course];
-      setEnrolledCourses(initial);
-      localStorage.setItem('cetep_enrollments', JSON.stringify(initial));
+      return () => {
+        supabase.removeChannel(channel);
+      };
     }
   }, [user]);
 
-  const saveMessages = (updatedMessages: Message[]) => {
-    setMessages(updatedMessages);
-    localStorage.setItem('cetep_classroom_messages', JSON.stringify(updatedMessages));
+  const fetchEnrollments = async () => {
+    const { data, error } = await supabase
+      .from('matriculas')
+      .select('curso')
+      .eq('usuario_id', user?.id);
+    
+    if (data) {
+      setEnrolledCourses(data.map(m => m.curso));
+    }
+  };
+
+  const fetchMessages = async () => {
+    const { data, error } = await supabase
+      .from('mensagens')
+      .select('*')
+      .order('timestamp', { ascending: true })
+      .limit(50);
+    
+    if (data) {
+      setMessages(data as any);
+    }
   };
 
   useEffect(() => {
@@ -130,21 +142,25 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
     toast.success(`Iniciando download de: ${fileName}`);
   };
 
-  const handleSendMessage = (e: FormEvent) => {
+  const handleSendMessage = async (e: FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
+    const newMessage = {
       sender: user?.id || 'anonymous',
       senderName: user?.name || 'Estudante',
       role: user?.role || 'student',
       content: message,
-      timestamp: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+      timestamp: new Date().toISOString()
     };
 
-    saveMessages([...messages, newMessage]);
-    setMessage('');
+    const { error } = await supabase.from('mensagens').insert([newMessage]);
+    
+    if (error) {
+      toast.error('Erro ao enviar mensagem');
+    } else {
+      setMessage('');
+    }
   };
 
   if (selectedClass) {
