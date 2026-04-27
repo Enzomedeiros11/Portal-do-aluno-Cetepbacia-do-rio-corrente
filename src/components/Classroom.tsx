@@ -121,7 +121,12 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
     };
 
     const { error } = await supabase.from('mensagens').insert([newMessage]);
-    if (!error) setMessage('');
+    if (error) {
+      console.error('Erro ao enviar mensagem:', error);
+      toast.error('Não foi possível enviar a mensagem.');
+    } else {
+      setMessage('');
+    }
   };
 
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {

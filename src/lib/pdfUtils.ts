@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import 'jspdf-autotable';
 import { User } from '../types';
 
 export const downloadBoletimPDF = (user: User) => {
@@ -77,27 +77,37 @@ export const downloadBoletimPDF = (user: User) => {
     ]);
 
     // Robust autoTable call
-    autoTable(doc, {
-      startY: 65,
-      head: [['Matéria', '1º Bim', '2º Bim', '3º Bim', 'Média Final']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [0, 51, 102] },
-      styles: { fontSize: 9, halign: 'center' },
-      columnStyles: {
-        0: { halign: 'left', fontStyle: 'bold' }
-      }
-    });
+    const docAny = doc as any;
+    if (typeof docAny.autoTable === 'function') {
+      docAny.autoTable({
+        startY: 65,
+        head: [['Matéria', '1º Bim', '2º Bim', '3º Bim', 'Média Final']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [0, 51, 102] },
+        styles: { fontSize: 9, halign: 'center' },
+        columnStyles: {
+          0: { halign: 'left', fontStyle: 'bold' }
+        }
+      });
+    } else {
+      console.error('autoTable is not a function on doc');
+      // Simple fallback if autotable fails
+      doc.text('Dados das Notas:', 20, 70);
+      tableData.forEach((row, i) => {
+        doc.text(`${row[0]}: ${row[4]}`, 20, 80 + (i * 5));
+      });
+    }
     
-    // Footer - safe check
-    const finalY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 20 : 150;
+    // Footer - safe check after autoTable
+    const finalY = Math.min((doc as any).lastAutoTable?.finalY + 20 || 200, 280);
     
     doc.setFontSize(8);
     doc.setTextColor(150);
     doc.text('Documento gerado eletronicamente pelo Sistema de Gestão Acadêmica CETEP.', pageWidth / 2, finalY, { align: 'center' });
     doc.text('Este documento tem caráter informativo.', pageWidth / 2, finalY + 5, { align: 'center' });
 
-    // Directly save - more reliable in many environments
+    // Directly save
     doc.save(`Boletim_${user.name.replace(/\s+/g, '_')}.pdf`);
 
     return true;
