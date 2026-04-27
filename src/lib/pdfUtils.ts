@@ -68,18 +68,20 @@ export const downloadBoletimPDF = (user: User) => {
     // Table
     const tableData = subjects.map(sub => [sub.name, sub.grade]);
 
-    (doc as any).autoTable({
-      startY: 65,
-      head: [['Matéria', 'Média']],
-      body: tableData,
-      theme: 'striped',
-      headStyles: { fillColor: [0, 51, 102] },
-      styles: { fontSize: 9 },
-    });
+    const autoTable = (doc as any).autoTable;
+    if (typeof autoTable === 'function') {
+      autoTable(doc, {
+        startY: 65,
+        head: [['Matéria', 'Média']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [0, 51, 102] },
+        styles: { fontSize: 9 },
+      });
+    }
     
-    // Footer - check if table exists
-    const lastY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY : 70;
-    const finalY = Math.min(lastY + 20, 280); 
+    // Footer - safe check
+    const finalY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 20 : 150;
     
     doc.setFontSize(8);
     doc.setTextColor(150);
