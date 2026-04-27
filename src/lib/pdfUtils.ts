@@ -3,22 +3,23 @@ import 'jspdf-autotable';
 import { User } from '../types';
 
 export const downloadBoletimPDF = (user: User) => {
-  const getSubjectGrade = (subName: string, subjectGrades: any) => {
-    const grades = subjectGrades?.[subName];
-    if (!grades) return '-';
+  const getDetailedGrades = (subName: string, subjectGrades: any) => {
+    const grades = subjectGrades?.[subName] || { n1: '-', n2: '-', n3: '-' };
+    const n1 = grades.n1 || '-';
+    const n2 = grades.n2 || '-';
+    const n3 = grades.n3 || '-';
     
-    const vals = [grades.n1, grades.n2, grades.n3].filter((v: any) => v !== '' && !isNaN(Number(v)));
-    if (vals.length === 0) return '-';
+    const vals = [n1, n2, n3].filter((v: any) => v !== '-' && v !== '' && !isNaN(Number(v)));
+    const media = vals.length === 0 ? '-' : (vals.reduce((acc: number, val: any) => acc + Number(val), 0) / vals.length).toFixed(1);
     
-    const sum = vals.reduce((acc: number, val: any) => acc + Number(val), 0);
-    return (sum / vals.length).toFixed(1);
+    return { n1, n2, n3, media };
   };
 
   const getSubjects = (courseName?: string, subjectGrades?: any) => {
-    const regular = [
+    const regularNames = [
       'Português', 'Matemática', 'Química', 'Física', 'Biologia', 'História', 
       'Geografia', 'Inglês', 'Filosofia', 'Sociologia', 'Educação Física', 'Artes'
-    ].map(name => ({ name, grade: getSubjectGrade(name, subjectGrades) }));
+    ];
 
     const technicalSubjects: Record<string, string[]> = {
       'Técnico em Informática': ['Banco de Dados', 'Robótica', 'Prática Profissional', 'Fundamentos e Arquitetura', 'Programação Web'],
@@ -29,13 +30,14 @@ export const downloadBoletimPDF = (user: User) => {
       'Meio Ambiente': ['Ecologia', 'Gestão Ambiental', 'Educação Ambiental', 'Poluição e Controle', 'Microbiologia Ambiental']
     };
 
-    const techMapped = (technicalSubjects[courseName || ''] || []).map(name => ({ name, grade: getSubjectGrade(name, subjectGrades) }));
-    if (!courseName || courseName === 'Regular') return regular;
-    return [...regular, ...techMapped];
+    const techNames = technicalSubjects[courseName || ''] || [];
+    const allNames = courseName === 'Regular' ? regularNames : [...regularNames, ...techNames];
+    
+    return allNames.map(name => ({ name, ...getDetailedGrades(name, subjectGrades) }));
   };
 
   const subjects = getSubjects(user.course, user.subjectGrades);
-  const validGrades = subjects.filter(s => s.grade !== '-').map(s => Number(s.grade));
+  const validGrades = subjects.filter(s => s.media !== '-').map(s => Number(s.media));
   const ira = validGrades.length === 0 ? '0.0' : (validGrades.reduce((a, b) => a + b, 0) / validGrades.length).toFixed(1);
 
   try {
@@ -65,18 +67,27 @@ export const downloadBoletimPDF = (user: User) => {
     doc.setDrawColor(200);
     doc.line(20, 60, pageWidth - 20, 60);
     
-    // Table
-    const tableData = subjects.map(sub => [sub.name, sub.grade]);
+    // Table Data
+    const tableData = subjects.map(sub => [
+      sub.name, 
+      sub.n1, 
+      sub.n2, 
+      sub.n3, 
+      sub.media
+    ]);
 
     const autoTable = (doc as any).autoTable;
     if (typeof autoTable === 'function') {
       autoTable(doc, {
         startY: 65,
-        head: [['Matéria', 'Média']],
+        head: [['Matéria', '1º Bim', '2º Bim', '3º Bim', 'Média Final']],
         body: tableData,
         theme: 'striped',
         headStyles: { fillColor: [0, 51, 102] },
-        styles: { fontSize: 9 },
+        styles: { fontSize: 9, halign: 'center' },
+        columnStyles: {
+          0: { halign: 'left', fontStyle: 'bold' }
+        }
       });
     }
     
