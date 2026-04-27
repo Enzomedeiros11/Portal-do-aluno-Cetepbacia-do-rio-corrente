@@ -35,11 +35,16 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
     toast.success(`${action} iniciado com sucesso!`);
   };
 
-  const handleDownload = (type: string) => {
+  const handleDownload = async (type: string) => {
     if (type === 'Boletim') {
       if (user) {
-        toast.info('Gerando Boletim em PDF...');
-        downloadBoletimPDF(user);
+        try {
+          toast.info('Gerando Boletim em PDF...');
+          downloadBoletimPDF(user);
+          toast.success('Boletim gerado com sucesso!');
+        } catch (error) {
+          toast.error('Erro ao gerar o boletim.');
+        }
       }
       return;
     }

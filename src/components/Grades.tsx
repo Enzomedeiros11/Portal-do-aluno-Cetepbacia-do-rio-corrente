@@ -98,9 +98,13 @@ export default function Grades({ user }: GradesProps) {
 
   const handleExport = () => {
     if (!user) return;
-    toast.info('Gerando PDF do Boletim...');
-    downloadBoletimPDF(user);
-    toast.success('Boletim baixado com sucesso!');
+    try {
+      toast.info('Gerando PDF do Boletim...');
+      downloadBoletimPDF(user);
+      toast.success('Boletim baixado com sucesso!');
+    } catch (error) {
+      toast.error('Ocorreu um erro ao gerar o PDF.');
+    }
   };
 
   return (
