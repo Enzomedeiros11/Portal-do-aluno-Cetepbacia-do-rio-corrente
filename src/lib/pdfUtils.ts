@@ -76,20 +76,18 @@ export const downloadBoletimPDF = (user: User) => {
       sub.media
     ]);
 
-    const autoTable = (doc as any).autoTable;
-    if (typeof autoTable === 'function') {
-      autoTable(doc, {
-        startY: 65,
-        head: [['Matéria', '1º Bim', '2º Bim', '3º Bim', 'Média Final']],
-        body: tableData,
-        theme: 'striped',
-        headStyles: { fillColor: [0, 51, 102] },
-        styles: { fontSize: 9, halign: 'center' },
-        columnStyles: {
-          0: { halign: 'left', fontStyle: 'bold' }
-        }
-      });
-    }
+    // Standard autoTable call
+    (doc as any).autoTable({
+      startY: 65,
+      head: [['Matéria', '1º Bim', '2º Bim', '3º Bim', 'Média Final']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [0, 51, 102] },
+      styles: { fontSize: 9, halign: 'center' },
+      columnStyles: {
+        0: { halign: 'left', fontStyle: 'bold' }
+      }
+    });
     
     // Footer - safe check
     const finalY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY + 20 : 150;
