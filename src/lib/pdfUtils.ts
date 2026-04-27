@@ -77,27 +77,17 @@ export const downloadBoletimPDF = (user: User) => {
       styles: { fontSize: 9 },
     });
     
-    // Footer
-    const finalY = Math.max((doc as any).lastAutoTable.finalY + 20, 250);
+    // Footer - check if table exists
+    const lastY = (doc as any).lastAutoTable ? (doc as any).lastAutoTable.finalY : 70;
+    const finalY = Math.min(lastY + 20, 280); 
+    
     doc.setFontSize(8);
     doc.setTextColor(150);
     doc.text('Documento gerado eletronicamente pelo Sistema de Gestão Acadêmica CETEP.', pageWidth / 2, finalY, { align: 'center' });
     doc.text('Este documento tem caráter informativo.', pageWidth / 2, finalY + 5, { align: 'center' });
 
-    // Using output as blob to handle potential iframe download restrictions
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Boletim_${user.name.replace(/\s+/g, '_')}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    
-    // Cleanup
-    setTimeout(() => {
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }, 100);
+    // Directly save - more reliable in many environments
+    doc.save(`Boletim_${user.name.replace(/\s+/g, '_')}.pdf`);
 
     return true;
   } catch (error) {
