@@ -15,6 +15,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { User } from '../types';
+import { downloadBoletimPDF } from '../lib/pdfUtils';
 
 interface DashboardProps {
   user: User | null;
@@ -36,7 +37,10 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
 
   const handleDownload = (type: string) => {
     if (type === 'Boletim') {
-      navigate('/boletim');
+      if (user) {
+        toast.info('Gerando Boletim em PDF...');
+        downloadBoletimPDF(user);
+      }
       return;
     }
     toast.info(`Iniciando download do ${type}...`);

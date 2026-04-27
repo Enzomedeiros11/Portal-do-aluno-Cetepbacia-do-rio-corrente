@@ -2,6 +2,7 @@ import { motion } from 'motion/react';
 import { FileText, TrendingUp, AlertTriangle, Download } from 'lucide-react';
 import { toast } from 'sonner';
 import { User } from '../types';
+import { downloadBoletimPDF } from '../lib/pdfUtils';
 
 interface GradesProps {
   user: User | null;
@@ -96,8 +97,10 @@ export default function Grades({ user }: GradesProps) {
   const ira = calculateIRA(subjects);
 
   const handleExport = () => {
-    toast.info('Gerando Histórico...');
-    setTimeout(() => toast.success('Histórico exportado!'), 1500);
+    if (!user) return;
+    toast.info('Gerando PDF do Boletim...');
+    downloadBoletimPDF(user);
+    toast.success('Boletim baixado com sucesso!');
   };
 
   return (
