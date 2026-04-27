@@ -111,7 +111,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
 
         {/* Filters */}
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
-           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
               <div className="relative">
                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                  <input 
@@ -129,6 +129,14 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
               >
                  <option value="Todos">Todos os Cursos</option>
                  {COURSES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <select 
+                 value={filterGrade}
+                 onChange={(e) => setFilterGrade(e.target.value)}
+                 className="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm font-semibold outline-none appearance-none"
+              >
+                 <option value="Todos">Todas as Séries</option>
+                 {GRADES.filter(g => g !== 'Docente').map(g => <option key={g} value={g}>{g}</option>)}
               </select>
               <select 
                  value={selectedSubject}

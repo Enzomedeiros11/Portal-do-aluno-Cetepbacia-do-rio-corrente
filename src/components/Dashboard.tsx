@@ -214,11 +214,11 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
                 </div>
                 {/* Simplified static calendar representation */}
                 <div className="text-center py-4 bg-slate-50 rounded-lg border border-slate-100">
-                    <p className="text-sm font-bold text-slate-700">Abril 2024</p>
+                    <p className="text-sm font-bold text-slate-700">Abril 2026</p>
                     <div className="mt-4 grid grid-cols-7 gap-1 px-4">
-                         {[...Array(7)].map((_, i) => <div key={i} className="text-[10px] font-bold text-slate-300">S</div>)}
-                         {[...Array(28)].map((_, i) => (
-                           <div key={i} className={`text-xs p-1 rounded ${i + 1 === 17 ? 'bg-blue-600 text-white' : 'text-slate-500'}`}>
+                         {['D','S','T','Q','Q','S','S'].map((d, i) => <div key={i} className="text-[10px] font-bold text-slate-300">{d}</div>)}
+                         {[...Array(30)].map((_, i) => (
+                           <div key={i} className={`text-xs p-1 rounded ${i + 1 === 27 ? 'bg-blue-600 text-white' : 'text-slate-500'}`}>
                              {i + 1}
                            </div>
                          ))}
