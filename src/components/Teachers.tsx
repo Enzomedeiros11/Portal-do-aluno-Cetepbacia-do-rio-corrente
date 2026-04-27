@@ -20,46 +20,15 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
   
   const [localGrades, setLocalGrades] = useState<Record<string, { n1: string; n2: string; n3: string }>>({});
   const [localFrequency, setLocalFrequency] = useState<Record<string, number>>({});
-  const [dbUsers, setDbUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [announcement, setAnnouncement] = useState({ subject: '', message: '' });
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const fetchUsers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('usuarios')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (data) {
-        const mapped: User[] = data.map(d => ({
-          id: d.id,
-          name: d.nome || d.email.split('@')[0],
-          email: d.email,
-          role: (d.tipo === 'teacher' || d.email === 'codernador12@gmail.com') ? 'teacher' : 'student',
-          grade: d.grade || 'Não informada',
-          course: d.curso || 'Não informado',
-          subjectGrades: d.notas || {},
-          frequencia: d.frequencia || 100,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${d.id}`
-        }));
-        setDbUsers(mapped);
-        onUpdateUsers(mapped);
-      }
-    } catch (err: any) {
-      console.error('Fetch error:', err);
-    }
-  };
-
+  // Use the allUsers prop instead of local dbUsers
   useEffect(() => {
     const grades: Record<string, { n1: string; n2: string; n3: string }> = {};
     const freqs: Record<string, number> = {};
-    dbUsers.forEach(u => {
+    allUsers.forEach(u => {
       if (u.role === 'student') {
         const studentGrades = u.subjectGrades?.[selectedSubject] || { n1: '', n2: '', n3: '' };
         grades[u.id] = studentGrades;
@@ -68,9 +37,9 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
     });
     setLocalGrades(grades);
     setLocalFrequency(freqs);
-  }, [dbUsers, selectedSubject]);
+  }, [allUsers, selectedSubject]);
 
-  const studentsOnly = dbUsers.filter(u => u.role === 'student');
+  const studentsOnly = allUsers.filter(u => u.role === 'student');
 
   const filteredStudents = studentsOnly.filter(s => {
     const matchesSearch = (s.name || '').toLowerCase().includes(searchTerm.toLowerCase());
@@ -84,7 +53,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
     try {
       let savedCount = 0;
       for (const studentId of Object.keys(localGrades)) {
-        const student = dbUsers.find(u => u.id === studentId);
+        const student = allUsers.find(u => u.id === studentId);
         if (student) {
           const updatedSubjectGrades = { ...(student.subjectGrades || {}), [selectedSubject]: localGrades[studentId] };
           const { error } = await supabase
@@ -95,7 +64,6 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
         }
       }
       toast.success(`${savedCount} registros atualizados!`);
-      fetchUsers();
     } catch (err) {
       toast.error('Erro ao salvar algumas notas.');
     } finally {
@@ -121,9 +89,6 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
               </div>
               <p className="text-slate-500 mt-1">Gerenciamento de estudantes, notas e frequências.</p>
            </div>
-           <button onClick={fetchUsers} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
-              <RefreshCw className="w-4 h-4" /> Atualizar Lista
-           </button>
         </header>
 
         {/* Dash Summary */}

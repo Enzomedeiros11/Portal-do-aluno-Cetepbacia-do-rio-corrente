@@ -21,7 +21,7 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
     ? [
         { name: 'Dashboard', path: '/dashboard', icon: Layout },
         { name: 'Sala de Aula', path: '/classroom' },
-        { name: 'Boletim', path: '/students' },
+        { name: 'Boletim', path: '/boletim' },
         { name: 'Jornal', path: '/journal' },
         ...(isCoordinator ? [{ name: 'Secretaria', path: '/teachers' }] : []),
         { name: 'Perfil', path: '/settings' },

@@ -219,6 +219,9 @@ export default function App() {
           .upsert([newUserProfile]); // Using upsert for better reliability
 
         if (!insertError) {
+          // Refresh list so teachers see the new student
+          await fetchAllUsers();
+          
           // Notify student via Gmail on first login
           await sendEmail({
             to_name: newUserProfile.nome,
@@ -342,7 +345,7 @@ export default function App() {
             <Route path="/internships" element={
               isAuthenticated ? <Internships /> : <Navigate to="/auth" />
             } />
-            <Route path="/students" element={
+            <Route path="/boletim" element={
               isAuthenticated ? <Grades user={currentUser} /> : <Navigate to="/auth" />
             } />
             <Route path="/assignments" element={

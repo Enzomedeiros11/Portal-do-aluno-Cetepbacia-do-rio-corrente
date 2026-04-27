@@ -12,7 +12,7 @@ import {
   Trophy,
   Download
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { User } from '../types';
 
@@ -23,6 +23,7 @@ interface DashboardProps {
 
 export default function Dashboard({ user, allUsers }: DashboardProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
   
   if (!user) return null;
 
@@ -34,6 +35,10 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
   };
 
   const handleDownload = (type: string) => {
+    if (type === 'Boletim') {
+      navigate('/boletim');
+      return;
+    }
     toast.info(`Iniciando download do ${type}...`);
   };
 
@@ -71,7 +76,7 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
           
           <div className="flex items-center gap-4 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
              <div className="text-right hidden sm:block">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{user.curso}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{user.course}</p>
                 <p className="text-sm font-semibold text-slate-700">{user.grade}</p>
              </div>
              <div className="h-10 w-px bg-slate-100 hidden sm:block"></div>
