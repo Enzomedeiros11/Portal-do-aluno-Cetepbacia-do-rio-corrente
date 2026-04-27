@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { User } from '../types';
 
 export const downloadBoletimPDF = (user: User) => {
@@ -76,8 +76,8 @@ export const downloadBoletimPDF = (user: User) => {
       sub.media
     ]);
 
-    // Standard autoTable call
-    (doc as any).autoTable({
+    // Robust autoTable call
+    autoTable(doc, {
       startY: 65,
       head: [['Matéria', '1º Bim', '2º Bim', '3º Bim', 'Média Final']],
       body: tableData,
