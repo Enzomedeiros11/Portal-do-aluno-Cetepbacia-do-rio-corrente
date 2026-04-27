@@ -10,9 +10,10 @@ interface TeachersProps {
   allUsers: User[];
   onUpdateUsers: (newUsers: User[]) => void;
   currentUser: User | null;
+  onRefresh: () => Promise<void>;
 }
 
-export default function Teachers({ allUsers, onUpdateUsers, currentUser }: TeachersProps) {
+export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefresh }: TeachersProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCourse, setFilterCourse] = useState('Todos');
   const [filterGrade, setFilterGrade] = useState('Todos');
@@ -89,6 +90,9 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
               </div>
               <p className="text-slate-500 mt-1">Gerenciamento de estudantes, notas e frequências.</p>
            </div>
+           <button onClick={() => { onRefresh(); toast.success('Dados atualizados!'); }} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+              <RefreshCw className="w-4 h-4 cursor-pointer" /> Atualizar Lista
+           </button>
         </header>
 
         {/* Dash Summary */}

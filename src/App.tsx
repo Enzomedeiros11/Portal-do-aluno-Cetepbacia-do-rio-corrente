@@ -108,7 +108,18 @@ export default function App() {
             }
           });
           
-          return () => subscription.unsubscribe();
+          // Realtime subscription for users list
+          const usersChannel = supabase
+            .channel('public:usuarios')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'usuarios' }, () => {
+              fetchAllUsers();
+            })
+            .subscribe();
+          
+          return () => {
+            subscription.unsubscribe();
+            supabase.removeChannel(usersChannel);
+          };
         } else {
           console.warn('Supabase not configured. Using local simulation mode.');
         }
@@ -359,6 +370,7 @@ export default function App() {
                   allUsers={allUsers}
                   onUpdateUsers={updateAllUsers}
                   currentUser={currentUser} 
+                  onRefresh={fetchAllUsers}
                 /> : <Navigate to="/auth" />
             } />
             <Route path="/settings" element={
