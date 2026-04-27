@@ -33,26 +33,18 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
       ];
 
   return (
-    <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl">
-      <div className="bg-white/90 backdrop-blur-xl border border-slate-100/50 shadow-[0_8px_40px_rgba(0,0,0,0.04)] rounded-[40px] px-6 lg:px-10 h-20 flex items-center justify-between transition-colors duration-300">
-        <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-4 group perspective-1000">
-          <div className="relative transform group-hover:rotate-12 transition-transform duration-500">
-            <div className="w-14 h-14 bg-indigo-500 rounded-[22px] flex items-center justify-center shadow-lg shadow-indigo-500/10 group-hover:shadow-indigo-500/20 transition-all overflow-hidden">
-               <Logo className="w-10 h-10 text-white fill-white" />
-            </div>
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-4 border-white shadow-sm" title="Portal Ativo" />
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-3 active:opacity-80 transition-opacity">
+          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+             <Logo className="w-7 h-7 text-white fill-white" />
           </div>
           <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-black tracking-tighter text-slate-800 font-display leading-none group-hover:text-indigo-600 transition-colors">
-                CETEP
-              </span>
-              <span className="px-2 py-0.5 bg-indigo-50/50 text-indigo-500 text-[8px] font-black rounded-full border border-indigo-100/50 tracking-tighter uppercase">
-                Portal
-              </span>
-            </div>
-            <span className="text-[10px] font-bold text-slate-400 tracking-[0.25em] uppercase leading-none mt-1.5 opacity-60">
-              Bacia do Rio Corrente
+            <span className="text-xl font-bold tracking-tight text-slate-900 leading-none">
+              CETEP
+            </span>
+            <span className="text-[10px] font-medium text-slate-500 uppercase tracking-tighter leading-none mt-1">
+              Portal Acadêmico
             </span>
           </div>
         </Link>
@@ -62,14 +54,11 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
             <Link
               key={item.path}
               to={item.path}
-              className={`text-[10px] font-black uppercase tracking-widest transition-all hover:text-indigo-600 relative group/link ${
-                location.pathname === item.path ? 'text-indigo-600' : 'text-slate-400'
+              className={`text-sm font-semibold transition-all hover:text-blue-600 relative group/link ${
+                location.pathname === item.path ? 'text-blue-600' : 'text-slate-600'
               }`}
             >
               {item.name}
-              <span className={`absolute -bottom-2 left-0 h-0.5 bg-indigo-600 transition-all duration-300 ${
-                location.pathname === item.path ? 'w-full' : 'w-0 group-hover/link:w-full'
-              }`}></span>
             </Link>
           ))}
         </div>
@@ -79,21 +68,21 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
             {isAuthenticated ? (
               <button 
                 onClick={logout}
-                className="flex items-center gap-2 px-6 py-3 bg-slate-800 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-slate-900/10 active:scale-95"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-700 border border-slate-200 rounded-md text-sm font-semibold hover:bg-slate-100 transition-all active:scale-95"
               >
-                <LogOut className="w-3.5 h-3.5 opacity-80" /> Sair
+                <LogOut className="w-4 h-4 opacity-70" /> Sair
               </button>
             ) : (
               <Link 
                 to="/auth"
-                className="px-8 py-3 bg-indigo-500 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg shadow-indigo-500/10 active:scale-95"
+                className="px-6 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700 transition-all shadow-sm active:scale-95"
               >
                 Acessar Portal
               </Link>
             )}
           </div>
 
-          <button className="lg:hidden p-3 bg-slate-50 rounded-2xl text-slate-900" onClick={() => setIsOpen(!isOpen)}>
+          <button className="lg:hidden p-2 rounded-md hover:bg-slate-100 transition-colors" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>

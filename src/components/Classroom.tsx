@@ -5,20 +5,17 @@ import {
   Layout, 
   Users, 
   FileText, 
-  Pin, 
-  ShieldCheck,
   ArrowLeft, 
   Send, 
   Paperclip, 
   Image as ImageIcon, 
-  MoreVertical,
   Search,
   MessageSquare,
   ChevronRight,
   ClipboardList,
   User as UserIcon,
-  Zap,
-  Trophy
+  ShieldCheck,
+  Bell
 } from 'lucide-react';
 import { User } from '../types';
 import { supabase } from '../lib/supabase';
@@ -46,33 +43,21 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
-  const [enrolledCourses, setEnrolledCourses] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [unreadCount, setUnreadCount] = useState(0);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const notificationSound = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    notificationSound.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
-  }, []);
 
   useEffect(() => {
     if (user) {
-      fetchEnrollments();
       fetchMessages();
       
-      // Subscribe to real-time messages
       const channel = supabase
         .channel('classroom_messages')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens' }, (payload) => {
           const newMessage = payload.new as Message;
           setMessages(prev => [...prev, newMessage]);
-          
           if (newMessage.usuario_email !== user.email) {
-            setUnreadCount(prev => prev + 1);
-            notificationSound.current?.play().catch(() => {});
             toast.info(`Nova mensagem de ${newMessage.usuario_nome}`);
           }
         })
@@ -84,23 +69,14 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
     }
   }, [user]);
 
-  const fetchEnrollments = async () => {
-    // For agora, baseamos no curso do perfil do usuário
-    if (user?.course) {
-      setEnrolledCourses([user.course]);
-    }
-  };
-
   const fetchMessages = async () => {
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('mensagens')
       .select('*')
       .order('created_at', { ascending: true })
       .limit(50);
     
-    if (data) {
-      setMessages(data as any);
-    }
+    if (data) setMessages(data as any);
   };
 
   useEffect(() => {
@@ -123,42 +99,10 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   const isInformatica = user?.course?.toLowerCase().includes('informática') || user?.role === 'teacher';
   const initialClasses = isInformatica ? informaticsClasses : genericClasses;
 
-  const classStudents = allUsers.filter(u => 
-    u.id !== user?.id && 
-    u.course === user?.course && 
-    u.role === 'student'
-  ).sort((a, b) => {
-    // Online first, then alphabetically
-    if (a.isOnline === b.isOnline) return a.name.localeCompare(b.name);
-    return a.isOnline ? -1 : 1;
-  });
-
-  const officialStaff = allUsers.filter(u => 
-    u.id !== user?.id && 
-    u.role === 'teacher'
-  ).sort((a, b) => {
-    if (a.isOnline === b.isOnline) return a.name.localeCompare(b.name);
-    return a.isOnline ? -1 : 1;
-  });
-
-  const onlineCount = allUsers.filter(u => u.isOnline).length;
-
   const displayClasses = initialClasses.filter(cls => 
     cls.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     cls.teacher.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleJoinWithCode = () => {
-    const code = prompt('Digite o código da turma:');
-    if (code) {
-      toast.info(`Tentando entrar na turma com código: ${code}`);
-      setTimeout(() => toast.error('Código inválido ou expirado.'), 1500);
-    }
-  };
-
-  const handleDownloadFile = (fileName: string) => {
-    toast.success(`Iniciando download de: ${fileName}`);
-  };
 
   const handleSendMessage = async (e: FormEvent, fileData?: { url: string, name: string, type: string }) => {
     if (e) e.preventDefault();
@@ -168,7 +112,7 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
       texto: message || `Enviou um arquivo: ${fileData?.name}`,
       usuario_nome: user?.name || 'Estudante',
       usuario_email: user?.email || '',
-      turma_id: selectedClass.id.toString(),
+      turma_id: selectedClass?.id?.toString() || 'general',
       role: user?.role || 'student',
       arquivo_url: fileData?.url || null,
       arquivo_nome: fileData?.name || null,
@@ -177,340 +121,195 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
     };
 
     const { error } = await supabase.from('mensagens').insert([newMessage]);
-    
-    if (error) {
-      console.error('Erro Supabase:', error);
-      toast.error('Erro ao enviar mensagem no mural. Verifique se a tabela "mensagens" existe.');
-    } else {
-      setMessage('');
-      if (!fileData) setUnreadCount(0);
-    }
+    if (!error) setMessage('');
   };
 
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('O arquivo é muito grande. Limite de 10MB.');
-      return;
-    }
-
     setIsUploading(true);
-    setUploadProgress(10);
+    setUploadProgress(20);
 
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `${user?.id}/${fileName}`;
-
-      setUploadProgress(30);
+      const filePath = `${user?.id || 'anon'}/${Math.random()}.${fileExt}`;
 
       const { data, error: uploadError } = await supabase.storage
         .from('arquivos_turma')
         .upload(filePath, file);
 
-      if (uploadError) {
-        if (uploadError.message.includes('bucket not found')) {
-          throw new Error('O bucket "arquivos_turma" não existe no Supabase. Crie-o para habilitar uploads.');
-        }
-        throw uploadError;
-      }
-
-      setUploadProgress(70);
+      if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from('arquivos_turma')
         .getPublicUrl(filePath);
 
-      setUploadProgress(100);
-      
       await handleSendMessage(null as any, {
         url: publicUrl,
         name: file.name,
         type: file.type
       });
 
-      toast.success('Arquivo enviado com sucesso!');
+      toast.success('Arquivo enviado!');
     } catch (err: any) {
-      console.error('Upload error:', err);
-      toast.error(err.message || 'Erro ao enviar arquivo.');
+      toast.error('Erro ao enviar arquivo.');
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
-      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
+  const classStudents = allUsers.filter(u => 
+    u.id !== user?.id && u.course === user?.course && u.role === 'student'
+  );
+
+  const officialStaff = allUsers.filter(u => u.role === 'teacher');
+
   if (selectedClass) {
     return (
-      <div className="min-h-screen bg-[#F5F5F7] pt-20 flex flex-col transition-colors duration-300">
-        <div className="bg-white border-b border-gray-200 px-6 py-4 fixed top-20 left-0 right-0 z-40 transition-colors">
-          <div className="container mx-auto max-w-6xl flex items-center justify-between">
+      <div className="min-h-screen bg-slate-50 pt-20 flex flex-col">
+        {/* Header Sala */}
+        <div className="bg-white border-b border-slate-200 px-6 py-4 shadow-sm z-40 fixed top-16 left-0 right-0">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button 
-                onClick={() => setSelectedClass(null)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                title="Voltar para Turmas"
-              >
-                <ArrowLeft className="w-6 h-6 text-slate-600" />
+              <button onClick={() => setSelectedClass(null)} className="p-2 hover:bg-slate-100 rounded-lg transition-colors">
+                <ArrowLeft className="w-5 h-5 text-slate-600" />
               </button>
-              <div className={`w-10 h-10 ${selectedClass.color} rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-black/10`}>
-                 <Layout className="text-white w-6 h-6" />
-              </div>
               <div>
-                <h2 className="font-bold text-slate-900 leading-none tracking-tight">{selectedClass.title}</h2>
-                <p className="text-[10px] text-gray-500 mt-1 font-black uppercase tracking-widest">{selectedClass.teacher}</p>
+                <h2 className="font-bold text-slate-900 leading-tight">{selectedClass.title}</h2>
+                <p className="text-xs text-slate-500 font-medium">{selectedClass.teacher}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => toast.info('Acessando atividades pendentes...')}
-                className="hidden md:flex items-center gap-2 px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all"
-              >
-                <ClipboardList className="w-4 h-4" /> Atividades
-              </button>
+            <div className="flex items-center gap-2">
+               <button className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold shadow-sm hover:bg-blue-700 transition-colors">
+                  <ClipboardList className="w-4 h-4" /> Atividades
+               </button>
             </div>
           </div>
         </div>
 
-        <div className="container mx-auto max-w-5xl flex-1 flex flex-col md:flex-row gap-6 mt-20 mb-20 p-6">
-          {/* Main Feed/Chat */}
-          <div className="flex-1 flex flex-col bg-white rounded-[40px] border border-gray-200 shadow-xl overflow-hidden transition-all relative">
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-               <div className="flex items-center gap-3">
-                 <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
-                    <MessageSquare className="w-5 h-5 text-indigo-600" />
-                 </div>
-                 <h3 className="font-bold text-slate-900">Mural da Turma</h3>
+        <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col lg:flex-row gap-6 mt-20 p-6 mb-20">
+          {/* Feed principal */}
+          <div className="flex-1 flex flex-col bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px]">
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+               <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-blue-600" />
+                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Mural Interativo</h3>
                </div>
-               <div className="flex items-center gap-4">
-                  {unreadCount > 0 && (
-                    <button 
-                      onClick={() => setUnreadCount(0)}
-                      className="px-3 py-1 bg-rose-600 text-white rounded-full text-[10px] font-black uppercase tracking-tighter"
-                    >
-                      {unreadCount} Novas
-                    </button>
-                  )}
-                  <div className="text-[10px] font-black text-emerald-500 uppercase tracking-widest flex items-center gap-2">
-                    <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                    Online
-                  </div>
+               <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tempo Real</span>
                </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 space-y-6 max-h-[600px] scroll-smooth custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 max-h-[600px] scroll-smooth">
               {messages.length === 0 && (
-                <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-20">
-                  <MessageSquare className="w-16 h-16 mb-4 text-slate-300" />
-                  <p className="text-sm font-medium">Nenhuma mensagem ainda.<br/>Inicie uma conversa!</p>
+                <div className="h-full flex flex-col items-center justify-center text-slate-300 py-12">
+                   <MessageSquare className="w-12 h-12 mb-2 opacity-50" />
+                   <p className="text-sm font-medium">Inicie uma conversa nesta turma.</p>
                 </div>
               )}
               {messages.map((msg) => (
-                <motion.div 
-                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  key={msg.id} 
-                  className={`flex gap-4 ${msg.usuario_email === user?.email ? 'flex-row-reverse' : 'flex-row'}`}
-                >
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-2 ${msg.role === 'teacher' ? 'bg-indigo-50 border-indigo-100' : 'bg-emerald-50 border-emerald-100'}`}>
-                    <UserIcon className={`w-6 h-6 ${msg.role === 'teacher' ? 'text-indigo-600' : 'text-emerald-600'}`} />
+                <div key={msg.id} className={`flex gap-3 ${msg.usuario_email === user?.email ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white font-bold text-xs ${msg.role === 'teacher' ? 'bg-blue-600' : 'bg-slate-400'}`}>
+                    {msg.usuario_nome.charAt(0)}
                   </div>
-                  <div className={`max-w-[75%] ${msg.usuario_email === user?.email ? 'text-right' : 'text-left'}`}>
-                    <div className={`flex items-baseline gap-2 mb-1 ${msg.usuario_email === user?.email ? 'flex-row-reverse' : 'flex-row'}`}>
-                      <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">{msg.usuario_nome}</span>
-                      <span className="text-[9px] text-gray-400 font-bold">{new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                  <div className={`max-w-[80%] ${msg.usuario_email === user?.email ? 'text-right' : 'text-left'}`}>
+                    <div className="flex items-center gap-2 mb-1 px-1">
+                      <span className="text-[10px] font-bold text-slate-900 uppercase tracking-tight">{msg.usuario_nome}</span>
+                      <span className="text-[9px] text-slate-400">{new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                    <div className={`p-4 rounded-3xl text-sm leading-relaxed ${
-                      msg.role === 'teacher' 
-                        ? 'bg-indigo-900 text-white rounded-tl-none shadow-lg shadow-indigo-900/20' 
-                        : msg.usuario_email === user?.email
-                          ? 'bg-emerald-600 text-white rounded-tr-none shadow-lg shadow-emerald-900/20'
-                          : 'bg-white border border-indigo-100 text-slate-700 rounded-tl-none shadow-sm'
+                    <div className={`px-4 py-3 rounded-2xl text-sm ${
+                      msg.usuario_email === user?.email 
+                        ? 'bg-blue-600 text-white rounded-tr-none shadow-sm' 
+                        : 'bg-slate-100 text-slate-800 rounded-tl-none border border-slate-200'
                     }`}>
                       {msg.texto}
-                      
                       {msg.arquivo_url && (
-                        <div className="mt-4 p-3 bg-black/10 rounded-2xl flex items-center justify-between gap-4 border border-white/10 hover:bg-black/20 transition-all cursor-pointer" onClick={() => window.open(msg.arquivo_url, '_blank')}>
-                          <div className="flex items-center gap-3 overflow-hidden">
-                             <div className="p-2 bg-white/20 rounded-xl">
-                                {msg.arquivo_tipo?.includes('image') ? <ImageIcon className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
-                             </div>
-                             <span className="text-xs font-bold truncate">{msg.arquivo_nome}</span>
-                          </div>
-                          <ChevronRight className="w-4 h-4 shrink-0 opacity-50" />
+                        <div 
+                          className="mt-3 p-3 bg-black/5 rounded-xl flex items-center justify-between gap-3 cursor-pointer hover:bg-black/10 transition-colors"
+                          onClick={() => window.open(msg.arquivo_url, '_blank')}
+                        >
+                           <div className="flex items-center gap-2 truncate">
+                              <FileText className="w-4 h-4 shrink-0" />
+                              <span className="text-[10px] font-bold truncate">{msg.arquivo_nome}</span>
+                           </div>
+                           <ChevronRight className="w-4 h-4 shrink-0 opacity-50" />
                         </div>
                       )}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
               <div ref={chatEndRef} />
             </div>
 
-            {isUploading && (
-              <div className="px-6 py-3 bg-indigo-50 border-t border-indigo-100 flex items-center gap-4">
-                 <div className="w-full bg-indigo-200 rounded-full h-1.5 overflow-hidden">
-                    <motion.div 
-                      className="bg-indigo-600 h-full" 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${uploadProgress}%` }}
-                    />
+            <form onSubmit={handleSendMessage} className="p-4 bg-slate-50 border-t border-slate-200">
+               <div className="flex items-center gap-2 bg-white rounded-xl border border-slate-200 p-1.5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                  <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
+                  <button 
+                    type="button" 
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2.5 text-slate-400 hover:text-blue-600 transition-colors"
+                  >
+                    <Paperclip className="w-5 h-5" />
+                  </button>
+                  <input 
+                    type="text" 
+                    placeholder="Escreva sua mensagem..." 
+                    className="flex-1 px-3 py-2 outline-none text-sm font-medium"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
+                  <button 
+                    type="submit" 
+                    disabled={!message.trim() && !isUploading}
+                    className="bg-blue-600 text-white p-2.5 rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+               </div>
+               {isUploading && (
+                 <div className="mt-2 h-1 bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-600 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
                  </div>
-                 <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest whitespace-nowrap">Enviando {uploadProgress}%</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSendMessage} className="p-6 border-t border-gray-100 bg-white transition-colors">
-              <div className="flex items-center gap-3 bg-gray-50 p-2 rounded-[30px] focus-within:ring-4 focus-within:ring-indigo-600/10 transition-all border border-gray-100">
-                <input 
-                  type="file" 
-                  ref={fileInputRef} 
-                  onChange={handleFileUpload} 
-                  className="hidden" 
-                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.zip"
-                />
-                <button 
-                  type="button" 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="p-4 hover:bg-white rounded-full transition-all text-gray-400 hover:text-indigo-600 group"
-                  title="Anexar arquivo (PDF, Imagem, Word...)"
-                >
-                  <Paperclip className="w-5 h-5 group-hover:rotate-45 transition-transform" />
-                </button>
-                <input 
-                  type="text" 
-                  placeholder="Escreva uma mensagem para a turma..." 
-                  className="flex-1 bg-transparent px-4 py-3 outline-none text-sm font-medium text-slate-700"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  onFocus={() => setUnreadCount(0)}
-                />
-                <button 
-                  type="submit"
-                  disabled={!message.trim() && !isUploading}
-                  className="p-4 bg-indigo-600 text-white rounded-full hover:bg-slate-900 transition-all shadow-xl shadow-indigo-600/20 active:scale-95 disabled:opacity-50"
-                >
-                  <Send className="w-5 h-5" />
-                </button>
-              </div>
-              <p className="text-[9px] text-gray-400 mt-3 ml-4 font-bold uppercase tracking-widest">Pressione Enter para enviar • Limite 10MB</p>
+               )}
             </form>
           </div>
 
-          {/* Teacher Info / Materials */}
-          <div className="w-full md:w-80 space-y-6">
-            <div className="bg-white p-8 rounded-[40px] border border-gray-200 shadow-sm transition-colors">
-               <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-4">Informações</h4>
-               <p className="text-sm text-slate-600 leading-relaxed font-bold">
-                 {selectedClass.description}
-               </p>
-               <div className="mt-8 pt-8 border-t border-gray-50 space-y-4">
-                  <div className="flex items-center gap-3 p-4 bg-indigo-50 rounded-2xl border border-indigo-100">
-                    <Users className="w-5 h-5 text-indigo-600" />
-                    <span className="text-xs font-black text-indigo-900 uppercase tracking-widest">Turma Oficial CETEP</span>
-                  </div>
-               </div>
-            </div>
-
-            <div className="bg-white p-8 rounded-[40px] border border-gray-200 shadow-sm transition-colors overflow-hidden">
-               <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-50">
-                 <h4 className="text-[10px] font-black uppercase text-gray-400 tracking-widest">Membros da Turma</h4>
-                 <div className="flex items-center gap-1.5 px-3 py-1 bg-indigo-50 rounded-full">
-                    <Users className="w-3 h-3 text-indigo-600" />
-                    <span className="text-[10px] font-bold text-indigo-600">{classStudents.length + officialStaff.length + 1}</span>
-                 </div>
-               </div>
-               
-               <div className="space-y-8 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                  {/* Official Staff Section */}
-                  <div className="space-y-4">
-                     <h5 className="text-[9px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
-                        <ShieldCheck className="w-3 h-3" /> STAFF DOCENTE
-                     </h5>
-                     
-                     {user?.role === 'teacher' && (
-                       <div className="flex items-center gap-3 bg-indigo-50/50 p-3 rounded-2xl border border-indigo-100/50">
-                          <div className="relative">
-                             <div className="w-10 h-10 rounded-full bg-indigo-900 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden">
-                                <img src={user?.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                             </div>
-                             <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
-                          </div>
-                          <div>
-                             <p className="text-sm font-bold text-indigo-950 leading-none">Você</p>
-                             <p className="text-[9px] text-indigo-500 font-black mt-1.5 uppercase tracking-widest">Online Agora</p>
-                          </div>
-                       </div>
-                     )}
-
-                     {officialStaff.map(staff => (
-                       <div key={staff.id} className={`flex items-center gap-3 transition-opacity ${staff.isOnline ? 'opacity-100' : 'opacity-40 hover:opacity-100 transition-all'}`}>
-                          <div className="relative">
-                             <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden text-slate-400">
-                                {staff.avatar ? (
-                                  <img src={staff.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                                ) : (
-                                  <UserIcon className="w-5 h-5" />
-                                )}
-                             </div>
-                             <div className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full ${staff.isOnline ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                          </div>
-                          <div>
-                             <p className="text-sm font-bold text-slate-900 leading-none">{staff.name}</p>
-                             <p className={`text-[9px] font-black mt-1.5 uppercase tracking-widest ${staff.isOnline ? 'text-indigo-500' : 'text-slate-400'}`}>
-                                {staff.isOnline ? 'Equipe • Online' : 'Ausente'}
-                             </p>
-                          </div>
-                       </div>
-                     ))}
-                  </div>
-
-                  {/* Students Section */}
-                  <div className="space-y-4">
-                     <h5 className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                        <Users className="w-3 h-3" /> COMUNIDADE DISCENTE
-                     </h5>
-
-                     {user?.role === 'student' && (
-                        <div className="flex items-center gap-3 bg-emerald-50/30 p-3 rounded-2xl border border-emerald-100/50">
-                           <div className="relative">
-                              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden">
-                                 <img src={user?.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                              </div>
-                              <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full" />
-                           </div>
-                           <div>
-                              <p className="text-sm font-bold text-slate-900 leading-none">Você</p>
-                              <p className="text-[9px] text-emerald-500 font-black mt-1.5 uppercase tracking-widest">Online Agora</p>
-                           </div>
+          {/* Lateral */}
+          <div className="w-full lg:w-80 space-y-6">
+             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h4 className="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-4 flex items-center gap-2">
+                   <Users className="w-3.5 h-3.5" /> Membros Conectados
+                </h4>
+                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                   {officialStaff.map(s => (
+                     <div key={s.id} className="flex items-center gap-3">
+                        <div className="relative">
+                           <img src={s.avatar} className="w-8 h-8 rounded-full bg-slate-100" />
+                           <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 border-2 border-white rounded-full ${s.isOnline ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                         </div>
-                     )}
-
-                     {classStudents.map(student => (
-                       <div key={student.id} className={`flex items-center gap-3 transition-opacity ${student.isOnline ? 'opacity-100' : 'opacity-40 hover:opacity-100 transition-all'}`}>
-                          <div className="relative">
-                             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center border-2 border-white shadow-sm overflow-hidden text-gray-400">
-                                {student.avatar ? (
-                                  <img src={student.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                                ) : (
-                                  <UserIcon className="w-5 h-5" />
-                                )}
-                             </div>
-                             <div className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-white rounded-full ${student.isOnline ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                          </div>
-                          <div>
-                             <p className="text-sm font-bold text-slate-700 leading-none">{student.name}</p>
-                             <p className="text-[9px] text-gray-400 font-bold mt-1.5 uppercase tracking-widest">
-                                {student.isOnline ? 'Conectado' : 'Offline'}
-                             </p>
-                          </div>
-                       </div>
-                     ))}
-                  </div>
-               </div>
-            </div>
+                        <div>
+                           <p className="text-xs font-bold text-slate-900 leading-none">{s.name}</p>
+                           <p className="text-[9px] font-bold text-blue-600 uppercase mt-1">Equipe Docente</p>
+                        </div>
+                     </div>
+                   ))}
+                   <div className="pt-2 border-t border-slate-100">
+                      {classStudents.map(s => (
+                        <div key={s.id} className="flex items-center gap-3 mt-4">
+                           <div className="relative">
+                              <img src={s.avatar} className="w-8 h-8 rounded-full bg-slate-100" />
+                              <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 border-2 border-white rounded-full ${s.isOnline ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                           </div>
+                           <p className="text-xs font-semibold text-slate-700">{s.name}</p>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+             </div>
           </div>
         </div>
       </div>
@@ -518,114 +317,91 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-28 pb-12 px-6 shadow-inner font-sans relative overflow-hidden transition-colors duration-300">
-      {/* Background accents optimized */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[60px] pointer-events-none" />
-      
-      <div className="container mx-auto max-w-6xl relative z-10">
-        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
-          <div className="md:flex-1">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
+    <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6">
+      <div className="max-w-7xl mx-auto">
+        <header className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center shadow-md">
                 <Layout className="text-white w-6 h-6" />
               </div>
-              <h1 className="text-5xl font-black text-slate-900 tracking-tighter font-display">Minhas Turmas</h1>
+              <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Salas de Aula</h1>
             </div>
-            <p className="text-slate-500 text-lg font-medium max-w-md">Acesse seus materiais de estudo e interaja com os professores em tempo real.</p>
+            <p className="text-slate-500 font-medium text-lg">Gerenciamento de materiais e comunicação acadêmica.</p>
           </div>
-          <div className="flex items-center gap-4">
-             <div className="relative group">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-4 h-4 group-focus-within:text-indigo-600 transition-colors" />
-               <input 
-                 type="text" 
-                 placeholder="Pesquisar salas..." 
-                 value={searchTerm}
-                 onChange={(e) => setSearchTerm(e.target.value)}
-                 className="pl-12 pr-6 py-4 bg-white rounded-[30px] border border-slate-200 focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-600 outline-none transition-all text-sm font-bold w-full md:w-72 shadow-sm" 
-               />
-             </div>
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+            <input 
+              type="text" 
+              placeholder="Localizar turma..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition-all font-semibold shadow-sm"
+            />
           </div>
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-              {displayClasses.map((cls, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {displayClasses.map((cls, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={{ y: -8, scale: 1.02 }}
+              whileHover={{ y: -4 }}
               onClick={() => setSelectedClass(cls)}
-              className="bg-white rounded-[48px] border border-slate-200 shadow-2xl shadow-indigo-900/[0.03] overflow-hidden flex flex-col group cursor-pointer transition-all"
+              className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col cursor-pointer group hover:border-blue-300 transition-all"
             >
-              <div className={`h-40 ${cls.color} p-10 relative flex flex-col justify-end overflow-hidden`}>
-                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-black/20 to-transparent pointer-events-none" />
-                 <h3 className="text-2xl text-white font-black tracking-tighter leading-tight font-display relative z-10">{cls.title}</h3>
-                 <p className="text-white/70 text-[10px] mt-2 uppercase font-black tracking-widest relative z-10">{cls.teacher}</p>
-                 <div className="absolute top-8 right-8 w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-xl border border-white/20 group-hover:bg-white group-hover:text-indigo-600 transition-all">
-                    <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              <div className={`h-32 ${cls.color} p-6 relative flex flex-col justify-end`}>
+                 <h3 className="text-xl text-white font-bold leading-tight relative z-10">{cls.title}</h3>
+                 <p className="text-white/80 text-[10px] mt-1 font-bold uppercase tracking-wider relative z-10">{cls.teacher}</p>
+                 <div className="absolute top-4 right-4 p-2 bg-white/20 rounded-lg backdrop-blur-sm border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ChevronRight className="w-5 h-5 text-white" />
                  </div>
               </div>
-              <div className="p-10 flex-1 flex flex-col">
-                 <div className="flex flex-wrap items-center gap-2 mb-8">
-                    <div className="px-4 py-1.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest">
-                       Matriculado
+              <div className="p-6 flex-1 flex flex-col">
+                 <div className="flex items-center justify-between mb-4">
+                    <div className="px-3 py-1 bg-blue-50 text-blue-600 rounded-md text-[10px] font-bold uppercase tracking-wide">
+                       Ativo
                     </div>
-                    {cls.tasks > 0 ? (
-                      <div className="px-4 py-1.5 bg-rose-50 text-rose-600 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                    {cls.tasks > 0 && (
+                      <span className="flex items-center gap-1.5 text-[10px] font-bold text-rose-600 uppercase">
                          <div className="w-1.5 h-1.5 bg-rose-600 rounded-full animate-pulse" />
-                         {cls.tasks} pendentes
-                      </div>
-                    ) : (
-                      <div className="px-4 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest">
-                        Em dia
-                      </div>
+                         {cls.tasks} Tarefas
+                      </span>
                     )}
                  </div>
-                 
-                 <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-50">
-                    <div className="flex items-center gap-3 text-slate-400 group-hover:text-indigo-600 transition-colors">
-                       <MessageSquare className="w-5 h-5" />
-                       <span className="text-[10px] font-black uppercase tracking-widest">Mural Interativo</span>
-                    </div>
+                 <div className="mt-auto py-3 border-t border-slate-50 flex items-center justify-between text-slate-400">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-2">
+                       <MessageSquare className="w-4 h-4" /> Mural
+                    </span>
+                    <span className="text-[10px] font-bold">{cls.students} Alunos</span>
                  </div>
               </div>
             </motion.div>
           ))}
         </div>
 
-        <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="mt-20 bg-slate-900 p-12 lg:p-16 rounded-[64px] text-white relative overflow-hidden group shadow-2xl shadow-indigo-900/40"
-        >
-           <div className="relative z-10">
-              <div className="flex items-center gap-4 mb-10">
-                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
-                    <Pin className="text-indigo-400 w-6 h-6 rotate-45 group-hover:scale-110 transition-transform" />
-                 </div>
-                 <h2 className="text-4xl font-black tracking-tighter font-display uppercase">Canal da Coordenação</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                 {[
-                   { author: 'Coordenação Pedagógica', msg: 'Atenção alunos: confiram as datas das provas do segundo bimestre no calendário oficial do portal.', date: 'Há 2 dias' },
-                   { author: 'Coordenação Profissional', msg: 'Novas parcerias de estágio foram firmadas para alunos do curso de Informática e Administração.', date: 'Hoje' },
-                 ].map((m, idx) => (
-                   <div key={idx} className="p-10 bg-white/5 backdrop-blur-xl rounded-[40px] border border-white/10 hover:bg-white/10 transition-all group/msg">
-                      <div className="flex items-center justify-between mb-6">
-                        <span className="text-[11px] font-black uppercase text-indigo-400 tracking-widest">{m.author}</span>
-                        <span className="text-[10px] font-bold text-white/20">{m.date}</span>
-                      </div>
-                      <p className="text-lg text-white/70 leading-relaxed font-medium transition-colors group-hover/msg:text-white">"{m.msg}"</p>
-                   </div>
-                 ))}
-              </div>
+        {/* Quadro de Avisos Geral (opcional, simplificado) */}
+        <section className="mt-16 bg-slate-900 rounded-3xl p-10 text-white shadow-xl shadow-slate-900/10">
+           <div className="flex items-center gap-2 mb-8">
+              <Bell className="w-5 h-5 text-blue-400" />
+              <h2 className="text-lg font-bold uppercase tracking-widest text-blue-400">Comunicados Oficiais</h2>
            </div>
-           
-           {/* Decorative elements */}
-           <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-gradient-to-tl from-indigo-500/20 to-transparent rounded-full translate-x-1/4 translate-y-1/4 blur-3xl pointer-events-none" />
-        </motion.section>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                { title: 'Calendário de Avaliações', msg: 'As datas para as avaliações do 2º bimestre já estão disponíveis na secretaria.', date: 'Há 1 dia' },
+                { title: 'Vagas de Estágio', msg: 'Novas oportunidades para os cursos técnicos no mural da coordenação.', date: 'Hoje' },
+              ].map((adv, idx) => (
+                <div key={idx} className="bg-white/5 border border-white/10 p-6 rounded-2xl hover:bg-white/10 transition-colors">
+                   <div className="flex justify-between items-start mb-3">
+                      <h4 className="font-bold text-slate-100">{adv.title}</h4>
+                      <span className="text-[10px] text-slate-500 font-bold">{adv.date}</span>
+                   </div>
+                   <p className="text-sm text-slate-400 leading-relaxed font-medium">{adv.msg}</p>
+                </div>
+              ))}
+           </div>
+        </section>
       </div>
     </div>
   );

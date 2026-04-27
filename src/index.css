@@ -1,55 +1,32 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-serif: "Inter", serif;
   --font-sans: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
-  --font-display: "Outfit", sans-serif;
+  --font-display: "Inter", sans-serif;
   
-  --color-primary: #6366f1;
+  --color-primary: #2563eb;
   --color-secondary: #475569;
 }
 
 @layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
-  }
-
   body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    @apply bg-slate-50/50 text-slate-800;
+    @apply bg-slate-50 text-slate-900 font-sans;
   }
 }
 
 .glass {
-  @apply bg-white/80 backdrop-blur-xl border border-slate-200/50;
+  @apply bg-white border border-slate-200 shadow-sm;
 }
 
 .nav-link {
-  @apply px-4 py-2 rounded-full font-semibold text-xs uppercase tracking-widest transition-all hover:bg-slate-200/50 text-slate-500 hover:text-slate-900;
+  @apply px-3 py-2 rounded-md font-medium text-sm transition-all text-slate-600 hover:text-blue-600 hover:bg-slate-100;
 }
 
 .card-premium {
-  @apply bg-white rounded-[32px] border border-slate-100 shadow-sm transition-all hover:shadow-md;
+  @apply bg-white rounded-lg border border-slate-200 shadow-sm transition-all hover:border-slate-300;
 }

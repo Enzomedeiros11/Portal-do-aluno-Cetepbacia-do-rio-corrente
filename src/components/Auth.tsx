@@ -33,7 +33,6 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
 
     if (!isSupabaseConfigured) {
       setError('Banco de dados real não conectado. Usando simulação local (LocalStorage).');
-      // Simulate local login/register
       await new Promise(resolve => setTimeout(resolve, 800));
       
       if (mode === 'login') {
@@ -70,23 +69,16 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
       return;
     }
 
-    // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
       if (mode === 'login') {
-        const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        const { error: authError } = await supabase.auth.signInWithPassword({
           email: formData.email,
           password: formData.password,
         });
-
         if (authError) throw authError;
-
-        // The session update will be handled by App.tsx listener
-        // But we can trigger immediate onLogin if we fetch here or just let the listener do its job.
-        // Actually, App.tsx is already listening, we just need to wait for it or redirect.
       } else {
-        // Registration
         if (!formData.name || !formData.email || !formData.password) {
           throw new Error('Por favor, preencha todos os campos.');
         }
@@ -104,103 +96,90 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
         if (signUpError) throw signUpError;
         if (!signUpData.user) throw new Error('Erro ao criar usuário.');
 
-        // Insert into our custom profiles table (usuarios)
         const { error: profileError } = await supabase
           .from('usuarios')
           .insert([{
             id: signUpData.user.id,
             nome: formData.name,
             email: formData.email,
-            tipo: 'student', // Use 'student' consistently with UserRole type
-            grade: formData.grade, // Extra fields
+            tipo: 'student',
+            grade: formData.grade,
             curso: formData.course
           }]);
 
         if (profileError) {
           console.error('Error creating profile:', profileError);
-          // Even if profile fails, user is created in Auth
         }
       }
     } catch (err: any) {
-      console.error('Auth error:', err);
-      if (err instanceof TypeError && err.message === 'Failed to fetch') {
-        setError('Erro de conexão: Não foi possível alcançar o servidor de autenticação. Verifique sua chave API e URL do Supabase.');
-      } else {
-        setError(err.message || 'Ocorreu um erro inesperado.');
-      }
+      setError(err.message || 'Ocorreu um erro inesperado.');
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row overflow-hidden font-sans transition-colors duration-300">
-      {/* Left Side: Dynamic Visuals */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-800 relative items-center justify-center p-20 overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/4" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[80px] translate-y-1/4 -translate-x-1/4" />
-        
+    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row overflow-hidden font-sans">
+      {/* Left Side: Solid Professional Section */}
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative items-center justify-center p-20">
         <div className="relative z-10 max-w-lg">
            <motion.div 
-             initial={{ opacity: 0, scale: 0.8 }}
+             initial={{ opacity: 0, scale: 0.9 }}
              animate={{ opacity: 1, scale: 1 }}
-             className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-[28px] border border-white/20 flex items-center justify-center mb-12 shadow-xl"
+             className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-8 shadow-lg"
            >
-              <Logo className="w-12 h-12" />
+              <Logo className="w-10 h-10 text-white fill-white" />
            </motion.div>
            <motion.h2 
-             initial={{ opacity: 0, y: 20 }}
+             initial={{ opacity: 0, y: 10 }}
              animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.2 }}
-             className="text-6xl font-black text-white leading-none tracking-tighter mb-8 font-display"
+             transition={{ delay: 0.1 }}
+             className="text-5xl font-bold text-white mb-6 tracking-tight leading-tight"
            >
-             Sua jornada rumo ao <span className="text-indigo-300 italic">futuro</span> começa aqui.
+             Sua educação profissional começa <span className="text-blue-400 font-medium">aqui.</span>
            </motion.h2>
            <motion.p 
-             initial={{ opacity: 0, y: 20 }}
+             initial={{ opacity: 0, y: 10 }}
              animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.3 }}
-             className="text-xl text-white/60 leading-relaxed font-medium"
+             transition={{ delay: 0.2 }}
+             className="text-lg text-slate-400 leading-relaxed font-medium"
            >
-             Acesse o Portal Acadêmico do CETEP e conecte-se com sua educação profissional de forma moderna.
+             Acesse o Portal Acadêmico do CETEP para gerenciar sua vida estudantil com eficiência e organização.
            </motion.p>
 
            <motion.div 
-             initial={{ opacity: 0, y: 20 }}
+             initial={{ opacity: 0, y: 10 }}
              animate={{ opacity: 1, y: 0 }}
-             transition={{ delay: 0.4 }}
-             className="mt-16 grid grid-cols-2 gap-4"
+             transition={{ delay: 0.3 }}
+             className="mt-12 flex gap-4"
            >
-              <div className="p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10">
-                 <p className="text-4xl font-black text-white font-display mb-1 tracking-tighter">1.2k+</p>
-                 <p className="text-xs font-black text-white/40 uppercase tracking-widest">Alunos Ativos</p>
+              <div className="flex-1 p-6 bg-white/5 rounded-xl border border-white/10">
+                 <p className="text-3xl font-bold text-white mb-1 tracking-tight">1.2k+</p>
+                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Alunos</p>
               </div>
-              <div className="p-6 bg-white/5 backdrop-blur-md rounded-3xl border border-white/10">
-                 <p className="text-4xl font-black text-white font-display mb-1 tracking-tighter">98%</p>
-                 <p className="text-xs font-black text-white/40 uppercase tracking-widest">Aprovação</p>
+              <div className="flex-1 p-6 bg-white/5 rounded-xl border border-white/10">
+                 <p className="text-3xl font-bold text-white mb-1 tracking-tight">98%</p>
+                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Aprovação</p>
               </div>
            </motion.div>
         </div>
       </div>
 
       {/* Right Side: Auth Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-20 bg-slate-50 relative">
-        <div className="lg:hidden absolute top-10 left-10">
-           <Logo className="w-12 h-12" />
-        </div>
-
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-20 bg-white">
         <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           className="max-w-md w-full"
         >
-          <div className="mb-12">
-            <h1 className="text-4xl font-black text-slate-800 tracking-tighter font-display">
-              {mode === 'login' ? 'Bem-vindo de volta!' : 'Criar minha conta'}
+          <div className="mb-10 text-center lg:text-left">
+            <div className="lg:hidden inline-flex w-12 h-12 bg-blue-600 rounded-lg items-center justify-center mb-6">
+              <Logo className="w-8 h-8 text-white fill-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+              {mode === 'login' ? 'Identificação' : 'Criar Conta'}
             </h1>
             <p className="text-slate-500 mt-2 font-medium">
-              {mode === 'login' 
-                ? 'Insira suas credenciais corporativas do CETEP.' 
-                : 'Preencha os dados abaixo para iniciar seu cadastro.'}
+              Centro Territorial de Educação Profissional.
             </p>
           </div>
 
@@ -209,7 +188,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
               <motion.div 
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-600 text-sm font-bold"
+                className="p-4 bg-rose-50 border border-rose-100 rounded-lg flex items-center gap-3 text-rose-600 text-sm font-semibold"
               >
                 <AlertCircle className="w-5 h-5 shrink-0" />
                 <p>{error}</p>
@@ -224,22 +203,22 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                   exit={{ opacity: 0, height: 0 }}
                   className="space-y-4"
                 >
-                  <div className="relative group">
-                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
+                  <div className="relative">
+                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                     <input
                       type="text"
                       placeholder="Nome completo"
-                      className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
+                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="relative group">
-                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
+                    <div className="relative">
+                      <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                       <select
-                        className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all appearance-none font-bold text-xs uppercase"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none font-semibold text-sm"
                         value={formData.grade}
                         onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
                       >
@@ -248,10 +227,10 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                         ))}
                       </select>
                     </div>
-                    <div className="relative group">
-                      <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
+                    <div className="relative">
+                      <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                       <select
-                        className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all appearance-none text-[10px] uppercase font-black tracking-widest"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none text-xs font-bold uppercase tracking-tight"
                         value={formData.course}
                         onChange={(e) => setFormData({ ...formData, course: e.target.value })}
                       >
@@ -265,30 +244,30 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
               )}
             </AnimatePresence>
 
-            <div className="relative group">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 type="email"
-                placeholder="E-mail institucional"
-                className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
+                placeholder="E-mail principal"
+                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
             </div>
 
-            <div className="relative group">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300 group-focus-within:text-indigo-600 transition-colors" />
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Senha"
-                className="w-full pl-12 pr-12 py-4 bg-white border border-slate-200 rounded-3xl focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 outline-none transition-all font-medium"
+                placeholder="Sua senha"
+                className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-300 hover:text-indigo-600 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors"
               >
                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
@@ -297,30 +276,27 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-5 bg-indigo-500 text-white rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all flex items-center justify-center gap-3 group shadow-xl shadow-indigo-500/10 active:scale-95 disabled:opacity-50"
+              className="w-full py-3.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 group shadow-sm active:scale-95 disabled:opacity-50"
             >
               {loading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                  <span>Processando...</span>
-                </>
+                <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <span>{mode === 'login' ? 'Acessar Portal' : 'Finalizar Cadastro'}</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <span>{mode === 'login' ? 'Acessar Conta' : 'Finalizar Registro'}</span>
+                  <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
 
-          <div className="mt-12 text-center">
+          <div className="mt-8 text-center">
             <button
               onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              className="px-6 py-3 bg-white text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-2xl transition-all"
+              className="text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors"
             >
                {mode === 'login' 
-                ? 'Não possui conta? Registre-se agora' 
-                : 'Já possui uma conta? Faça login aqui'}
+                ? 'Novo por aqui? Crie sua conta' 
+                : 'Já tem uma conta? Identifique-se'}
             </button>
           </div>
         </motion.div>
