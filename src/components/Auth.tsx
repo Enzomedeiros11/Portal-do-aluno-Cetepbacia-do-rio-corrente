@@ -135,17 +135,17 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row overflow-hidden font-sans transition-colors duration-300">
       {/* Left Side: Dynamic Visuals */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative items-center justify-center p-20 overflow-hidden">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-600/15 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/4" />
-        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-600/5 rounded-full blur-[60px] translate-y-1/4 -translate-x-1/4" />
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-800 relative items-center justify-center p-20 overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/4" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[80px] translate-y-1/4 -translate-x-1/4" />
         
         <div className="relative z-10 max-w-lg">
            <motion.div 
              initial={{ opacity: 0, scale: 0.8 }}
              animate={{ opacity: 1, scale: 1 }}
-             className="w-24 h-24 bg-white/10 backdrop-blur-xl rounded-[32px] border border-white/20 flex items-center justify-center mb-12 shadow-2xl"
+             className="w-20 h-20 bg-white/10 backdrop-blur-xl rounded-[28px] border border-white/20 flex items-center justify-center mb-12 shadow-xl"
            >
-              <Logo className="w-16 h-16" />
+              <Logo className="w-12 h-12" />
            </motion.div>
            <motion.h2 
              initial={{ opacity: 0, y: 20 }}
@@ -153,15 +153,15 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
              transition={{ delay: 0.2 }}
              className="text-6xl font-black text-white leading-none tracking-tighter mb-8 font-display"
            >
-             Sua jornada rumo ao <span className="text-indigo-400 italic">futuro</span> começa aqui.
+             Sua jornada rumo ao <span className="text-indigo-300 italic">futuro</span> começa aqui.
            </motion.h2>
            <motion.p 
              initial={{ opacity: 0, y: 20 }}
              animate={{ opacity: 1, y: 0 }}
              transition={{ delay: 0.3 }}
-             className="text-xl text-white/50 leading-relaxed font-medium"
+             className="text-xl text-white/60 leading-relaxed font-medium"
            >
-             Acesse o Portal Acadêmico do CETEP e conecte-se com sua educação profissional de forma moderna e simplificada.
+             Acesse o Portal Acadêmico do CETEP e conecte-se com sua educação profissional de forma moderna.
            </motion.p>
 
            <motion.div 
@@ -194,7 +194,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
           className="max-w-md w-full"
         >
           <div className="mb-12">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tighter font-display">
+            <h1 className="text-4xl font-black text-slate-800 tracking-tighter font-display">
               {mode === 'login' ? 'Bem-vindo de volta!' : 'Criar minha conta'}
             </h1>
             <p className="text-slate-500 mt-2 font-medium">
@@ -297,7 +297,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-5 bg-indigo-900 text-white rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-black transition-all flex items-center justify-center gap-3 group shadow-2xl shadow-indigo-900/40 active:scale-95 disabled:opacity-50"
+              className="w-full py-5 bg-indigo-500 text-white rounded-3xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all flex items-center justify-center gap-3 group shadow-xl shadow-indigo-500/10 active:scale-95 disabled:opacity-50"
             >
               {loading ? (
                 <>

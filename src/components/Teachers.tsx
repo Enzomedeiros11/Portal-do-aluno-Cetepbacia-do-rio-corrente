@@ -229,14 +229,14 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
         <header className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <Users className="text-indigo-600 w-10 h-10" />
-              <h1 className="text-4xl font-black text-slate-900 font-display tracking-tighter">Gestão de Alunos</h1>
+              <Users className="text-indigo-500 w-10 h-10" />
+              <h1 className="text-4xl font-black text-slate-800 font-display tracking-tighter">Gestão de Alunos</h1>
             </div>
-            <p className="text-slate-500 font-medium italic">Os alunos aparecem aqui automaticamente após o primeiro login.</p>
+            <p className="text-slate-500 font-medium italic">Os alunos aparecem aqui automaticamente.</p>
           </div>
           <button 
             onClick={fetchUsers}
-            className="px-6 py-3 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all flex items-center gap-2 shadow-xl"
+            className="px-6 py-3 bg-slate-800 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-900 transition-all flex items-center gap-2 shadow-lg"
           >
             <Users className="w-4 h-4" /> Atualizar Lista
           </button>
@@ -244,33 +244,33 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
 
         {/* Centralized Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm flex items-center gap-4">
-                <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+            <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-4">
+                <div className="w-12 h-12 bg-indigo-50/50 rounded-2xl flex items-center justify-center text-indigo-500">
                     <Users className="w-6 h-6" />
                 </div>
                 <div>
-                    <h3 className="text-2xl font-black text-slate-900 leading-none">{studentsOnly.length}</h3>
+                    <h3 className="text-2xl font-black text-slate-800 leading-none">{studentsOnly.length}</h3>
                     <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Alunos Ativos</p>
                 </div>
             </div>
-            <div className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm flex items-center gap-4">
-                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+            <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-4">
+                <div className="w-12 h-12 bg-emerald-50/50 rounded-2xl flex items-center justify-center text-emerald-500">
                     <CheckCircle className="w-6 h-6" />
                 </div>
                 <div>
-                    <h3 className="text-2xl font-black text-slate-900 leading-none">
+                    <h3 className="text-2xl font-black text-slate-800 leading-none">
                         {(studentsOnly.reduce((acc, s) => acc + (s.frequencia || 0), 0) / (studentsOnly.length || 1)).toFixed(1)}%
                     </h3>
                     <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Frequência Média</p>
                 </div>
             </div>
-            <div className="bg-white p-6 rounded-[32px] border border-slate-200 shadow-sm flex items-center gap-4">
-                <div className="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
+            <div className="bg-white p-6 rounded-[32px] border border-slate-100 shadow-sm flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-50/50 rounded-2xl flex items-center justify-center text-amber-500">
                     <BookOpen className="w-6 h-6" />
                 </div>
                 <div>
-                    <h3 className="text-2xl font-black text-slate-900 leading-none">{selectedSubject}</h3>
-                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Matéria em Foco</p>
+                    <h3 className="text-2xl font-black text-slate-800 leading-none">{selectedSubject}</h3>
+                    <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Materia</p>
                 </div>
             </div>
         </div>
@@ -427,32 +427,32 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser }: Teach
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Save Grades Card */}
-          <div className="bg-indigo-900 p-10 rounded-[48px] shadow-2xl shadow-indigo-900/20 flex flex-col justify-between gap-8 relative overflow-hidden">
+          <div className="bg-slate-800 p-10 rounded-[48px] shadow-lg shadow-slate-900/10 flex flex-col justify-between gap-8 relative overflow-hidden">
               <div className="relative z-10 flex items-center gap-6">
-                 <div className="w-18 h-18 bg-white/10 backdrop-blur-md rounded-3xl flex items-center justify-center border border-white/10 shadow-sm">
+                 <div className="w-18 h-18 bg-white/5 backdrop-blur-md rounded-3xl flex items-center justify-center border border-white/10 shadow-sm">
                     <CheckCircle className="text-white w-10 h-10" />
                  </div>
                  <div>
-                    <h4 className="font-black text-white text-3xl tracking-tighter">Salvar Grade</h4>
-                    <p className="text-sm text-indigo-100/70 font-medium italic">Vincular notas ao bimestre atual.</p>
+                    <h4 className="font-black text-white text-3xl tracking-tighter">Salvar Notas</h4>
+                    <p className="text-sm text-slate-300 font-medium italic">Atualizar dados de {selectedSubject}.</p>
                  </div>
               </div>
               <div className="relative z-10">
                  <button 
                    onClick={handleSaveGrades}
                    disabled={loading}
-                   className="w-full py-6 bg-white text-indigo-900 rounded-[32px] font-black text-sm uppercase tracking-widest hover:bg-indigo-50 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 disabled:opacity-50"
+                   className="w-full py-6 bg-indigo-500 text-white rounded-[32px] font-black text-sm uppercase tracking-widest hover:bg-white hover:text-slate-800 transition-all flex items-center justify-center gap-3 shadow-xl active:scale-95 disabled:opacity-50"
                  >
                     {loading ? (
-                      <div className="w-5 h-5 border-2 border-indigo-900/30 border-t-indigo-900 rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        <Save className="w-5 h-5" /> Salvar Notas de {selectedSubject}
+                        <Save className="w-5 h-5" /> Salvar Notas
                       </>
                     )}
                  </button>
               </div>
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-32 translate-x-32" />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -translate-y-32 translate-x-32" />
           </div>
 
           {/* Announcement Card (Email Integration) */}

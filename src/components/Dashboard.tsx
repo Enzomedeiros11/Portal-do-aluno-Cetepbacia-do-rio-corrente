@@ -51,10 +51,10 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-28 pb-12 px-6 font-sans relative overflow-hidden transition-colors duration-300">
+    <div className="min-h-screen bg-[#fafbfc] pt-28 pb-12 px-6 font-sans relative overflow-hidden transition-colors duration-300">
       {/* Dynamic Background elements optimized */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[80px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-[60px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-500/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-[80px] pointer-events-none" />
 
       <motion.div 
         variants={containerVariants}
@@ -73,11 +73,11 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
               <Zap className="w-3 h-3 fill-current" />
               <span>Painel do Aluno</span>
             </motion.div>
-            <h1 className="text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter leading-none font-display">
+            <h1 className="text-5xl lg:text-6xl font-black text-slate-800 tracking-tighter leading-none font-display">
               Olá, {user.name.split(' ')[0]}!
             </h1>
             <p className="text-lg text-slate-500 font-medium max-w-lg mt-4">
-              Bem-vindo ao seu portal. Suas tarefas e notas estão em dia.
+              Bem-vindo ao seu portal academicos.
             </p>
           </div>
           
@@ -115,11 +115,11 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
                 variants={itemVariants}
                 whileHover={{ y: -5 }}
                 onClick={() => handleQuickAction('Novo Trabalho')}
-                className="group relative flex flex-col items-center justify-center p-8 bg-indigo-600 text-white rounded-[40px] shadow-2xl shadow-indigo-600/20 active:scale-95 overflow-hidden transition-all"
+                className="group relative flex flex-col items-center justify-center p-8 bg-indigo-500 text-white rounded-[32px] shadow-lg shadow-indigo-500/10 active:scale-95 overflow-hidden transition-all"
               >
                 <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-150 transition-transform duration-500" />
-                <Zap className="w-8 h-8 mb-4 lg:mb-6 fill-current" />
-                <span className="text-[11px] font-black uppercase tracking-widest leading-none">Novo Trabalho</span>
+                <Zap className="w-8 h-8 mb-4 lg:mb-6 fill-current opacity-80" />
+                <span className="text-[11px] font-black uppercase tracking-widest leading-none opacity-90">Novo Trabalho</span>
               </motion.button>
 
               <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
@@ -132,11 +132,11 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
               </motion.div>
 
               <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-                <Link to="/internships" className="group relative flex flex-col items-center justify-center p-8 bg-slate-900 text-white rounded-[40px] shadow-xl hover:bg-black transition-all text-center">
-                   <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-4 lg:mb-6 group-hover:scale-110 transition-transform">
-                      <Zap className="w-6 h-6 text-indigo-400 fill-current" />
+                <Link to="/classroom" className="group relative flex flex-col items-center justify-center p-8 bg-slate-800 text-white rounded-[32px] shadow-lg shadow-slate-800/10 hover:bg-slate-900 transition-all text-center">
+                   <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center mb-4 lg:mb-6 group-hover:scale-110 transition-transform">
+                      <Zap className="w-6 h-6 text-indigo-300 fill-current" />
                    </div>
-                   <span className="text-[11px] font-black uppercase tracking-widest leading-none">Estágios</span>
+                   <span className="text-[11px] font-black uppercase tracking-widest leading-none opacity-90">Estágios</span>
                 </Link>
               </motion.div>
 
@@ -158,18 +158,18 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
               <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm flex items-center justify-between group">
                  <div>
                     <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Média Geral</p>
-                    <h4 className="text-3xl font-black text-slate-900 group-hover:text-indigo-600 transition-colors">9.2</h4>
+                    <h4 className="text-3xl font-black text-slate-800 group-hover:text-indigo-600 transition-colors">9.2</h4>
                  </div>
-                 <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                 <div className="w-12 h-12 bg-indigo-50/50 rounded-2xl flex items-center justify-center text-indigo-500">
                     <Trophy className="w-6 h-6" />
                  </div>
               </div>
-              <div className="bg-white p-8 rounded-[40px] border border-slate-100 shadow-sm flex items-center justify-between group">
+              <div className="bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm flex items-center justify-between group">
                  <div>
                     <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1">Frequência</p>
-                    <h4 className="text-3xl font-black text-slate-900 group-hover:text-emerald-600 transition-colors">{user.frequencia || 100}%</h4>
+                    <h4 className="text-3xl font-black text-slate-800 group-hover:text-emerald-600 transition-colors">{user.frequencia || 100}%</h4>
                  </div>
-                 <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600">
+                 <div className="w-12 h-12 bg-emerald-50/50 rounded-2xl flex items-center justify-center text-emerald-500">
                     <Zap className="w-6 h-6 fill-current" />
                  </div>
               </div>
@@ -179,20 +179,20 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
             <motion.div 
               variants={itemVariants}
               whileHover={{ y: -8 }}
-              className="relative bg-white p-12 rounded-[60px] border border-slate-200 shadow-2xl shadow-indigo-900/5 group overflow-hidden transition-colors"
+              className="relative bg-white p-12 rounded-[48px] border border-slate-100 shadow-sm group overflow-hidden transition-colors"
             >
               <div className="relative z-10 grid md:grid-cols-2 items-center gap-12">
                 <div className="text-center md:text-left">
-                  <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-black uppercase tracking-widest mb-6">
+                  <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-widest mb-6 border border-emerald-100">
                     Acesso Rápido
                   </span>
-                  <h3 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter leading-tight font-display">
+                  <h3 className="text-4xl font-black text-slate-800 mb-4 tracking-tighter leading-tight font-display">
                     Sala de Aula Virtual
                   </h3>
-                  <p className="text-slate-500 text-lg mb-8 leading-relaxed">
-                    Acesse materiais exclusivos, participe de discussões e envie seus trabalhos de forma prática e modernizada.
+                  <p className="text-slate-500 text-lg mb-8 leading-relaxed font-medium">
+                    Acesse materiais exclusivos, participe de discussões e envie seus trabalhos de forma prática.
                   </p>
-                  <Link to="/classroom" className="inline-flex items-center gap-3 px-10 py-5 bg-indigo-900 text-white rounded-full font-bold hover:bg-black transition-all shadow-2xl shadow-indigo-900/20 active:scale-95 group/btn">
+                  <Link to="/classroom" className="inline-flex items-center gap-3 px-10 py-5 bg-slate-800 text-white rounded-2xl font-bold hover:bg-slate-900 transition-all shadow-xl shadow-slate-900/10 active:scale-95 group/btn">
                     Entrar na Sala <ArrowRight className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform" />
                   </Link>
                 </div>

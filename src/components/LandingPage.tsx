@@ -7,7 +7,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-24 pb-32 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/10 via-slate-50 to-transparent">
+      <section className="relative overflow-hidden pt-24 pb-32 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/5 via-slate-50/50 to-transparent">
         <div className="container mx-auto px-6">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <motion.div 
@@ -15,25 +15,25 @@ export default function LandingPage() {
               animate={{ opacity: 1, x: 0 }}
               className="lg:w-3/5"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-600/10 text-indigo-600 text-sm font-semibold mb-8">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-500 text-sm font-semibold mb-8 border border-indigo-100/50">
                 <Trophy className="w-4 h-4" />
-                <span>Centro Territorial de Educação Profissional</span>
+                <span>Educação Profissional de Elite</span>
               </div>
-              <h1 className="text-6xl lg:text-8xl font-bold leading-[0.9] text-[#1A1A1A] mb-8 tracking-tighter">
-                Sua porta de entrada para o <span className="text-indigo-600">sucesso</span> profissional.
+              <h1 className="text-6xl lg:text-8xl font-black leading-[0.9] text-slate-800 mb-8 tracking-tighter font-display">
+                Sua porta de entrada para o <span className="text-indigo-500">sucesso</span> profissional.
               </h1>
-              <p className="text-xl text-[#1A1A1A]/70 mb-10 max-w-xl leading-relaxed">
-                Portal acadêmico da <span className="font-bold text-[#1A1A1A]">CETEP Bacia do Rio Corrente</span>. Acesse suas notas, tarefas e acompanhe sua jornada acadêmica com facilidade.
+              <p className="text-xl text-slate-600 mb-10 max-w-xl leading-relaxed font-medium">
+                Portal acadêmico da <span className="font-bold text-slate-800">CETEP Bacia do Rio Corrente</span>. Acesse suas notas, tarefas e acompanhe sua jornada.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link to="/auth" className="px-10 py-5 bg-indigo-900 text-white rounded-full font-bold hover:bg-slate-900 transition-all flex items-center gap-3 shadow-lg hover:shadow-xl hover:-translate-y-1">
-                  Acessar Portal do Aluno <ArrowRight className="w-5 h-5" />
+                <Link to="/auth" className="px-10 py-5 bg-indigo-500 text-white rounded-2xl font-bold hover:bg-slate-800 transition-all flex items-center gap-3 shadow-lg shadow-indigo-500/10 hover:shadow-xl hover:-translate-y-1">
+                  Acessar Portal do Aluno <ArrowRight className="w-5 h-5 opacity-80" />
                 </Link>
-                <Link to="/auth" className="px-10 py-5 border-2 border-indigo-600/10 rounded-full font-bold text-slate-800 hover:bg-gray-50 transition-all flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-indigo-600/10 flex items-center justify-center">
-                    <Play className="w-5 h-5 text-indigo-600 fill-current" />
+                <Link to="/auth" className="px-10 py-5 border-2 border-slate-200 rounded-2xl font-bold text-slate-700 hover:bg-slate-100 transition-all flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
+                    <Play className="w-4 h-4 text-indigo-500 fill-current" />
                   </div>
-                  Painel do Professor
+                  Área do Professor
                 </Link>
               </div>
             </motion.div>
@@ -63,11 +63,11 @@ export default function LandingPage() {
       </section>
 
       {/* Feature Grid */}
-      <section className="py-32 bg-gray-50">
+      <section className="py-32 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-20">
-            <h2 className="text-4xl font-bold text-[#1A1A1A] mb-6">Educação Profissional de Excelência</h2>
-            <p className="text-gray-500 text-lg">Oferecemos cursos técnicos especializados para preparar você para os desafios do mercado de trabalho contemporâneo.</p>
+            <h2 className="text-4xl font-black text-slate-800 mb-6 font-display tracking-tight">Educação Profissional</h2>
+            <p className="text-slate-500 text-lg font-medium">Oferecemos cursos técnicos especializados para preparar você para os desafios do mercado de trabalho.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -94,18 +94,18 @@ export default function LandingPage() {
               <motion.div 
                 key={i}
                 whileHover={{ y: -10 }}
-                className="bg-white p-10 rounded-[40px] border border-gray-100 hover:shadow-xl transition-all"
+                className="bg-slate-50/50 p-10 rounded-[32px] border border-slate-100 hover:shadow-lg transition-all"
               >
-                <div className="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-8">
-                  <feature.icon className="w-8 h-8 text-indigo-600" />
+                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8 shadow-sm border border-slate-100">
+                  <feature.icon className="w-7 h-7 text-indigo-500" />
                 </div>
-                <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
-                <p className="text-gray-500 mb-8 text-sm">{feature.desc}</p>
+                <h3 className="text-2xl font-black text-slate-800 mb-4 tracking-tight">{feature.title}</h3>
+                <p className="text-slate-500 mb-8 text-sm font-medium">{feature.desc}</p>
                 <ul className="space-y-3">
                   {feature.items.map((item, idx) => (
-                    <li key={idx} className="flex items-center gap-3 text-sm font-medium text-slate-800">
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
-                      {item}
+                    <li key={idx} className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-slate-400">
+                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                      <span className="text-[10px]">{item}</span>
                     </li>
                   ))}
                 </ul>
