@@ -40,14 +40,42 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
     setLocalFrequency(freqs);
   }, [allUsers, selectedSubject]);
 
-  const studentsOnly = allUsers.filter(u => u.role === 'student');
+  const studentsOnly = allUsers.filter(u => 
+    u.role === 'student' || 
+    (!u.role && u.email && !['codernador12@gmail.com', 'enzomedeirosdasilva6@gmail.com'].includes(u.email))
+  );
 
-  const filteredStudents = studentsOnly.filter(s => {
-    const matchesSearch = (s.name || '').toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCourse = filterCourse === 'Todos' || s.course === filterCourse;
-    const matchesGrade = filterGrade === 'Todos' || s.grade === filterGrade;
-    return matchesSearch && matchesCourse && matchesGrade;
-  });
+  const handleBroadcast = async () => {
+    if (!announcement.subject || !announcement.message) {
+      toast.error('Preencha o assunto e a mensagem.');
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      // Send to messages table for classroom visibility
+      const { error } = await supabase.from('mensagens').insert([
+        {
+          canal: 'Geral',
+          usuario: currentUser?.name || 'Administração',
+          email: currentUser?.email,
+          avatar: currentUser?.avatar,
+          texto: `[COMUNICADO OFICIAL: ${announcement.subject}] ${announcement.message}`,
+          data: new Date().toISOString()
+        }
+      ]);
+
+      if (error) throw error;
+
+      toast.success('Comunicado transmitido com sucesso!');
+      setAnnouncement({ subject: '', message: '' });
+    } catch (err) {
+      console.error('Erro ao transmitir:', err);
+      toast.error('Erro ao enviar comunicado.');
+    } finally {
+      setSendingEmail(false);
+    }
+  };
 
   const handleSaveGrades = async () => {
     setLoading(true);
@@ -238,8 +266,12 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
                     value={announcement.message}
                     onChange={(e) => setAnnouncement({...announcement, message: e.target.value})}
                  />
-                 <button className="w-full py-3 bg-slate-900 text-white rounded-lg font-bold text-sm hover:bg-black transition-all flex items-center justify-center gap-2">
-                    <Send className="w-4 h-4" /> 
+                 <button 
+                    disabled={sendingEmail}
+                    onClick={handleBroadcast}
+                    className="w-full py-3 bg-slate-900 text-white rounded-lg font-bold text-sm hover:bg-black transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                 >
+                    {sendingEmail ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     <span>Transmitir para Alunos</span>
                  </button>
               </div>

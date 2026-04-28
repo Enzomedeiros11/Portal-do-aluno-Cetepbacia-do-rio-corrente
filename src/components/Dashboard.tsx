@@ -99,19 +99,9 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
           {/* Main Content Area */}
           <div className="lg:col-span-8 space-y-6">
             {/* Action Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <motion.button 
-                variants={itemVariants}
-                whileHover={{ y: -2 }}
-                onClick={() => navigate('/assignments')}
-                className="flex flex-col items-start p-6 bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 transition-all text-left"
-              >
-                <Zap className="w-6 h-6 mb-4 opacity-80" />
-                <span className="text-xs font-bold uppercase tracking-wider">Novo Trabalho</span>
-              </motion.button>
-
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <motion.div variants={itemVariants} whileHover={{ y: -2 }}>
-                <Link to="/extra-courses" className="flex flex-col items-start p-6 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-200 transition-all text-left group">
+                <Link to="/extra-courses" className="flex flex-col items-start p-6 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-200 transition-all text-left group h-full">
                   <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4 transition-colors">
                     <BookOpen className="w-5 h-5" />
                   </div>
@@ -120,11 +110,11 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
               </motion.div>
 
               <motion.div variants={itemVariants} whileHover={{ y: -2 }}>
-                <Link to="/classroom" className="flex flex-col items-start p-6 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-200 transition-all text-left group">
-                   <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 transition-colors">
+                <Link to="/internships" className="flex flex-col items-start p-6 bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 transition-all text-left group h-full">
+                   <div className="w-10 h-10 rounded-lg bg-white/20 text-white flex items-center justify-center mb-4 transition-colors">
                       <Zap className="w-5 h-5 fill-current" />
                    </div>
-                   <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">Estágios</span>
+                   <span className="text-xs font-bold uppercase tracking-wider">Painel Estágios</span>
                 </Link>
               </motion.div>
 
@@ -132,7 +122,7 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
                 variants={itemVariants}
                 whileHover={{ y: -2 }}
                 onClick={() => handleDownload('Boletim')}
-                className="flex flex-col items-start p-6 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-200 transition-all text-left group"
+                className="flex flex-col items-start p-6 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-200 transition-all text-left group h-full"
               >
                 <div className="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center mb-4 transition-colors">
                   <Download className="w-5 h-5" />
