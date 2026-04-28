@@ -225,13 +225,15 @@ export default function App() {
           frequencia: 100
         };
 
-        const { error: insertError } = await supabase
+    const { error: insertError } = await supabase
           .from('usuarios')
-          .upsert([newUserProfile]); // Using upsert for better reliability
+          .upsert([newUserProfile]);
 
         if (!insertError) {
-          // Refresh list so teachers see the new student
-          await fetchAllUsers();
+          // Small delay to ensure DB propagation before refresh
+          setTimeout(async () => {
+            await fetchAllUsers();
+          }, 500);
           
           // Notify student via Gmail on first login
           await sendEmail({

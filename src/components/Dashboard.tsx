@@ -103,7 +103,7 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
               <motion.button 
                 variants={itemVariants}
                 whileHover={{ y: -2 }}
-                onClick={() => handleQuickAction('Novo Trabalho')}
+                onClick={() => navigate('/assignments')}
                 className="flex flex-col items-start p-6 bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 transition-all text-left"
               >
                 <Zap className="w-6 h-6 mb-4 opacity-80" />

@@ -40,7 +40,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
     setLocalFrequency(freqs);
   }, [allUsers, selectedSubject]);
 
-  const studentsOnly = allUsers.filter(u => u.role === 'student' || (u.email && !['codernador12@gmail.com', 'enzomedeirosdasilva6@gmail.com'].includes(u.email)));
+  const studentsOnly = allUsers.filter(u => u.role === 'student');
 
   const filteredStudents = studentsOnly.filter(s => {
     const matchesSearch = (s.name || '').toLowerCase().includes(searchTerm.toLowerCase());

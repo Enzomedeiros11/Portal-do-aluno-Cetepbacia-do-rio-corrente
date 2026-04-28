@@ -1,5 +1,6 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
+import { toast } from 'sonner';
 import { User } from '../types';
 
 export const downloadBoletimPDF = (user: User) => {
@@ -76,31 +77,21 @@ export const downloadBoletimPDF = (user: User) => {
       sub.media
     ]);
 
-    // Robust autoTable call
-    const docAny = doc as any;
-    if (typeof docAny.autoTable === 'function') {
-      docAny.autoTable({
-        startY: 65,
-        head: [['Matéria', '1º Bim', '2º Bim', '3º Bim', 'Média Final']],
-        body: tableData,
-        theme: 'striped',
-        headStyles: { fillColor: [0, 51, 102] },
-        styles: { fontSize: 9, halign: 'center' },
-        columnStyles: {
-          0: { halign: 'left', fontStyle: 'bold' }
-        }
-      });
-    } else {
-      console.error('autoTable is not a function on doc');
-      // Simple fallback if autotable fails
-      doc.text('Dados das Notas:', 20, 70);
-      tableData.forEach((row, i) => {
-        doc.text(`${row[0]}: ${row[4]}`, 20, 80 + (i * 5));
-      });
-    }
+    // Robust autoTable call using the imported function directly
+    autoTable(doc, {
+      startY: 65,
+      head: [['Matéria', '1º Bim', '2º Bim', '3º Bim', 'Média Final']],
+      body: tableData,
+      theme: 'striped',
+      headStyles: { fillColor: [0, 51, 102] },
+      styles: { fontSize: 9, halign: 'center' },
+      columnStyles: {
+        0: { halign: 'left', fontStyle: 'bold' }
+      }
+    });
     
     // Footer - safe check after autoTable
-    const finalY = Math.min((doc as any).lastAutoTable?.finalY + 20 || 200, 280);
+    const finalY = (doc as any).lastAutoTable?.finalY ? Math.min((doc as any).lastAutoTable.finalY + 20, 280) : 200;
     
     doc.setFontSize(8);
     doc.setTextColor(150);
@@ -113,6 +104,7 @@ export const downloadBoletimPDF = (user: User) => {
     return true;
   } catch (error) {
     console.error('PDF Generation Error:', error);
-    throw error;
+    toast.error('Erro ao gerar o PDF. Verifique os dados ou tente novamente.');
+    return false;
   }
 };

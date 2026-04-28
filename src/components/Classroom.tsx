@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, FormEvent, ChangeEvent } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { 
   Layout, 
@@ -39,6 +40,7 @@ interface Message {
 }
 
 export default function Classroom({ user, allUsers }: ClassroomProps) {
+  const navigate = useNavigate();
   const [selectedClass, setSelectedClass] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [message, setMessage] = useState('');
@@ -187,7 +189,10 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
               </div>
             </div>
             <div className="flex items-center gap-2">
-               <button className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold shadow-sm hover:bg-blue-700 transition-colors">
+               <button 
+                 onClick={() => navigate('/assignments')}
+                 className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold shadow-sm hover:bg-blue-700 transition-colors"
+               >
                   <ClipboardList className="w-4 h-4" /> Atividades
                </button>
             </div>
