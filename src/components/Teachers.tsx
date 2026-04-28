@@ -45,6 +45,13 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
     (!u.role && u.email && !['codernador12@gmail.com', 'enzomedeirosdasilva6@gmail.com'].includes(u.email))
   );
 
+  const filteredStudents = studentsOnly.filter(s => {
+    const matchesSearch = (s.name || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCourse = filterCourse === 'Todos' || s.course === filterCourse;
+    const matchesGrade = filterGrade === 'Todos' || s.grade === filterGrade;
+    return matchesSearch && matchesCourse && matchesGrade;
+  });
+
   const handleBroadcast = async () => {
     if (!announcement.subject || !announcement.message) {
       toast.error('Preencha o assunto e a mensagem.');
@@ -56,12 +63,12 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
       // Send to messages table for classroom visibility
       const { error } = await supabase.from('mensagens').insert([
         {
-          canal: 'Geral',
-          usuario: currentUser?.name || 'Administração',
-          email: currentUser?.email,
-          avatar: currentUser?.avatar,
+          usuario_nome: currentUser?.name || 'Administração',
+          usuario_email: currentUser?.email,
+          role: 'teacher',
+          turma_id: 'general',
           texto: `[COMUNICADO OFICIAL: ${announcement.subject}] ${announcement.message}`,
-          data: new Date().toISOString()
+          created_at: new Date().toISOString()
         }
       ]);
 
