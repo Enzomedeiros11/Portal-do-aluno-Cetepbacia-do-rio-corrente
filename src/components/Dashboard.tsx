@@ -10,12 +10,13 @@ import {
   ChevronRight,
   Layout,
   Trophy,
-  Download
+  Download,
+  FileCode
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { User } from '../types';
-import { downloadBoletimPDF } from '../lib/pdfUtils';
+import { downloadBoletimPDF, downloadGuiaTecnicoPDF } from '../lib/pdfUtils';
 
 interface DashboardProps {
   user: User | null;
@@ -228,6 +229,24 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
                            );
                          })}
                     </div>
+                </div>
+            </section>
+
+            <section className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                   <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Desenvolvedor</h4>
+                   <FileCode className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="space-y-4">
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Este sistema foi desenvolvido por **Enzo Medeiros da Silva** com auxílio da **IA Gemini**.
+                  </p>
+                  <button 
+                    onClick={() => downloadGuiaTecnicoPDF(user?.name || 'Enzo Medeiros')}
+                    className="w-full py-2 bg-slate-900 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all"
+                  >
+                    Baixar Regras HTML/CSS (PDF)
+                  </button>
                 </div>
             </section>
           </div>
