@@ -29,14 +29,15 @@ interface ClassroomProps {
 interface Message {
   id: string;
   texto: string;
-  usuario_nome: string;
-  usuario_email: string;
-  role: 'student' | 'teacher';
-  turma_id: string;
+  usuario: string;
+  email: string;
+  role?: 'student' | 'teacher';
+  canal: string;
+  avatar?: string;
   arquivo_url?: string;
   arquivo_nome?: string;
   arquivo_tipo?: string;
-  created_at: string;
+  data: string;
 }
 
 export default function Classroom({ user, allUsers }: ClassroomProps) {
@@ -59,8 +60,8 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens' }, (payload) => {
           const newMessage = payload.new as Message;
           setMessages(prev => [...prev, newMessage]);
-          if (newMessage.usuario_email !== user.email) {
-            toast.info(`Nova mensagem de ${newMessage.usuario_nome}`);
+          if (newMessage.email !== user.email) {
+            toast.info(`Nova mensagem de ${newMessage.usuario || 'Colega'}`);
           }
         })
         .subscribe();
@@ -75,8 +76,8 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
     const { data } = await supabase
       .from('mensagens')
       .select('*')
-      .order('created_at', { ascending: true })
-      .limit(50);
+      .order('data', { ascending: true })
+      .limit(100);
     
     if (data) setMessages(data as any);
   };
@@ -112,14 +113,14 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
 
     const newMessage = {
       texto: message || `Enviou um arquivo: ${fileData?.name}`,
-      usuario_nome: user?.name || 'Estudante',
-      usuario_email: user?.email || '',
-      turma_id: selectedClass?.id?.toString() || 'general',
-      role: user?.role || 'student',
+      usuario: user?.name || 'Estudante',
+      email: user?.email || '',
+      canal: selectedClass?.id?.toString() || 'Geral',
+      avatar: user?.avatar || null,
       arquivo_url: fileData?.url || null,
       arquivo_nome: fileData?.name || null,
       arquivo_tipo: fileData?.type || null,
-      created_at: new Date().toISOString()
+      data: new Date().toISOString()
     };
 
     const { error } = await supabase.from('mensagens').insert([newMessage]);
@@ -214,30 +215,30 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-4 max-h-[600px] scroll-smooth">
-              {messages.filter(m => m.turma_id === 'general' || m.turma_id === selectedClass?.id?.toString()).length === 0 && (
+              {messages.filter(m => m.canal === 'Geral' || m.canal === selectedClass?.id?.toString()).length === 0 && (
                 <div className="h-full flex flex-col items-center justify-center text-slate-300 py-12">
                    <MessageSquare className="w-12 h-12 mb-2 opacity-50" />
                    <p className="text-sm font-medium">Inicie uma conversa nesta turma.</p>
                 </div>
               )}
               {messages
-                .filter(m => m.turma_id === 'general' || m.turma_id === selectedClass?.id?.toString())
+                .filter(m => m.canal === 'Geral' || m.canal === selectedClass?.id?.toString())
                 .map((msg) => (
-                <div key={msg.id} className={`flex gap-3 ${msg.usuario_email === user?.email ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white font-bold text-xs ${msg.role === 'teacher' || msg.turma_id === 'general' ? 'bg-blue-600' : 'bg-slate-400'}`}>
-                    {msg.usuario_nome?.charAt(0) || '?'}
+                <div key={msg.id} className={`flex gap-3 ${msg.email === user?.email ? 'flex-row-reverse' : 'flex-row'}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white font-bold text-xs ${msg.canal === 'Geral' ? 'bg-amber-500' : 'bg-slate-400'}`}>
+                    {(msg.usuario || '?').charAt(0)}
                   </div>
-                  <div className={`max-w-[80%] ${msg.usuario_email === user?.email ? 'text-right' : 'text-left'}`}>
+                  <div className={`max-w-[80%] ${msg.email === user?.email ? 'text-right' : 'text-left'}`}>
                     <div className="flex items-center gap-2 mb-1 px-1">
                       <span className="text-[10px] font-bold text-slate-900 uppercase tracking-tight">
-                        {msg.turma_id === 'general' ? '📢 SECRETARIA' : msg.usuario_nome}
+                        {msg.canal === 'Geral' ? '📢 COMUNICADO' : msg.usuario}
                       </span>
-                      <span className="text-[9px] text-slate-400">{new Date(msg.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="text-[9px] text-slate-400">{new Date(msg.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
                     <div className={`px-4 py-3 rounded-2xl text-sm ${
-                      msg.turma_id === 'general'
+                      msg.canal === 'Geral'
                         ? 'bg-amber-50 text-slate-900 border-2 border-amber-200'
-                        : msg.usuario_email === user?.email 
+                        : msg.email === user?.email 
                           ? 'bg-blue-600 text-white rounded-tr-none shadow-sm' 
                           : 'bg-slate-100 text-slate-800 rounded-tl-none border border-slate-200'
                     }`}>

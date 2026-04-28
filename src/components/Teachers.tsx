@@ -42,10 +42,11 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
 
   const studentsOnly = allUsers.filter(u => 
     u.role === 'student' || 
-    (!u.role && u.email && !['codernador12@gmail.com', 'enzomedeirosdasilva6@gmail.com'].includes(u.email))
+    u.email?.includes('aluno') || 
+    (!['codernador12@gmail.com', 'enzomedeirosdasilva6@gmail.com'].includes(u.email || ''))
   );
 
-  const filteredStudents = studentsOnly.filter(s => {
+  const filteredStudents = (studentsOnly || []).filter(s => {
     const matchesSearch = (s.name || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCourse = filterCourse === 'Todos' || s.course === filterCourse;
     const matchesGrade = filterGrade === 'Todos' || s.grade === filterGrade;
@@ -60,15 +61,15 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
 
     setSendingEmail(true);
     try {
-      // Send to messages table for classroom visibility
+      // Send message to classroom
       const { error } = await supabase.from('mensagens').insert([
         {
-          usuario_nome: currentUser?.name || 'Administração',
-          usuario_email: currentUser?.email,
-          role: 'teacher',
-          turma_id: 'general',
+          canal: 'Geral',
+          usuario: currentUser?.name || 'Administração',
+          email: currentUser?.email,
+          avatar: currentUser?.avatar,
           texto: `[COMUNICADO OFICIAL: ${announcement.subject}] ${announcement.message}`,
-          created_at: new Date().toISOString()
+          data: new Date().toISOString()
         }
       ]);
 
