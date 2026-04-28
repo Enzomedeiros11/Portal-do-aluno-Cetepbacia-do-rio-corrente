@@ -39,15 +39,18 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
         const user = users.find(u => u.email === formData.email);
         if (user) {
           onLogin(user);
-        } else if (formData.email === 'codernador12@gmail.com' && formData.password === '123') {
+        } else if (
+          (formData.email === 'codernador12@gmail.com' || formData.email === 'enzomedeirosdasilva6@gmail.com') && 
+          formData.password === '123'
+        ) {
            onLogin({
-             id: 'admin',
-             name: 'Coordenador',
-             email: 'codernador12@gmail.com',
+             id: formData.email === 'codernador12@gmail.com' ? 'admin' : 'enzo',
+             name: formData.email === 'codernador12@gmail.com' ? 'Coordenador' : 'Enzo Medeiros',
+             email: formData.email,
              role: 'teacher',
              course: 'Todos',
              grade: 'Docente',
-             avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
+             avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${formData.email}`
            });
         } else {
           setError('E-mail ou senha incorretos (Modo Local).');
