@@ -20,10 +20,13 @@ import Internships from './components/Internships';
 import Teachers from './components/Teachers';
 import About from './components/About';
 import Settings from './components/Settings';
+import DatabaseManager from './components/DatabaseManager';
 import Logo from './components/Logo';
 import { User } from './types';
 import { Toaster, toast } from 'sonner';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
+import { db } from './lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { sendEmail } from './services/emailService';
 
 /**
@@ -82,6 +85,36 @@ export default function App() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
 
   useEffect(() => {
+    // Subscribe to Firebase Firestore 'usuarios' collection for real-time user sync
+    const unsubscribeFirebaseUsers = onSnapshot(collection(db, 'usuarios'), (snapshot) => {
+      const fbUsers: User[] = [];
+      snapshot.forEach((docSnap) => {
+        const d = docSnap.data();
+        let role: 'student' | 'teacher' = 'student';
+        if (d.tipo === 'teacher' || d.role === 'teacher' || d.email === 'codernador12@gmail.com' || d.email === 'enzomedeirosdasilva6@gmail.com') {
+          role = 'teacher';
+        }
+
+        fbUsers.push({
+          id: docSnap.id,
+          name: d.nome || d.name || d.email?.split('@')[0] || 'Usuário',
+          email: d.email || '',
+          role,
+          grade: d.grade || '1º Ano',
+          course: d.curso || d.course || 'Técnico em Informática',
+          avatar: d.avatar || d.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${docSnap.id}`,
+          isOnline: false,
+          lastSeen: d.updatedAt || new Date().toISOString(),
+          subjectGrades: d.notas || d.subjectGrades || {},
+          frequencia: d.frequencia || 100
+        });
+      });
+
+      if (fbUsers.length > 0) {
+        setAllUsers(fbUsers);
+      }
+    });
+
     // Session state management
     const checkState = async () => {
       try {
@@ -365,6 +398,9 @@ export default function App() {
               isAuthenticated ? <Assignments /> : <Navigate to="/auth" />
             } />
             
+            {/* Database Control Panel Route */}
+            <Route path="/database" element={<DatabaseManager onRefreshAll={fetchAllUsers} />} />
+
             {/* Protected Teacher/Admin Routes */}
             <Route path="/teachers" element={
               isAuthenticated && (currentUser?.email === 'codernador12@gmail.com' || currentUser?.email === 'enzomedeirosdasilva6@gmail.com') ? 

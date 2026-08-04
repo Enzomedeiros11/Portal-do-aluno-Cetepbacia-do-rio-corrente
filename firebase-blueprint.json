@@ -1,0 +1,66 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Usuários do portal acadêmico (Alunos, Professores e Admin)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "course": { "type": "string" },
+        "grade": { "type": "string" },
+        "frequencia": { "type": "number" },
+        "subjectGrades": { "type": "object" },
+        "avatar": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["email", "name", "role"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Mensagens de chat e comunicados das turmas",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "texto": { "type": "string" },
+        "usuario": { "type": "string" },
+        "email": { "type": "string" },
+        "canal": { "type": "string" },
+        "avatar": { "type": "string" },
+        "arquivo_url": { "type": "string" },
+        "arquivo_nome": { "type": "string" },
+        "arquivo_tipo": { "type": "string" },
+        "data": { "type": "string" }
+      },
+      "required": ["texto", "usuario", "email", "canal"]
+    },
+    "Class": {
+      "title": "Class",
+      "description": "Turmas acadêmicas",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "course": { "type": "string" },
+        "grade": { "type": "string" },
+        "teacher": { "type": "string font" }
+      }
+    }
+  },
+  "firestore": {
+    "/usuarios/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Coleção de usuários registrados no sistema"
+    },
+    "/mensagens/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "Coleção de mensagens de chat e comunicados"
+    },
+    "/turmas/{classId}": {
+      "schema": { "$ref": "#/entities/Class" },
+      "description": "Coleção de turmas e salas"
+    }
+  }
+}

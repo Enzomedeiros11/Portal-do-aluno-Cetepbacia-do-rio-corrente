@@ -23,6 +23,8 @@ import { useState, useEffect, FormEvent } from 'react';
 import { User, COURSES, GRADES } from '../types';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabase';
+import { db } from '../lib/firebase';
+import { doc, setDoc, deleteDoc } from 'firebase/firestore';
 
 interface TeachersProps {
   allUsers: User[];
@@ -132,16 +134,17 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
         curso: newUser.course,
         grade: newUser.grade,
         frequencia: newUser.frequencia || 100,
-        notas: {}
+        notas: {},
+        updatedAt: new Date().toISOString()
       };
 
-      const { error } = await supabase.from('usuarios').upsert([payload]);
-      
-      if (error) {
-        console.warn('Supabase create user error:', error);
-      }
+      // Save to Firebase Firestore
+      await setDoc(doc(db, 'usuarios', newUid), payload);
 
-      toast.success(`Usuário ${newUser.name} cadastrado com sucesso!`);
+      // Also upsert in Supabase for backwards compatibility
+      await supabase.from('usuarios').upsert([payload]);
+
+      toast.success(`Usuário ${newUser.name} cadastrado com sucesso no Firebase!`);
       setIsAddModalOpen(false);
       setNewUser({
         name: '',
@@ -181,22 +184,26 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
     setLoading(true);
     try {
       const payload = {
+        id: editUser.id,
         nome: editUser.name,
         email: editUser.email,
         tipo: editUser.role,
         curso: editUser.course,
         grade: editUser.grade,
-        frequencia: editUser.frequencia
+        frequencia: editUser.frequencia,
+        updatedAt: new Date().toISOString()
       };
 
-      const { error } = await supabase
+      // Update in Firebase Firestore
+      await setDoc(doc(db, 'usuarios', editUser.id), payload, { merge: true });
+
+      // Update in Supabase
+      await supabase
         .from('usuarios')
         .update(payload)
         .eq('id', editUser.id);
 
-      if (error) console.warn('Supabase update user error:', error);
-
-      toast.success('Usuário atualizado com sucesso!');
+      toast.success('Usuário atualizado com sucesso no Firebase!');
       setIsEditModalOpen(false);
       await onRefresh();
     } catch (err) {
@@ -212,14 +219,16 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      // Delete from Firebase Firestore
+      await deleteDoc(doc(db, 'usuarios', userToDelete.id));
+
+      // Delete from Supabase
+      await supabase
         .from('usuarios')
         .delete()
         .eq('id', userToDelete.id);
 
-      if (error) console.warn('Supabase delete error:', error);
-
-      toast.success(`Usuário ${userToDelete.name} excluído!`);
+      toast.success(`Usuário ${userToDelete.name} excluído do Firebase!`);
       setUserToDelete(null);
       await onRefresh();
     } catch (err) {

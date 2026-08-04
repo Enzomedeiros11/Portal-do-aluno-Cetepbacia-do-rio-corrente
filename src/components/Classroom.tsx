@@ -20,6 +20,8 @@ import {
 } from 'lucide-react';
 import { User } from '../types';
 import { supabase } from '../lib/supabase';
+import { db, handleFirestoreError, OperationType } from '../lib/firebase';
+import { collection, onSnapshot, addDoc, query, orderBy, limit } from 'firebase/firestore';
 
 interface ClassroomProps {
   user: User | null;
@@ -53,33 +55,36 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
 
   useEffect(() => {
     if (user) {
-      fetchMessages();
-      
-      const channel = supabase
-        .channel('classroom_messages')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'mensagens' }, (payload) => {
-          const newMessage = payload.new as Message;
-          setMessages(prev => [...prev, newMessage]);
-          if (newMessage.email !== user.email) {
-            toast.info(`Nova mensagem de ${newMessage.usuario || 'Colega'}`);
-          }
-        })
-        .subscribe();
+      // Subscribe to Firebase Firestore 'mensagens' collection
+      const msgsCol = collection(db, 'mensagens');
+      const unsubscribe = onSnapshot(msgsCol, (snapshot) => {
+        const msgsList: Message[] = [];
+        snapshot.forEach((docSnap) => {
+          msgsList.push({ id: docSnap.id, ...docSnap.data() } as Message);
+        });
+        // Sort by date ascending
+        msgsList.sort((a, b) => new Date(a.data || 0).getTime() - new Date(b.data || 0).getTime());
+        setMessages(msgsList);
+      }, (error) => {
+        handleFirestoreError(error, OperationType.LIST, 'mensagens');
+        fetchMessagesFallback();
+      });
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
+      return () => unsubscribe();
     }
   }, [user]);
 
-  const fetchMessages = async () => {
-    const { data } = await supabase
-      .from('mensagens')
-      .select('*')
-      .order('data', { ascending: true })
-      .limit(100);
-    
-    if (data) setMessages(data as any);
+  const fetchMessagesFallback = async () => {
+    try {
+      const { data } = await supabase
+        .from('mensagens')
+        .select('*')
+        .order('data', { ascending: true })
+        .limit(100);
+      if (data) setMessages(data as any);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   useEffect(() => {
@@ -123,11 +128,13 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
       data: new Date().toISOString()
     };
 
-    const { error } = await supabase.from('mensagens').insert([newMessage]);
-    if (error) {
-      console.error('Erro ao enviar mensagem:', error);
-      toast.error('Não foi possível enviar a mensagem.');
-    } else {
+    try {
+      await addDoc(collection(db, 'mensagens'), newMessage);
+      setMessage('');
+    } catch (err) {
+      console.error('Erro ao enviar mensagem para Firebase:', err);
+      // Fallback
+      await supabase.from('mensagens').insert([newMessage]);
       setMessage('');
     }
   };

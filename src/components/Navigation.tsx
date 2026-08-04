@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, LogOut, Layout } from 'lucide-react';
+import { Menu, X, LogOut, Layout, Database } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from './Logo';
@@ -24,12 +24,14 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
         { name: 'Boletim', path: '/boletim' },
         { name: 'Jornal', path: '/journal' },
         ...(isCoordinator ? [{ name: 'Secretaria', path: '/teachers' }] : []),
+        { name: 'Banco de Dados', path: '/database', icon: Database },
         { name: 'Perfil', path: '/settings' },
       ]
     : [
         { name: 'Página Inicial', path: '/lp-video' },
         { name: 'Sobre Nós', path: '/about' },
         { name: 'Suporte', path: '/contact' },
+        { name: 'Banco de Dados', path: '/database', icon: Database },
       ];
 
   return (
