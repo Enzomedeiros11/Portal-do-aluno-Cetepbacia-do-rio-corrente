@@ -46,6 +46,48 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
     });
   };
 
+  const compressImage = (file: File, maxDim = 300, quality = 0.75): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            return resolve(e.target?.result as string);
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressedDataUrl);
+        };
+        img.onerror = () => reject(new Error('Falha ao processar a imagem'));
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = () => reject(new Error('Falha ao ler o arquivo'));
+      reader.readAsDataURL(file);
+    });
+  };
+
   const handleAvatarChange = async (newAvatarUrl: string) => {
     if (!newAvatarUrl) return;
     setIsUploading(true);
@@ -66,30 +108,32 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
         onUpdateUser(updatedUser);
       }
       toast.success('Foto de perfil atualizada com sucesso!');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error updating profile picture:', err);
-      toast.error('Erro ao atualizar foto de perfil.');
+      toast.error('Erro ao atualizar foto de perfil no banco de dados.');
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('A imagem deve ter no máximo 5MB.');
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('A imagem deve ter no máximo 10MB.');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        handleAvatarChange(reader.result);
-      }
-    };
-    reader.readAsDataURL(file);
+    try {
+      setIsUploading(true);
+      const compressedUrl = await compressImage(file, 300, 0.75);
+      await handleAvatarChange(compressedUrl);
+    } catch (error) {
+      toast.error('Erro ao processar imagem. Tente outra foto.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleRequestGmailCode = async () => {
