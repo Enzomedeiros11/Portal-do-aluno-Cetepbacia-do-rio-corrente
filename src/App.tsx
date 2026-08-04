@@ -370,7 +370,7 @@ export default function App() {
             <Route path="/sitemap" element={<Sitemap />} />
             <Route path="/lp-video" element={<LandingPage />} />
             <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
+            <Route path="/contact" element={<Contact currentUser={currentUser} />} />
             <Route path="/auth" element={
               isAuthenticated ? <Navigate to="/dashboard" /> : <Auth onLogin={login} onRegister={register} users={allUsers} />
             } />

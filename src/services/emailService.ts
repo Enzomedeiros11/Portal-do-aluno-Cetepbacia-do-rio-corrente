@@ -21,9 +21,15 @@ export const sendEmail = async (params: EmailParams) => {
     return { success: true, skipped: true };
   }
 
-  if (!serviceId || !templateId || !publicKey) {
-    console.log(`[E-mail Enviado para ${params.to_email}]: ${params.subject}`);
-    toast.success(`E-mail enviado para ${params.to_email}!`, {
+  const isConfigured = 
+    Boolean(serviceId && templateId && publicKey) &&
+    !serviceId?.includes('your-') &&
+    !templateId?.includes('your-') &&
+    !publicKey?.includes('your-');
+
+  if (!isConfigured) {
+    console.log(`[Notificação/Simulação CETEP - E-mail para ${params.to_email}]: ${params.subject}`);
+    toast.success(`Notificação gerada para ${params.to_email}!`, {
       description: `Assunto: ${params.subject}`
     });
     return { success: true, simulated: true };
@@ -48,9 +54,11 @@ export const sendEmail = async (params: EmailParams) => {
       return { success: true };
     }
     throw new Error('Falha no envio de e-mail');
-  } catch (error) {
-    console.error('Email error:', error);
-    toast.info(`Notificação gerada para ${params.to_email} (${params.subject})`);
+  } catch (error: any) {
+    console.warn('EmailJS notification fallback:', error?.text || error?.message || error);
+    toast.info(`Notificação gerada para ${params.to_email}`, {
+      description: `Assunto: ${params.subject}`
+    });
     return { success: true, simulated: true };
   }
 };
@@ -81,6 +89,16 @@ export const sendSupportNotificationEmail = async (studentName: string, studentE
     to_email: 'enzomedeirosdasilva6@gmail.com',
     subject: `[Suporte CETEP] Novo chamado de ${studentName}: ${subject}`,
     message: `Novo chamado de suporte recebido no Portal CETEP!\n\nAluno: ${studentName}\nE-mail do Aluno: ${studentEmail}\nAssunto: ${subject}\n\nMensagem:\n${message}\n\nResponda diretamente ou pelo painel do portal.`,
+    type: 'support'
+  });
+};
+
+export const sendContactFormEmail = async (data: { name: string; email: string; subject: string; message: string }) => {
+  return sendEmail({
+    to_name: 'Secretaria CETEP',
+    to_email: 'contato@cetep-brc.edu.br',
+    subject: `[Contato Site CETEP] ${data.subject} - ${data.name}`,
+    message: `Nome do Remetente: ${data.name}\nE-mail do Remetente: ${data.email}\nAssunto: ${data.subject}\n\nMensagem:\n${data.message}`,
     type: 'support'
   });
 };

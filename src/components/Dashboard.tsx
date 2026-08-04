@@ -10,12 +10,16 @@ import {
   ChevronRight,
   Layout,
   Trophy,
-  Download
+  Download,
+  Bot,
+  Sparkles,
+  Send
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { User } from '../types';
 import { downloadBoletimPDF } from '../lib/pdfUtils';
+import { askAiTeacher } from '../services/aiTeacherService';
 
 interface DashboardProps {
   user: User | null;
@@ -24,9 +28,28 @@ interface DashboardProps {
 
 export default function Dashboard({ user, allUsers }: DashboardProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [quickAiQuery, setQuickAiQuery] = useState('');
+  const [quickAiResponse, setQuickAiResponse] = useState('');
+  const [isAskingAi, setIsAskingAi] = useState(false);
   const navigate = useNavigate();
   
   if (!user) return null;
+
+  const handleAskQuickAi = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickAiQuery.trim() || isAskingAi) return;
+
+    setIsAskingAi(true);
+    setQuickAiResponse('');
+    try {
+      const res = await askAiTeacher(quickAiQuery, user.course, user.grade);
+      setQuickAiResponse(res);
+    } catch (err) {
+      toast.error('Erro ao consultar o Professor IA.');
+    } finally {
+      setIsAskingAi(false);
+    }
+  };
 
   const onlineUsersCount = allUsers.filter(u => u.isOnline).length;
   const classmates = allUsers.filter(u => u.course === user.course && u.id !== user.id);
@@ -151,6 +174,58 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
                     <Zap className="w-5 h-5 fill-current" />
                  </div>
               </div>
+            </div>
+
+            {/* Professor IA CETEP Widget */}
+            <div className="bg-gradient-to-br from-blue-900 to-indigo-950 text-white p-8 rounded-2xl shadow-lg relative overflow-hidden">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+                <div className="space-y-2 flex-1">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-400/30">
+                    <Bot className="w-4 h-4 text-blue-400" />
+                    <span>Professor IA CETEP</span>
+                  </div>
+                  <h3 className="text-2xl font-black text-white tracking-tight">
+                    Tire dúvidas dos seus estudos agora
+                  </h3>
+                  <p className="text-blue-200 text-xs font-medium max-w-xl">
+                    Precisa de ajuda com exercícios de {user.course}, matemática, redação ou resumos? Digite abaixo e receba resposta instantânea!
+                  </p>
+                </div>
+
+                <Link
+                  to="/contact"
+                  className="px-5 py-2.5 bg-white text-blue-900 hover:bg-blue-50 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shrink-0 shadow-md"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-500" /> Abrir Chat Completo
+                </Link>
+              </div>
+
+              {/* Quick Prompt Input */}
+              <form onSubmit={handleAskQuickAi} className="mt-6 flex gap-2 relative z-10">
+                <input
+                  type="text"
+                  value={quickAiQuery}
+                  onChange={(e) => setQuickAiQuery(e.target.value)}
+                  placeholder={`Ex: Como resolver exercício de ${user.course}...`}
+                  className="flex-1 px-5 py-3.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-xs font-medium text-white placeholder-blue-300/70 outline-none focus:ring-2 focus:ring-blue-400"
+                />
+                <button
+                  type="submit"
+                  disabled={!quickAiQuery.trim() || isAskingAi}
+                  className="px-6 py-3.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-2 shrink-0 shadow-md"
+                >
+                  {isAskingAi ? 'Pensando...' : 'Perguntar'} <Send className="w-3.5 h-3.5" />
+                </button>
+              </form>
+
+              {quickAiResponse && (
+                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4 p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-xs text-blue-100 whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto">
+                  <div className="font-bold text-white mb-1 flex items-center gap-1.5">
+                    <Bot className="w-4 h-4 text-blue-300" /> Resposta do Professor IA:
+                  </div>
+                  {quickAiResponse}
+                </motion.div>
+              )}
             </div>
 
             {/* Feature Card */}

@@ -23,7 +23,7 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
         { name: 'Sala de Aula', path: '/classroom' },
         { name: 'Boletim', path: '/boletim' },
         { name: 'Jornal', path: '/journal' },
-        { name: 'Suporte IA', path: '/contact' },
+        { name: 'Ajuda', path: '/contact' },
         ...(isEnzoAdmin ? [{ name: 'Secretaria', path: '/teachers' }] : []),
         ...(isEnzoAdmin ? [{ name: 'Banco de Dados', path: '/database', icon: Database }] : []),
         { name: 'Perfil', path: '/settings' },
@@ -31,7 +31,7 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
     : [
         { name: 'Página Inicial', path: '/lp-video' },
         { name: 'Sobre Nós', path: '/about' },
-        { name: 'Suporte IA', path: '/contact' },
+        { name: 'Ajuda', path: '/contact' },
         ...(isEnzoAdmin ? [{ name: 'Banco de Dados', path: '/database', icon: Database }] : []),
       ];
 
