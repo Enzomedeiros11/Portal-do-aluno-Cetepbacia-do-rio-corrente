@@ -46,7 +46,7 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
     });
   };
 
-  const compressImage = (file: File, maxDim = 300, quality = 0.75): Promise<string> => {
+  const compressImage = (file: File, maxDim = 200, quality = 0.70): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -97,6 +97,12 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
       avatar: newAvatarUrl
     };
 
+    // Save locally immediately so UI updates and stays persistent
+    localStorage.setItem('cetep_user', JSON.stringify(updatedUser));
+    if (onUpdateUser) {
+      onUpdateUser(updatedUser);
+    }
+
     try {
       // Sync to Firebase
       await setDoc(doc(db, 'usuarios', currentUser.id), {
@@ -104,13 +110,10 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
         updatedAt: new Date().toISOString()
       }, { merge: true });
 
-      if (onUpdateUser) {
-        onUpdateUser(updatedUser);
-      }
-      toast.success('Foto de perfil atualizada com sucesso!');
+      toast.success('Foto de perfil atualizada e salva com sucesso!');
     } catch (err: any) {
-      console.error('Error updating profile picture:', err);
-      toast.error('Erro ao atualizar foto de perfil no banco de dados.');
+      console.warn('Firebase sync warning:', err);
+      toast.success('Foto salva no dispositivo com sucesso!');
     } finally {
       setIsUploading(false);
     }

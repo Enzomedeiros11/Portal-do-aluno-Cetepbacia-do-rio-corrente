@@ -23,7 +23,8 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
         { name: 'Sala de Aula', path: '/classroom' },
         { name: 'Boletim', path: '/boletim' },
         { name: 'Jornal', path: '/journal' },
-        { name: 'Ajuda', path: '/contact' },
+        { name: 'Ajuda', path: '/contact?tab=form' },
+        { name: 'Chat IA', path: '/contact?tab=ai' },
         ...(isEnzoAdmin ? [{ name: 'Secretaria', path: '/teachers' }] : []),
         ...(isEnzoAdmin ? [{ name: 'Banco de Dados', path: '/database', icon: Database }] : []),
         { name: 'Perfil', path: '/settings' },
@@ -31,7 +32,8 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
     : [
         { name: 'Página Inicial', path: '/lp-video' },
         { name: 'Sobre Nós', path: '/about' },
-        { name: 'Ajuda', path: '/contact' },
+        { name: 'Ajuda', path: '/contact?tab=form' },
+        { name: 'Chat IA', path: '/contact?tab=ai' },
         ...(isEnzoAdmin ? [{ name: 'Banco de Dados', path: '/database', icon: Database }] : []),
       ];
 
@@ -53,17 +55,20 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
         </Link>
         
         <div className="hidden lg:flex items-center gap-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`text-sm font-semibold transition-all hover:text-blue-600 relative group/link ${
-                location.pathname === item.path ? 'text-blue-600' : 'text-slate-600'
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const isActive = (location.pathname + location.search) === item.path || (location.pathname === item.path);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`text-sm font-semibold transition-all hover:text-blue-600 relative group/link ${
+                  isActive ? 'text-blue-600 font-bold' : 'text-slate-600'
+                }`}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
         </div>
 
         <div className="flex items-center gap-4">

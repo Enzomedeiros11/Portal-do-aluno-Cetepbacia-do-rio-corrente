@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Send, MessageSquare, Bot, Sparkles, User as UserIcon, BookOpen, SendHorizontal, RefreshCw, CheckCircle2, HelpCircle } from 'lucide-react';
 import { User } from '../types';
@@ -18,7 +19,15 @@ interface ChatMessage {
 }
 
 export default function Contact({ currentUser }: ContactProps) {
-  const [activeTab, setActiveTab] = useState<'ai' | 'form'>('ai');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<'ai' | 'form'>(tabParam === 'form' ? 'form' : 'ai');
+
+  useEffect(() => {
+    if (tabParam === 'form' || tabParam === 'ai') {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   // AI Tutor Chat State
   const [messages, setMessages] = useState<ChatMessage[]>([

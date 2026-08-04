@@ -426,6 +426,7 @@ export default function App() {
                   const newUsers = allUsers.map(u => u.id === updated.id ? updated : u);
                   updateAllUsers(newUsers);
                   setCurrentUser(updated);
+                  localStorage.setItem('cetep_user', JSON.stringify(updated));
                 }
               }} /> : <Navigate to="/auth" />
             } />
