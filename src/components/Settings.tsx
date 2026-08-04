@@ -4,6 +4,7 @@ import { useState, ChangeEvent } from 'react';
 import { toast } from 'sonner';
 import { db } from '../lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
+import { requestPushNotificationPermission } from '../services/messagingService';
 
 interface SettingsProps {
   currentUser: UserType | null;
@@ -291,6 +292,36 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
             {activeTab === 'notifications' && (
               <div className="bg-white p-10 rounded-[40px] border border-slate-200 shadow-sm space-y-8">
                 <section>
+                    <div className="flex items-center gap-3 mb-8">
+                        <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                           <Bell className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-black text-slate-900 tracking-tight">Notificações Push (FCM)</h3>
+                          <p className="text-xs text-slate-400 font-medium">Receba alertas instantâneos no dispositivo quando novos comunicados forem postados.</p>
+                        </div>
+                    </div>
+
+                    <div className="p-6 bg-slate-50 rounded-3xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div>
+                        <p className="font-bold text-slate-900 text-sm">Notificações em Tempo Real no Navegador</p>
+                        <p className="text-xs text-slate-500 font-medium mt-1">
+                          {typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted'
+                            ? '✅ Permissão concedida! Você receberá avisos no seu dispositivo.'
+                            : 'Ative para autorizar o serviço de avisos escolares em segundo plano.'}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => requestPushNotificationPermission(currentUser)}
+                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-2xl transition-all shadow-md shrink-0 flex items-center gap-2"
+                      >
+                        <Bell className="w-4 h-4" />
+                        Ativar Notificações Push
+                      </button>
+                    </div>
+                </section>
+
+                <section className="pt-6 border-t border-slate-100">
                     <div className="flex items-center gap-3 mb-8">
                         <div className="w-10 h-10 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
                            <Mail className="w-5 h-5" />

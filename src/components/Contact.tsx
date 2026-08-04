@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Mail, Phone, MapPin, Send, MessageSquare, Bot, Sparkles, User as UserIcon, BookOpen, SendHorizontal, RefreshCw, CheckCircle2, HelpCircle } from 'lucide-react';
@@ -40,6 +40,17 @@ export default function Contact({ currentUser }: ContactProps) {
   ]);
   const [inputQuestion, setInputQuestion] = useState('');
   const [isLoadingAi, setIsLoadingAi] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    if (activeTab === 'ai') {
+      scrollToBottom();
+    }
+  }, [messages, isLoadingAi, activeTab]);
 
   // Support Form State
   const [contactName, setContactName] = useState(currentUser?.name || '');
@@ -224,13 +235,21 @@ export default function Contact({ currentUser }: ContactProps) {
                 ))}
 
                 {isLoadingAi && (
-                  <div className="flex gap-3 items-center text-slate-400 text-xs font-semibold p-2">
-                    <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center animate-bounce">
-                      <Sparkles className="w-4 h-4" />
+                  <div className="flex gap-3 items-end py-1">
+                    <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                      <Bot className="w-4 h-4" />
                     </div>
-                    <span>Professor IA está pensando na resposta...</span>
+                    <div className="bg-slate-100 border border-slate-200/80 px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-2 shadow-xs">
+                      <span className="text-xs text-slate-500 font-semibold mr-1">Professor IA está digitando</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                        <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                        <span className="w-2 h-2 bg-blue-600 rounded-full animate-bounce"></span>
+                      </div>
+                    </div>
                   </div>
                 )}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Chat Input */}

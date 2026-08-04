@@ -6,9 +6,13 @@ export async function askAiTeacher(prompt: string, userCourse = 'Geral', userGra
   const cleanPrompt = prompt.trim();
   if (!cleanPrompt) return 'Por favor, digite sua dúvida para o Professor IA.';
 
-  const systemInstruction = `Você é o "Professor IA CETEP", o tutor acadêmico oficial do Centro Territorial de Educação Profissional (CETEP).
-Você ajuda alunos dos cursos técnicos (Informática, Enfermagem, Administração, Edificações, Agropecuária) e do Ensino Médio/Integrado.
-Forneça respostas didáticas, motivadoras, estruturadas e passo a passo.
+  const systemInstruction = `Você é o "Professor IA CETEP", assistente pedagógico e tutor acadêmico direto e eficiente.
+DIRETRIZ OBRIGATÓRIA: Responda EXATAMENTE e DIRETAMENTE ao que o usuário perguntou.
+- Vá direto ao ponto, sem saudações longas, preâmbulos desnecessários ou introduções clichês.
+- Se o usuário fez uma pergunta direta de conteúdo, matemática, código, enfermagem, biologia, história ou redação, forneça a resposta de forma clara, precisa, organizada e direta.
+- Se for uma dúvida simples (ex: "quanto é 2+2?", "o que é HTML?"), responda em poucas frases objetivas.
+- Se for um cálculo ou exercício, mostre a resolução passo a passo de forma simples.
+- Mantenha tom amigável, educacional e altamente eficiente.
 Curso do Aluno: ${userCourse} | Ano/Série: ${userGrade}.`;
 
   try {
@@ -19,18 +23,18 @@ Curso do Aluno: ${userCourse} | Ano/Série: ${userGrade}.`;
         contents: cleanPrompt,
         config: {
           systemInstruction,
-          temperature: 0.7
+          temperature: 0.5
         }
       });
       if (response.text) {
-        return response.text;
+        return response.text.trim();
       }
     }
   } catch (err) {
     console.warn('Gemini API call fallback to smart tutor:', err);
   }
 
-  // Intelligent educational response generator when key is pending or in preview mode
+  // Efficient educational response generator when API key is pending or in preview mode
   return generateSmartTutorResponse(cleanPrompt, userCourse);
 }
 
@@ -38,75 +42,66 @@ function generateSmartTutorResponse(prompt: string, course: string): string {
   const p = prompt.toLowerCase();
 
   if (p.includes('programação') || p.includes('código') || p.includes('javascript') || p.includes('python') || p.includes('html') || p.includes('react') || p.includes('algoritmo')) {
-    return `🎓 **Professor IA CETEP (Técnico em Informática & Lógica)**
+    return `💻 **Programação & Lógica**
 
-Olá! Excelente pergunta sobre Tecnologia/Programação. Aqui está uma explicação didática:
+Para resolver problemas de programação:
+1. **Entrada e Variáveis**: Armazene os dados de entrada.
+2. **Processamento/Lógica**: Aplique as estruturas condicionais (\`if/else\`) ou laços (\`for/while\`).
+3. **Saída**: Retorne o resultado esperado.
 
-1. **Conceito Chave:** Na lógica de programação e no desenvolvimento moderno (como Web e Sistemas), dividimos o problema em pequenos passos estruturados (algoritmos).
-2. **Exemplo Prático:**
-   \`\`\`javascript
-   // Exemplo em JavaScript / Lógica CETEP
-   function calcularMedia(nota1, nota2) {
-     const media = (nota1 + nota2) / 2;
-     return media >= 6 ? "Aprovado" : "Recuperação";
-   }
-   console.log(calcularMedia(8, 7)); // Aprovado
-   \`\`\`
-3. **Dica de Estudo:** Pratique escrevendo códigos pequenos todos os dias no laboratório de informática da CETEP!
-
-*Precisa de mais detalhes sobre alguma linguagem específica? Pode me perguntar!*`;
+**Exemplo Prático (JavaScript):**
+\`\`\`javascript
+// Exemplo de estrutura condicional
+const nota = 7.5;
+if (nota >= 6) {
+  console.log("Aprovado!");
+} else {
+  console.log("Recuperação");
+}
+\`\`\``;
   }
 
   if (p.includes('enfermagem') || p.includes('saúde') || p.includes('medicação') || p.includes('pressão') || p.includes('sinais vitais')) {
-    return `🩺 **Professor IA CETEP (Técnico em Enfermagem & Saúde)**
+    return `🩺 **Sinais Vitais e Enfermagem**
 
-Olá! Vamos revisar este tópico fundamental de Enfermagem:
+- **Pressão Arterial (PA):** Valor normal médio ~ 120/80 mmHg (Normotenso).
+- **Frequência Cardíaca (FC):** 60 a 100 bpm (Normocardia).
+- **Frequência Respiratória (FR):** 12 a 20 mrpm (Eupneia).
+- **Temperatura (T):** 36,1°C a 37,2°C (Afebril).
 
-1. **Fundamentos:** Os sinais vitais (Pressão Arterial, Frequência Cardíaca, Frequência Respiratória e Temperatura) indicam as funções vitais do paciente.
-2. **Procedimentos Padrão:**
-   - Higienização das mãos antes e após cada atendimento.
-   - Conferência dos 9 certos na administração de medicamentos (Paciente certo, Medicamento certo, Dose certa, Hora certa, Via certa, etc.).
-3. **Dica CETEP:** Sempre registre com precisão no prontuário do paciente durante as aulas práticas e estágios.
-
-*Qual dúvida específica você tem sobre este procedimento?*`;
+*Atenção à regra dos 9 Certos na Administração de Medicamentos (Paciente certo, dose certa, via certa, hora certa, medicação certa, etc).*`;
   }
 
   if (p.includes('matemática') || p.includes('cálculo') || p.includes('equação') || p.includes('porcentagem') || p.includes('regra de três')) {
-    return `📐 **Professor IA CETEP (Exatas & Matemática Aplicada)**
+    return `📐 **Resolução Matemática**
 
-Com certeza! Vamos resolver passo a passo:
+**Regra de Três Direta (Exemplo):**
+Para calcular $X$ quando valores crescem na mesma proporção:
+- Monte a tabela alinhando as grandezas.
+- Multiplique cruzado: $A \\times X = B \\times C$.
+- Isole $X = \\frac{B \\times C}{A}$.
 
-1. **Passo 1:** Identifique os valores conhecidos e a incógnita ($X$).
-2. **Passo 2:** Monte a proporção (Regra de Três Direta ou Inversa).
-3. **Passo 3:** Multiplique cruzado e isole $X$.
-   - *Exemplo:* Se 100% é R$ 200, quanto é 15%?
-   - $X = (200 \\times 15) / 100 = 3000 / 100 = 30$.
-
-*Se você me enviar a questão exata, resolvo ela inteira passo a passo com você!*`;
+*Se quiser a resolução de um cálculo específico, digite os números e a questão exata!*`;
   }
 
   if (p.includes('redação') || p.includes('enem') || p.includes('português') || p.includes('resumo')) {
-    return `📝 **Professor IA CETEP (Linguagens & Redação)**
+    return `📝 **Estrutura de Redação**
 
-Aqui estão os pilares para uma excelente Redação Dissertativa-Argumentativa:
-
-1. **Introdução:** Apresentação do tema + Tese clara.
-2. **Desenvolvimento (D1 e D2):** Repertório sócio-cultural + Argumentação fundamentada.
-3. **Conclusão:** Proposta de intervenção completa (Agente, Ação, Meio/Modo, Efeito e Detalhamento).
-
-*Quer que eu revise um parágrafo da sua redação ou ajude a estruturar uma tese? Digite abaixo!*`;
+1. **Introdução:** Contextualize o tema + Apresente a tese.
+2. **Desenvolvimento 1:** Argumento principal + Repertório legítimo.
+3. **Desenvolvimento 2:** Desdobramento das causas/consequências.
+4. **Conclusão:** Proposta de Intervenção (Agente + Ação + Modo/Meio + Efeito + Detalhamento).`;
   }
 
-  return `🤖 **Professor IA CETEP - Tutor Acadêmico**
+  return `📘 **Resposta ao tópico solicitado (${prompt}):**
 
-Olá! Estou pronto para te ajudar com **${prompt}** no seu curso de **${course}**.
+Em **${course}**, este assunto relaciona-se aos conceitos fundamentais da matéria. 
 
-a) **Explicação Didática:** Este tópico é muito importante na matriz curricular da CETEP. Recomendo revisar os tópicos principais nas apostilas disponíveis na Sala de Aula virtual.
-b) **Orientação de Estudo:** Divida o assunto em seções curtas, faça resumos em tópicos e resolva exercícios práticos.
-c) **Como posso te ajudar mais:** 
-- Explicar um conceito difícil de maneira simples
-- Criar um simulado de 3 questões para você treinar
-- Ajudar na estruturação do seu trabalho escolar
+Para estudar este tema com eficiência:
+- Foque nas definições principais e palavras-chave.
+- Aplique o conceito em um exemplo prático do seu dia a dia profissional.
+- Refaça os exercícios apresentados em sala de aula.
 
-Qual área você prefere focar agora?`;
+*Tem um exercício ou questão específica sobre isso? Pode digitar que eu resolvo com você!*`;
 }
+

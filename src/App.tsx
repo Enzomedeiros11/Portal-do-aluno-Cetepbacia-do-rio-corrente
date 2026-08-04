@@ -28,6 +28,7 @@ import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { db } from './lib/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { sendEmail } from './services/emailService';
+import { listenForComunicadosPushNotifications } from './services/messagingService';
 
 /**
  * Detects if the current environment is a cloud-based preview/dev environment.
@@ -187,6 +188,15 @@ export default function App() {
 
     checkState();
   }, []);
+
+  // Listen for FCM push notifications when user is logged in
+  useEffect(() => {
+    if (!currentUser) return;
+    const unsub = listenForComunicadosPushNotifications(currentUser.email);
+    return () => {
+      unsub();
+    };
+  }, [currentUser?.email]);
 
   const fetchAllUsers = async () => {
     if (!isSupabaseConfigured) return;

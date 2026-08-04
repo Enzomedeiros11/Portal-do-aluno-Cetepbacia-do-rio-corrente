@@ -23,6 +23,7 @@ import { User } from '../types';
 import { supabase } from '../lib/supabase';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, onSnapshot, addDoc, deleteDoc, doc, query, orderBy, limit } from 'firebase/firestore';
+import { requestPushNotificationPermission } from '../services/messagingService';
 
 interface ClassroomProps {
   user: User | null;
@@ -430,11 +431,19 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
 
         {/* Quadro de Avisos Geral / Comunicados Oficiais */}
         <section className="mt-16 bg-slate-900 rounded-3xl p-10 text-white shadow-xl shadow-slate-900/10">
-           <div className="flex items-center justify-between mb-8">
+           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
               <div className="flex items-center gap-2">
                  <Bell className="w-5 h-5 text-blue-400" />
                  <h2 className="text-lg font-bold uppercase tracking-widest text-blue-400">Comunicados Oficiais</h2>
               </div>
+              <button
+                onClick={() => requestPushNotificationPermission(user)}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600/30 hover:bg-blue-600/50 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-bold transition-all"
+                title="Ativar Notificações Push FCM no Dispositivo"
+              >
+                <Bell className="w-3.5 h-3.5" />
+                <span>Ativar Notificações Push</span>
+              </button>
            </div>
            
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
