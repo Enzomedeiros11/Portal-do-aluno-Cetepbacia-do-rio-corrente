@@ -112,6 +112,18 @@ export default function App() {
 
       if (fbUsers.length > 0) {
         setAllUsers(fbUsers);
+        localStorage.setItem('cetep_all_users', JSON.stringify(fbUsers));
+        
+        setCurrentUser((prev) => {
+          if (!prev) return prev;
+          const updatedMe = fbUsers.find(u => u.id === prev.id || u.email === prev.email);
+          if (updatedMe && updatedMe.avatar !== prev.avatar) {
+            const newMe = { ...prev, avatar: updatedMe.avatar };
+            localStorage.setItem('cetep_user', JSON.stringify(newMe));
+            return newMe;
+          }
+          return prev;
+        });
       }
     });
 

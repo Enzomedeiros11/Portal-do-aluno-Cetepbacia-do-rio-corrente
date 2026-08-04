@@ -24,7 +24,7 @@ import { User, COURSES, GRADES } from '../types';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabase';
 import { db } from '../lib/firebase';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, collection, addDoc, onSnapshot } from 'firebase/firestore';
 
 interface TeachersProps {
   allUsers: User[];
@@ -45,6 +45,22 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
   const [loading, setLoading] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
   const [announcement, setAnnouncement] = useState({ subject: '', message: '' });
+  const [comunicadosList, setComunicadosList] = useState<{ id: string; texto: string; usuario: string; data: string }[]>([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'mensagens'), (snap) => {
+      const list: any[] = [];
+      snap.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (data.canal === 'Geral') {
+          list.push({ id: docSnap.id, ...data });
+        }
+      });
+      list.sort((a, b) => new Date(b.data || 0).getTime() - new Date(a.data || 0).getTime());
+      setComunicadosList(list);
+    });
+    return () => unsub();
+  }, []);
 
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -279,26 +295,39 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
 
     setSendingEmail(true);
     try {
-      const { error } = await supabase.from('mensagens').insert([
-        {
-          canal: 'Geral',
-          usuario: currentUser?.name || 'Administração',
-          email: currentUser?.email,
-          avatar: currentUser?.avatar,
-          texto: `[COMUNICADO OFICIAL: ${announcement.subject}] ${announcement.message}`,
-          data: new Date().toISOString()
-        }
-      ]);
+      const payload = {
+        canal: 'Geral',
+        usuario: currentUser?.name || 'Administração',
+        email: currentUser?.email || '',
+        avatar: currentUser?.avatar || null,
+        texto: `[COMUNICADO OFICIAL: ${announcement.subject}] ${announcement.message}`,
+        data: new Date().toISOString()
+      };
 
-      if (error) throw error;
+      // Save to Firebase
+      await addDoc(collection(db, 'mensagens'), payload);
 
-      toast.success('Comunicado transmitido para a sala de aula!');
+      // Save to Supabase fallback
+      await supabase.from('mensagens').insert([payload]);
+
+      toast.success('Comunicado transmitido para a sala de aula com sucesso!');
       setAnnouncement({ subject: '', message: '' });
     } catch (err) {
       console.error('Erro ao transmitir:', err);
       toast.error('Erro ao enviar comunicado.');
     } finally {
       setSendingEmail(false);
+    }
+  };
+
+  const handleDeleteComunicado = async (comId: string) => {
+    try {
+      await deleteDoc(doc(db, 'mensagens', comId));
+      await supabase.from('mensagens').delete().eq('id', comId);
+      toast.success('Comunicado excluído com sucesso!');
+    } catch (err) {
+      console.error('Erro ao apagar comunicado:', err);
+      toast.error('Erro ao apagar comunicado.');
     }
   };
 
@@ -631,6 +660,31 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
                     {sendingEmail ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                     <span>Publicar Comunicado na Sala de Aula</span>
                  </button>
+
+                 {comunicadosList.length > 0 && (
+                   <div className="mt-6 pt-6 border-t border-slate-200 space-y-3">
+                     <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider">Comunicados Publicados ({comunicadosList.length})</h4>
+                     <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                       {comunicadosList.map((com) => (
+                         <div key={com.id} className="p-3 bg-slate-50 border border-slate-200 rounded-xl flex items-start justify-between gap-3">
+                           <div className="text-xs space-y-1">
+                             <p className="font-bold text-slate-800">{com.texto}</p>
+                             <p className="text-[10px] text-slate-400 font-medium">
+                               {com.usuario} • {new Date(com.data).toLocaleDateString('pt-BR')} às {new Date(com.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                             </p>
+                           </div>
+                           <button
+                             onClick={() => handleDeleteComunicado(com.id)}
+                             className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all shrink-0"
+                             title="Apagar comunicado"
+                           >
+                             <Trash2 className="w-4 h-4" />
+                           </button>
+                         </div>
+                       ))}
+                     </div>
+                   </div>
+                 )}
               </div>
            </div>
 

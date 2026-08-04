@@ -137,24 +137,24 @@ export default function Contact({ currentUser }: ContactProps) {
           {/* Navigation Tabs */}
           <div className="flex items-center gap-3 mt-8 border-b border-slate-200 pb-4 overflow-x-auto">
             <button
-              onClick={() => setActiveTab('ai')}
+              onClick={() => { setActiveTab('ai'); setSearchParams({ tab: 'ai' }); }}
               className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all shrink-0 ${
                 activeTab === 'ai'
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
                   : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
               }`}
             >
-              <Bot className="w-4 h-4" /> Professor IA CETEP
+              <Bot className="w-4 h-4" /> Chat IA
             </button>
             <button
-              onClick={() => setActiveTab('form')}
+              onClick={() => { setActiveTab('form'); setSearchParams({ tab: 'form' }); }}
               className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all shrink-0 ${
                 activeTab === 'form'
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
                   : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
               }`}
             >
-              <Mail className="w-4 h-4" /> Fale com a Secretaria / Suporte
+              <HelpCircle className="w-4 h-4" /> Ajuda
             </button>
           </div>
         </motion.div>
@@ -329,8 +329,8 @@ export default function Contact({ currentUser }: ContactProps) {
 
             {/* Contact Form */}
             <div className="lg:col-span-7 bg-white p-8 sm:p-10 rounded-[32px] border border-slate-200 shadow-sm">
-              <h3 className="text-xl font-bold text-slate-900 tracking-tight mb-2">Enviar Mensagem para a Secretaria</h3>
-              <p className="text-xs font-medium text-slate-500 mb-6">Preencha os dados abaixo. Respondemos em até 24 horas úteis.</p>
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight mb-2">Enviar Mensagem de Ajuda</h3>
+              <p className="text-xs font-medium text-slate-500 mb-6">Preencha os dados abaixo para entrar em contato com nossa equipe de suporte escolar.</p>
 
               <form onSubmit={handleSendSupportForm} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

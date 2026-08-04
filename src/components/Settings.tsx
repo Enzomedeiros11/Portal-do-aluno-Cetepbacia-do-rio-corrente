@@ -1,11 +1,9 @@
-import { motion } from 'motion/react';
-import { User, Bell, Mail, Shield, Smartphone, Globe, Cloud, LogOut, ChevronRight, Camera, Upload, KeyRound, CheckCircle2, RefreshCw } from 'lucide-react';
+import { User, Bell, Mail, Shield, LogOut, Camera, Upload } from 'lucide-react';
 import { User as UserType } from '../types';
 import { useState, ChangeEvent } from 'react';
 import { toast } from 'sonner';
 import { db } from '../lib/firebase';
 import { doc, setDoc } from 'firebase/firestore';
-import { sendVerificationCodeEmail } from '../services/emailService';
 
 interface SettingsProps {
   currentUser: UserType | null;
@@ -14,15 +12,9 @@ interface SettingsProps {
 }
 
 export default function Settings({ currentUser, onLogout, onUpdateUser }: SettingsProps) {
-  const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'privacy' | 'security'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'privacy'>('profile');
   const [customPhotoUrl, setCustomPhotoUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-
-  // Security Verification States
-  const [verificationCode, setVerificationCode] = useState('');
-  const [inputCode, setInputCode] = useState('');
-  const [isCodeSent, setIsCodeSent] = useState(false);
-  const [isVerified, setIsVerified] = useState(false);
 
   const [settings, setSettings] = useState({
     emailNotif: true,
@@ -46,7 +38,7 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
     });
   };
 
-  const compressImage = (file: File, maxDim = 200, quality = 0.70): Promise<string> => {
+  const compressImage = (file: File, maxDim = 250, quality = 0.70): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -99,6 +91,18 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
 
     // Save locally immediately so UI updates and stays persistent
     localStorage.setItem('cetep_user', JSON.stringify(updatedUser));
+
+    const savedAll = localStorage.getItem('cetep_all_users');
+    if (savedAll) {
+      try {
+        const usersArr: UserType[] = JSON.parse(savedAll);
+        const updatedArr = usersArr.map(u => u.id === currentUser.id ? updatedUser : u);
+        localStorage.setItem('cetep_all_users', JSON.stringify(updatedArr));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
     if (onUpdateUser) {
       onUpdateUser(updatedUser);
     }
@@ -107,10 +111,11 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
       // Sync to Firebase
       await setDoc(doc(db, 'usuarios', currentUser.id), {
         avatar: newAvatarUrl,
+        avatar_url: newAvatarUrl,
         updatedAt: new Date().toISOString()
       }, { merge: true });
 
-      toast.success('Foto de perfil atualizada e salva com sucesso!');
+      toast.success('Foto de perfil salva com sucesso!');
     } catch (err: any) {
       console.warn('Firebase sync warning:', err);
       toast.success('Foto salva no dispositivo com sucesso!');
@@ -130,30 +135,12 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
 
     try {
       setIsUploading(true);
-      const compressedUrl = await compressImage(file, 300, 0.75);
+      const compressedUrl = await compressImage(file, 250, 0.70);
       await handleAvatarChange(compressedUrl);
     } catch (error) {
       toast.error('Erro ao processar imagem. Tente outra foto.');
     } finally {
       setIsUploading(false);
-    }
-  };
-
-  const handleRequestGmailCode = async () => {
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setVerificationCode(code);
-    setIsCodeSent(true);
-
-    await sendVerificationCodeEmail(currentUser.name, currentUser.email, code);
-    toast.success(`Código enviado ao Gmail: ${currentUser.email}`);
-  };
-
-  const handleVerifyGmailCode = () => {
-    if (inputCode.trim() === verificationCode) {
-      setIsVerified(true);
-      toast.success('Identidade e e-mail verificados com sucesso!');
-    } else {
-      toast.error('Código inválido. Tente novamente.');
     }
   };
 
@@ -171,7 +158,7 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
       <div className="container mx-auto max-w-4xl">
         <header className="mb-12">
            <h1 className="text-5xl font-black text-slate-900 tracking-tighter font-display mb-2">Configurações e Perfil</h1>
-           <p className="text-slate-500 font-medium">Gerencie sua foto de perfil, privacidade e códigos de acesso do Gmail.</p>
+           <p className="text-slate-500 font-medium">Gerencie sua foto de perfil, preferências de privacidade e notificações do portal.</p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
@@ -180,8 +167,7 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
             {[
               { id: 'profile', label: 'Foto & Perfil', icon: User },
               { id: 'notifications', label: 'Notificações', icon: Bell },
-              { id: 'privacy', label: 'Privacidade', icon: Shield },
-              { id: 'security', label: 'Código Gmail & 2FA', icon: KeyRound }
+              { id: 'privacy', label: 'Privacidade', icon: Shield }
             ].map((item) => (
               <button 
                 key={item.id} 
@@ -367,61 +353,6 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
                         <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all duration-300 ${settings.hideEmail ? 'left-7 shadow-lg' : 'left-1'}`} />
                       </button>
                     </div>
-                  </div>
-                </section>
-              </div>
-            )}
-
-            {/* TAB: SECURITY & GMAIL CODE */}
-            {activeTab === 'security' && (
-              <div className="bg-white p-10 rounded-[40px] border border-slate-200 shadow-sm space-y-8">
-                <section>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600">
-                      <KeyRound className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-xl font-black text-slate-900 tracking-tight">Verificação de Código por Gmail</h3>
-                  </div>
-
-                  <p className="text-xs font-medium text-slate-500 mb-6">
-                    Solicite um código de 6 dígitos enviado para seu endereço de Gmail (<strong>{currentUser.email}</strong>) para confirmar ações sensíveis e proteger sua conta.
-                  </p>
-
-                  <div className="p-6 bg-slate-50 rounded-3xl border border-slate-200 space-y-4">
-                    <button
-                      onClick={handleRequestGmailCode}
-                      className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl text-xs font-bold transition-all shadow-md flex items-center gap-2"
-                    >
-                      <Mail className="w-4 h-4" /> Solicitar Código ao Gmail
-                    </button>
-
-                    {isCodeSent && (
-                      <div className="space-y-3 pt-2">
-                        <p className="text-xs text-blue-600 font-bold">Digite o código de 6 dígitos recebido no seu e-mail:</p>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            maxLength={6}
-                            placeholder="000000"
-                            className="w-40 px-4 py-3 bg-white border border-slate-200 rounded-2xl font-mono text-center tracking-widest text-lg font-bold outline-none focus:ring-2 focus:ring-blue-500"
-                            value={inputCode}
-                            onChange={(e) => setInputCode(e.target.value)}
-                          />
-                          <button
-                            onClick={handleVerifyGmailCode}
-                            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-2xl transition-all"
-                          >
-                            Validar Código
-                          </button>
-                        </div>
-                      </div>
-                    )}
-
-                    {isVerified && (
-                      <div className="flex items-center gap-2 text-emerald-600 text-xs font-bold pt-2">
-                        <CheckCircle2 className="w-5 h-5" /> Conta e-mail verificada com sucesso!
-                      </div>
-                    )}
                   </div>
                 </section>
               </div>

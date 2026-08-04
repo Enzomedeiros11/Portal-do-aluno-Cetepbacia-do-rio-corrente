@@ -16,12 +16,13 @@ import {
   ClipboardList,
   User as UserIcon,
   ShieldCheck,
-  Bell
+  Bell,
+  Trash2
 } from 'lucide-react';
 import { User } from '../types';
 import { supabase } from '../lib/supabase';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
-import { collection, onSnapshot, addDoc, query, orderBy, limit } from 'firebase/firestore';
+import { collection, onSnapshot, addDoc, deleteDoc, doc, query, orderBy, limit } from 'firebase/firestore';
 
 interface ClassroomProps {
   user: User | null;
@@ -175,6 +176,17 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
     }
   };
 
+  const handleDeleteMessage = async (msgId: string) => {
+    try {
+      await deleteDoc(doc(db, 'mensagens', msgId));
+      await supabase.from('mensagens').delete().eq('id', msgId);
+      toast.success('Comunicado/mensagem excluído com sucesso!');
+    } catch (err) {
+      console.error('Erro ao excluir mensagem:', err);
+      toast.error('Erro ao excluir do banco de dados.');
+    }
+  };
+
   const classStudents = allUsers.filter(u => 
     u.id !== user?.id && u.course === user?.course && u.role === 'student'
   );
@@ -236,11 +248,22 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                     {(msg.usuario || '?').charAt(0)}
                   </div>
                   <div className={`max-w-[80%] ${msg.email === user?.email ? 'text-right' : 'text-left'}`}>
-                    <div className="flex items-center gap-2 mb-1 px-1">
-                      <span className="text-[10px] font-bold text-slate-900 uppercase tracking-tight">
-                        {msg.canal === 'Geral' ? '📢 COMUNICADO' : msg.usuario}
-                      </span>
-                      <span className="text-[9px] text-slate-400">{new Date(msg.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                    <div className="flex items-center gap-2 mb-1 px-1 justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-slate-900 uppercase tracking-tight">
+                          {msg.canal === 'Geral' ? '📢 COMUNICADO' : msg.usuario}
+                        </span>
+                        <span className="text-[9px] text-slate-400">{new Date(msg.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                      {(user?.role === 'teacher' || user?.email === 'enzomedeirosdasilva6@gmail.com' || msg.email === user?.email) && (
+                        <button
+                          onClick={() => handleDeleteMessage(msg.id)}
+                          className="text-slate-400 hover:text-rose-600 transition-colors p-1"
+                          title="Apagar comunicado/mensagem"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </div>
                     <div className={`px-4 py-3 rounded-2xl text-sm ${
                       msg.canal === 'Geral'
@@ -405,25 +428,57 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
           ))}
         </div>
 
-        {/* Quadro de Avisos Geral (opcional, simplificado) */}
+        {/* Quadro de Avisos Geral / Comunicados Oficiais */}
         <section className="mt-16 bg-slate-900 rounded-3xl p-10 text-white shadow-xl shadow-slate-900/10">
-           <div className="flex items-center gap-2 mb-8">
-              <Bell className="w-5 h-5 text-blue-400" />
-              <h2 className="text-lg font-bold uppercase tracking-widest text-blue-400">Comunicados Oficiais</h2>
+           <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-2">
+                 <Bell className="w-5 h-5 text-blue-400" />
+                 <h2 className="text-lg font-bold uppercase tracking-widest text-blue-400">Comunicados Oficiais</h2>
+              </div>
            </div>
+           
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                { title: 'Calendário de Avaliações', msg: 'As datas para as avaliações do 2º bimestre já estão disponíveis na secretaria.', date: 'Há 1 dia' },
-                { title: 'Vagas de Estágio', msg: 'Novas oportunidades para os cursos técnicos no mural da coordenação.', date: 'Hoje' },
-              ].map((adv, idx) => (
-                <div key={idx} className="bg-white/5 border border-white/10 p-6 rounded-2xl hover:bg-white/10 transition-colors">
-                   <div className="flex justify-between items-start mb-3">
-                      <h4 className="font-bold text-slate-100">{adv.title}</h4>
-                      <span className="text-[10px] text-slate-500 font-bold">{adv.date}</span>
-                   </div>
-                   <p className="text-sm text-slate-400 leading-relaxed font-medium">{adv.msg}</p>
-                </div>
-              ))}
+              {messages.filter(m => m.canal === 'Geral').length === 0 ? (
+                <>
+                  <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                     <div className="flex justify-between items-start mb-3">
+                        <h4 className="font-bold text-slate-100">Calendário de Avaliações</h4>
+                        <span className="text-[10px] text-slate-500 font-bold">Secretaria</span>
+                     </div>
+                     <p className="text-sm text-slate-400 leading-relaxed font-medium">As datas para as avaliações do bimestre já estão disponíveis na secretaria escolar.</p>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 p-6 rounded-2xl">
+                     <div className="flex justify-between items-start mb-3">
+                        <h4 className="font-bold text-slate-100">Mural de Estágios</h4>
+                        <span className="text-[10px] text-slate-500 font-bold">Coordenação</span>
+                     </div>
+                     <p className="text-sm text-slate-400 leading-relaxed font-medium">Novas oportunidades de estágio abertas no painel de estágios para alunos do CETEP.</p>
+                  </div>
+                </>
+              ) : (
+                messages.filter(m => m.canal === 'Geral').map((com) => (
+                  <div key={com.id} className="bg-white/5 border border-white/10 p-6 rounded-2xl hover:bg-white/10 transition-all relative group">
+                     <div className="flex justify-between items-start mb-3">
+                        <div>
+                           <h4 className="font-bold text-amber-400 text-base">{com.usuario || 'Administração'}</h4>
+                           <span className="text-[10px] text-slate-400 font-bold">
+                              {new Date(com.data).toLocaleDateString('pt-BR')} às {new Date(com.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                           </span>
+                        </div>
+                        {(user?.role === 'teacher' || user?.email === 'enzomedeirosdasilva6@gmail.com' || com.email === user?.email) && (
+                          <button
+                            onClick={() => handleDeleteMessage(com.id)}
+                            className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 rounded-xl transition-all"
+                            title="Apagar comunicado"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                     </div>
+                     <p className="text-sm text-slate-200 leading-relaxed font-medium whitespace-pre-wrap">{com.texto}</p>
+                  </div>
+                ))
+              )}
            </div>
         </section>
       </div>
