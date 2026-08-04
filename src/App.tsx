@@ -100,6 +100,7 @@ export default function App() {
           id: docSnap.id,
           name: d.nome || d.name || d.email?.split('@')[0] || 'Usuário',
           email: d.email || '',
+          password: d.senha || d.password || '',
           role,
           grade: d.grade || '1º Ano',
           course: d.curso || d.course || 'Técnico em Informática',

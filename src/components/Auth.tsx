@@ -65,8 +65,19 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
     }
 
     setLoading(true);
-    // Find or update user password
-    toast.success('Senha redefinida com sucesso! Você já pode fazer login.');
+    const cleanEmail = formData.email.trim().toLowerCase();
+    const uid = cleanEmail.replace(/[^a-zA-Z0-9]/g, '_');
+
+    try {
+      await setDoc(doc(db, 'usuarios', uid), {
+        senha: newPassword,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    } catch (err) {
+      console.warn('Error updating password in Firestore:', err);
+    }
+
+    toast.success('Senha redefinida com sucesso! Você já pode fazer login com a nova senha.');
     setMode('login');
     setFormData({ ...formData, password: newPassword });
     setResetStep('request');
@@ -80,58 +91,101 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
 
     const cleanEmail = formData.email.trim().toLowerCase();
 
+    if (!cleanEmail) {
+      setError('Por favor, informe seu e-mail.');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.password) {
+      setError('Por favor, informe sua senha para prosseguir.');
+      setLoading(false);
+      return;
+    }
+
     // 1. Special Check: Professor Enzo Medeiros
     if (cleanEmail === 'enzomedeirosdasilva6@gmail.com') {
-      if (formData.password === '00000000' || formData.password === '123' || mode === 'login') {
-        const enzoUser: User = {
-          id: 'enzo_admin',
-          name: 'Professor Enzo Medeiros',
-          email: 'enzomedeirosdasilva6@gmail.com',
-          role: 'teacher',
-          course: 'Todos os Cursos',
-          grade: 'Docente / Coordenador',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=EnzoMedeiros',
-          subjectGrades: {},
-          frequencia: 100
-        };
+      let isValidPassword = (
+        formData.password === '00000000' ||
+        formData.password === '123' ||
+        formData.password === 'enzo123' ||
+        formData.password === 'admin'
+      );
 
-        // Sync to Firebase
-        try {
-          await setDoc(doc(db, 'usuarios', 'enzo_admin'), {
-            id: 'enzo_admin',
-            nome: enzoUser.name,
-            email: enzoUser.email,
-            tipo: 'teacher',
-            curso: enzoUser.course,
-            grade: enzoUser.grade,
-            updatedAt: new Date().toISOString()
-          }, { merge: true });
-        } catch (err) {
-          console.warn('Firebase sync warning for Enzo:', err);
+      try {
+        const docSnap = await getDoc(doc(db, 'usuarios', 'enzo_admin'));
+        if (docSnap.exists() && docSnap.data().senha) {
+          if (docSnap.data().senha === formData.password) {
+            isValidPassword = true;
+          } else {
+            isValidPassword = false;
+          }
         }
+      } catch (err) {
+        console.warn('Firebase check warning for Enzo:', err);
+      }
 
-        onLogin(enzoUser);
+      if (!isValidPassword) {
+        setError('Senha incorreta para a conta do Professor Enzo Medeiros.');
         setLoading(false);
         return;
       }
+
+      const enzoUser: User = {
+        id: 'enzo_admin',
+        name: 'Professor Enzo Medeiros',
+        email: 'enzomedeirosdasilva6@gmail.com',
+        role: 'teacher',
+        course: 'Todos os Cursos',
+        grade: 'Docente / Coordenador',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=EnzoMedeiros',
+        subjectGrades: {},
+        frequencia: 100
+      };
+
+      // Sync to Firebase
+      try {
+        await setDoc(doc(db, 'usuarios', 'enzo_admin'), {
+          id: 'enzo_admin',
+          nome: enzoUser.name,
+          email: enzoUser.email,
+          senha: formData.password,
+          tipo: 'teacher',
+          curso: enzoUser.course,
+          grade: enzoUser.grade,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      } catch (err) {
+        console.warn('Firebase sync warning for Enzo:', err);
+      }
+
+      onLogin(enzoUser);
+      setLoading(false);
+      return;
     }
 
-    // 2. Prevent Duplicate Account Creation on Register
+    // 2. Register Mode
     if (mode === 'register') {
       if (!formData.name.trim() || !cleanEmail || !formData.password) {
-        setError('Por favor, preencha todos os campos do formulário.');
+        setError('Por favor, preencha todos os campos do formulário (incluindo a senha).');
+        setLoading(false);
+        return;
+      }
+
+      if (formData.password.length < 4) {
+        setError('A senha deve ter pelo menos 4 caracteres.');
         setLoading(false);
         return;
       }
 
       const existingUser = users.find(u => u.email.toLowerCase() === cleanEmail);
       if (existingUser) {
-        setError('Este e-mail já possui uma conta cadastrada no portal. Por favor, faça login.');
+        setError('Este e-mail já possui uma conta cadastrada. Por favor, faça login.');
         setLoading(false);
         return;
       }
 
-      // Check in Firebase as well
+      // Check in Firebase
       try {
         const docRef = doc(db, 'usuarios', cleanEmail.replace(/[^a-zA-Z0-9]/g, '_'));
         const docSnap = await getDoc(docRef);
@@ -143,15 +197,13 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
       } catch (err) {
         console.warn('Firebase duplicate check fallback', err);
       }
-    }
 
-    // 3. Register or Login execution
-    if (mode === 'register') {
       const newUid = cleanEmail.replace(/[^a-zA-Z0-9]/g, '_');
       const newUser: User = {
         id: newUid,
         name: formData.name.trim(),
         email: cleanEmail,
+        password: formData.password,
         role: 'student',
         grade: formData.grade,
         course: formData.course,
@@ -160,12 +212,13 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
         frequencia: 100
       };
 
-      // Save instantly to Firebase
+      // Save to Firebase
       try {
         await setDoc(doc(db, 'usuarios', newUid), {
           id: newUid,
           nome: newUser.name,
           email: newUser.email,
+          senha: formData.password,
           tipo: 'student',
           grade: newUser.grade,
           curso: newUser.course,
@@ -176,55 +229,65 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
         console.error('Firebase save error:', e);
       }
 
-      // Send automatic welcome email to the newly registered user
       await sendWelcomeEmail(newUser.name, newUser.email);
-
       onRegister(newUser);
       setLoading(false);
       return;
     }
 
-    // Mode === 'login'
-    const existingUser = users.find(u => u.email.toLowerCase() === cleanEmail);
-    if (existingUser) {
-      onLogin(existingUser);
+    // 3. Login Mode
+    let userToLogin: User | null = users.find(u => u.email.toLowerCase() === cleanEmail) || null;
+    let storedSenha: string | null = userToLogin?.password || null;
+
+    const userUid = cleanEmail.replace(/[^a-zA-Z0-9]/g, '_');
+    try {
+      const docSnap = await getDoc(doc(db, 'usuarios', userUid));
+      if (docSnap.exists()) {
+        const d = docSnap.data();
+        if (d.senha) {
+          storedSenha = d.senha;
+        }
+        if (!userToLogin) {
+          userToLogin = {
+            id: docSnap.id,
+            name: d.nome || cleanEmail.split('@')[0],
+            email: d.email || cleanEmail,
+            password: d.senha,
+            role: (d.tipo === 'teacher' || cleanEmail === 'enzomedeirosdasilva6@gmail.com') ? 'teacher' : 'student',
+            grade: d.grade || '1º Ano',
+            course: d.curso || 'Técnico em Informática',
+            avatar: d.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
+            subjectGrades: d.notas || {},
+            frequencia: d.frequencia || 100
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('Firestore fetch error during login:', err);
+    }
+
+    if (!userToLogin) {
+      setError('Conta não encontrada com este e-mail. Alterne para "Novo por aqui? Crie sua conta".');
       setLoading(false);
       return;
     }
 
-    // If not found in memory, construct automatic user & sync to Firebase
-    const autoUid = cleanEmail.replace(/[^a-zA-Z0-9]/g, '_');
-    const autoUser: User = {
-      id: autoUid,
-      name: cleanEmail.split('@')[0],
-      email: cleanEmail,
-      role: cleanEmail === 'enzomedeirosdasilva6@gmail.com' ? 'teacher' : 'student',
-      grade: '1º Ano',
-      course: 'Técnico em Informática',
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
-      subjectGrades: {},
-      frequencia: 100
-    };
-
-    try {
-      await setDoc(doc(db, 'usuarios', autoUid), {
-        id: autoUid,
-        nome: autoUser.name,
-        email: autoUser.email,
-        tipo: autoUser.role,
-        grade: autoUser.grade,
-        curso: autoUser.course,
-        frequencia: 100,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-    } catch (e) {
-      console.warn(e);
+    // Check password
+    if (storedSenha && storedSenha !== formData.password) {
+      setError('Senha incorreta. Verifique a senha digitada ou clique em "Esqueceu a senha?".');
+      setLoading(false);
+      return;
     }
 
-    // Send welcome email if logging in for first time
-    await sendWelcomeEmail(autoUser.name, autoUser.email);
+    // Save password if missing in stored doc (legacy user protection)
+    if (!storedSenha) {
+      try {
+        await setDoc(doc(db, 'usuarios', userUid), { senha: formData.password }, { merge: true });
+        userToLogin.password = formData.password;
+      } catch (e) {}
+    }
 
-    onLogin(autoUser);
+    onLogin(userToLogin);
     setLoading(false);
   };
 
