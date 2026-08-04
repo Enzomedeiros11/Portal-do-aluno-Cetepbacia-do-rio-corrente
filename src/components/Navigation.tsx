@@ -15,7 +15,7 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
-  const isCoordinator = userEmail === 'codernador12@gmail.com' || userEmail === 'enzomedeirosdasilva6@gmail.com';
+  const isEnzoAdmin = userEmail === 'enzomedeirosdasilva6@gmail.com';
 
   const navItems = isAuthenticated 
     ? [
@@ -23,15 +23,16 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
         { name: 'Sala de Aula', path: '/classroom' },
         { name: 'Boletim', path: '/boletim' },
         { name: 'Jornal', path: '/journal' },
-        ...(isCoordinator ? [{ name: 'Secretaria', path: '/teachers' }] : []),
-        { name: 'Banco de Dados', path: '/database', icon: Database },
+        { name: 'Suporte IA', path: '/contact' },
+        ...(isEnzoAdmin ? [{ name: 'Secretaria', path: '/teachers' }] : []),
+        ...(isEnzoAdmin ? [{ name: 'Banco de Dados', path: '/database', icon: Database }] : []),
         { name: 'Perfil', path: '/settings' },
       ]
     : [
         { name: 'Página Inicial', path: '/lp-video' },
         { name: 'Sobre Nós', path: '/about' },
-        { name: 'Suporte', path: '/contact' },
-        { name: 'Banco de Dados', path: '/database', icon: Database },
+        { name: 'Suporte IA', path: '/contact' },
+        ...(isEnzoAdmin ? [{ name: 'Banco de Dados', path: '/database', icon: Database }] : []),
       ];
 
   return (

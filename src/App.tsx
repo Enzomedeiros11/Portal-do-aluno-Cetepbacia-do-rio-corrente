@@ -398,21 +398,36 @@ export default function App() {
               isAuthenticated ? <Assignments /> : <Navigate to="/auth" />
             } />
             
-            {/* Database Control Panel Route */}
-            <Route path="/database" element={<DatabaseManager onRefreshAll={fetchAllUsers} />} />
+            {/* Database Control Panel Route - Enzo Only */}
+            <Route path="/database" element={
+              currentUser?.email === 'enzomedeirosdasilva6@gmail.com' ? (
+                <DatabaseManager onRefreshAll={fetchAllUsers} />
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )
+            } />
 
-            {/* Protected Teacher/Admin Routes */}
+            {/* Protected Teacher/Secretaria Route - Enzo Only */}
             <Route path="/teachers" element={
-              isAuthenticated && (currentUser?.email === 'codernador12@gmail.com' || currentUser?.email === 'enzomedeirosdasilva6@gmail.com') ? 
+              currentUser?.email === 'enzomedeirosdasilva6@gmail.com' ? (
                 <Teachers 
                   allUsers={allUsers}
                   onUpdateUsers={updateAllUsers}
                   currentUser={currentUser} 
                   onRefresh={fetchAllUsers}
-                /> : <Navigate to="/auth" />
+                />
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )
             } />
             <Route path="/settings" element={
-              isAuthenticated ? <Settings currentUser={currentUser} onLogout={logout} /> : <Navigate to="/auth" />
+              isAuthenticated ? <Settings currentUser={currentUser} onLogout={logout} onUpdateUser={(updated) => {
+                if (currentUser) {
+                  const newUsers = allUsers.map(u => u.id === updated.id ? updated : u);
+                  updateAllUsers(newUsers);
+                  setCurrentUser(updated);
+                }
+              }} /> : <Navigate to="/auth" />
             } />
             
             {/* Catch-all Fallback */}

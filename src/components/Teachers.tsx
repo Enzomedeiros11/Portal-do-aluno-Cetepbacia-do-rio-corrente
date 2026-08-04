@@ -347,13 +347,6 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
 
            <div className="flex items-center gap-3 flex-wrap">
               <button 
-                onClick={() => setIsAddModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-bold hover:bg-blue-700 transition-colors shadow-sm"
-              >
-                 <UserPlus className="w-4 h-4" /> Cadastrar Pessoa
-              </button>
-
-              <button 
                 onClick={handleExportCSV}
                 className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
               >
