@@ -89,45 +89,55 @@ export default function App() {
   useEffect(() => {
     // Subscribe to Firebase Firestore 'usuarios' collection for real-time user sync
     const unsubscribeFirebaseUsers = onSnapshot(collection(db, 'usuarios'), (snapshot) => {
-      const fbUsers: User[] = [];
-      snapshot.forEach((docSnap) => {
-        const d = docSnap.data();
-        let role: 'student' | 'teacher' = 'student';
-        if (d.tipo === 'teacher' || d.role === 'teacher' || d.email === 'codernador12@gmail.com' || d.email === 'enzomedeirosdasilva6@gmail.com') {
-          role = 'teacher';
-        }
-
-        fbUsers.push({
-          id: docSnap.id,
-          name: d.nome || d.name || d.email?.split('@')[0] || 'Usuário',
-          email: d.email || '',
-          password: d.senha || d.password || '',
-          role,
-          grade: d.grade || '1º Ano',
-          course: d.curso || d.course || 'Técnico em Informática',
-          avatar: d.avatar || d.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${docSnap.id}`,
-          isOnline: false,
-          lastSeen: d.updatedAt || new Date().toISOString(),
-          subjectGrades: d.notas || d.subjectGrades || {},
-          frequencia: d.frequencia || 100
-        });
-      });
-
-      if (fbUsers.length > 0) {
-        setAllUsers(fbUsers);
-        localStorage.setItem('cetep_all_users', JSON.stringify(fbUsers));
-        
-        setCurrentUser((prev) => {
-          if (!prev) return prev;
-          const updatedMe = fbUsers.find(u => u.id === prev.id || u.email === prev.email);
-          if (updatedMe && updatedMe.avatar !== prev.avatar) {
-            const newMe = { ...prev, avatar: updatedMe.avatar };
-            localStorage.setItem('cetep_user', JSON.stringify(newMe));
-            return newMe;
+      try {
+        const fbUsers: User[] = [];
+        snapshot.forEach((docSnap) => {
+          const d = docSnap.data();
+          let role: 'student' | 'teacher' = 'student';
+          if (d.tipo === 'teacher' || d.role === 'teacher' || d.email === 'codernador12@gmail.com' || d.email === 'enzomedeirosdasilva6@gmail.com') {
+            role = 'teacher';
           }
-          return prev;
+
+          fbUsers.push({
+            id: docSnap.id,
+            name: d.nome || d.name || d.email?.split('@')[0] || 'Usuário',
+            email: d.email || '',
+            password: d.senha || d.password || '',
+            role,
+            grade: d.grade || '1º Ano',
+            course: d.curso || d.course || 'Técnico em Informática',
+            avatar: d.avatar || d.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${docSnap.id}`,
+            isOnline: false,
+            lastSeen: d.updatedAt || new Date().toISOString(),
+            subjectGrades: d.notas || d.subjectGrades || {},
+            frequencia: d.frequencia || 100
+          });
         });
+
+        if (fbUsers.length > 0) {
+          setAllUsers(fbUsers);
+          try {
+            localStorage.setItem('cetep_all_users', JSON.stringify(fbUsers));
+          } catch (e) {}
+          
+          setCurrentUser((prev) => {
+            if (!prev) return prev;
+            const updatedMe = fbUsers.find(u => u.id === prev.id || u.email === prev.email);
+            if (updatedMe && updatedMe.avatar !== prev.avatar) {
+              const newMe = { ...prev, avatar: updatedMe.avatar };
+              try {
+                localStorage.setItem('cetep_user', JSON.stringify(newMe));
+              } catch (e) {}
+              return newMe;
+            }
+            return prev;
+          });
+        }
+      } catch (err) {
+        console.warn('Error processing Firebase snapshot:', err);
       }
+    }, (error) => {
+      console.warn('Firebase users sync listener warning:', error);
     });
 
     // Session state management
@@ -139,7 +149,6 @@ export default function App() {
           
           if (error) {
             console.error('Supabase Auth error:', error);
-            // Fallback to simulation if auth fetch fails
           } else if (session?.user) {
             fetchUserProfile(session.user.id, session.user.email!);
           } else {
@@ -176,19 +185,29 @@ export default function App() {
       }
       
       // 2. Fallback: Simulation mode using LocalStorage
-      const savedUser = localStorage.getItem('cetep_user');
-      const savedAllUsers = localStorage.getItem('cetep_all_users');
-      
-      if (savedAllUsers) {
-        setAllUsers(JSON.parse(savedAllUsers));
-      }
-      if (savedUser) {
-        setCurrentUser(JSON.parse(savedUser));
+      try {
+        const savedUser = localStorage.getItem('cetep_user');
+        const savedAllUsers = localStorage.getItem('cetep_all_users');
+        
+        if (savedAllUsers) {
+          const parsedAll = JSON.parse(savedAllUsers);
+          if (Array.isArray(parsedAll)) setAllUsers(parsedAll);
+        }
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          if (parsed && typeof parsed === 'object') setCurrentUser(parsed);
+        }
+      } catch (e) {
+        console.warn('LocalStorage load warning:', e);
       }
       setLoading(false);
     };
 
     checkState();
+
+    return () => {
+      unsubscribeFirebaseUsers();
+    };
   }, []);
 
   // Listen for FCM push notifications when user is logged in
