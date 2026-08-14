@@ -1,6 +1,7 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { LogIn, UserPlus, ArrowRight, Mail, Lock, User as UserIcon, BookOpen, Calendar, AlertCircle, Eye, EyeOff, KeyRound, CheckCircle2 } from 'lucide-react';
+import { LogIn, UserPlus, ArrowRight, Mail, Lock, User as UserIcon, BookOpen, Calendar, AlertCircle, Eye, EyeOff, KeyRound, ChevronDown, Sparkles } from 'lucide-react';
 import Logo from './Logo';
 import { User, COURSES, GRADES } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
@@ -18,10 +19,29 @@ interface AuthProps {
 }
 
 export default function Auth({ onLogin, onRegister, users }: AuthProps) {
-  const [mode, setMode] = useState<AuthMode>('login');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialMode = (searchParams.get('mode') === 'register' || searchParams.get('tab') === 'register') ? 'register' : 'login';
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    const urlMode = searchParams.get('mode') || searchParams.get('tab');
+    if (urlMode === 'register' && mode !== 'register') {
+      setMode('register');
+    } else if (urlMode === 'login' && mode !== 'login') {
+      setMode('login');
+    }
+  }, [searchParams]);
+
+  const switchMode = (newMode: AuthMode) => {
+    setMode(newMode);
+    setError(null);
+    if (newMode !== 'forgot') {
+      setSearchParams({ mode: newMode });
+    }
+  };
 
   // Recovery States
   const [resetStep, setResetStep] = useState<'request' | 'verify'>('request');
@@ -353,19 +373,51 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-md w-full"
         >
-          <div className="mb-10 text-center lg:text-left">
+          <div className="mb-8 text-center lg:text-left">
             <div className="lg:hidden inline-flex w-12 h-12 bg-blue-600 rounded-lg items-center justify-center mb-6">
               <Logo className="w-8 h-8 text-white fill-white" />
             </div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-              {mode === 'login' && 'Identificação'}
-              {mode === 'register' && 'Criar Conta'}
+              {mode === 'login' && 'Identificação de Aluno'}
+              {mode === 'register' && 'Criar Nova Conta'}
               {mode === 'forgot' && 'Recuperar Senha'}
             </h1>
-            <p className="text-slate-500 mt-2 font-medium">
-              Centro Territorial de Educação Profissional.
+            <p className="text-slate-500 mt-1.5 font-medium text-sm">
+              {mode === 'login' && 'Insira seus dados de acesso para entrar no portal acadêmico.'}
+              {mode === 'register' && 'Preencha seus dados de estudante para se cadastrar no CETEP.'}
+              {mode === 'forgot' && 'Redefina sua senha através do código de verificação por e-mail.'}
             </p>
           </div>
+
+          {/* Top Switcher Tabs: Entrar vs Criar Conta */}
+          {mode !== 'forgot' && (
+            <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border border-slate-200 shadow-inner">
+              <button
+                type="button"
+                onClick={() => switchMode('login')}
+                className={`flex-1 py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  mode === 'login'
+                    ? 'bg-white text-blue-600 shadow-sm border border-slate-200 font-extrabold'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Entrar</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => switchMode('register')}
+                className={`flex-1 py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  mode === 'register'
+                    ? 'bg-blue-600 text-white shadow-md font-extrabold'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
+              >
+                <UserPlus className="w-4 h-4" />
+                <span>Criar Conta</span>
+              </button>
+            </div>
+          )}
 
           {mode === 'forgot' ? (
             <div className="space-y-4">
@@ -378,21 +430,26 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
 
               {resetStep === 'request' ? (
                 <>
-                  <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      type="email"
-                      placeholder="Seu e-mail cadastrado"
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    />
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      E-mail Cadastrado
+                    </label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="email"
+                        placeholder="seu.email@exemplo.com"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      />
+                    </div>
                   </div>
                   <button
                     type="button"
                     onClick={handleSendRecoveryCode}
                     disabled={loading}
-                    className="w-full py-3.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-sm"
+                    className="w-full py-3.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                   >
                     {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Enviar Código ao Gmail'}
                   </button>
@@ -402,32 +459,42 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                   <div className="p-3 bg-blue-50 text-blue-700 text-xs rounded-lg font-medium">
                     Código de 6 dígitos enviado para <strong>{formData.email}</strong>
                   </div>
-                  <div className="relative">
-                    <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      type="text"
-                      maxLength={6}
-                      placeholder="Código de 6 dígitos"
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-mono text-center tracking-widest text-lg"
-                      value={inputCode}
-                      onChange={(e) => setInputCode(e.target.value)}
-                    />
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Código de Verificação
+                    </label>
+                    <div className="relative">
+                      <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="text"
+                        maxLength={6}
+                        placeholder="Código de 6 dígitos"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-mono text-center tracking-widest text-lg"
+                        value={inputCode}
+                        onChange={(e) => setInputCode(e.target.value)}
+                      />
+                    </div>
                   </div>
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                    <input
-                      type="password"
-                      placeholder="Nova Senha"
-                      className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-medium"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                    />
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Nova Senha
+                    </label>
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="password"
+                        placeholder="Digite sua nova senha"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-medium"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                    </div>
                   </div>
                   <button
                     type="button"
                     onClick={handleConfirmPasswordReset}
                     disabled={loading}
-                    className="w-full py-3.5 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 shadow-sm"
+                    className="w-full py-3.5 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 shadow-sm cursor-pointer"
                   >
                     {loading ? <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : 'Redefinir Senha'}
                   </button>
@@ -437,10 +504,10 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
               <div className="pt-4 text-center">
                 <button
                   type="button"
-                  onClick={() => { setMode('login'); setError(null); }}
-                  className="text-xs font-bold text-slate-500 hover:text-blue-600"
+                  onClick={() => switchMode('login')}
+                  className="text-xs font-bold text-slate-500 hover:text-blue-600 cursor-pointer"
                 >
-                  Voltar para o Login
+                  ← Voltar para o Login
                 </button>
               </div>
             </div>
@@ -457,6 +524,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                 </motion.div>
               )}
 
+              {/* REGISTER ONLY FIELDS: NOME, SÉRIE, CURSO */}
               <AnimatePresence mode="wait">
                 {mode === 'register' && (
                   <motion.div
@@ -465,74 +533,109 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                     exit={{ opacity: 0, height: 0 }}
                     className="space-y-4"
                   >
-                    <div className="relative">
-                      <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        type="text"
-                        placeholder="Nome completo"
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
-                        value={formData.name}
-                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      />
+                    {/* Campo 1: Nome Completo */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Nome Completo do Aluno
+                      </label>
+                      <div className="relative">
+                        <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                        <input
+                          type="text"
+                          required={mode === 'register'}
+                          placeholder="Ex: João da Silva"
+                          className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm text-slate-800"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        />
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="relative">
-                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                        <select
-                          className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none font-semibold text-sm"
-                          value={formData.grade}
-                          onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                        >
-                          {GRADES.filter(g => g !== 'Docente').map(g => (
-                            <option key={g} value={g}>{g}</option>
-                          ))}
-                        </select>
+                    {/* Campo 2 e 3: Série e Curso */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Série / Ano
+                        </label>
+                        <div className="relative">
+                          <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                          <select
+                            className="w-full pl-10 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none font-semibold text-xs text-slate-800 cursor-pointer"
+                            value={formData.grade}
+                            onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                          >
+                            {GRADES.filter(g => g !== 'Docente').map(g => (
+                              <option key={g} value={g}>{g}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
                       </div>
-                      <div className="relative">
-                        <BookOpen className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                        <select
-                          className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none text-xs font-bold uppercase tracking-tight"
-                          value={formData.course}
-                          onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-                        >
-                          {COURSES.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                          ))}
-                        </select>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                          Curso Técnico
+                        </label>
+                        <div className="relative">
+                          <BookOpen className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                          <select
+                            className="w-full pl-10 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none font-semibold text-xs text-slate-800 cursor-pointer"
+                            value={formData.course}
+                            onChange={(e) => setFormData({ ...formData, course: e.target.value })}
+                          >
+                            {COURSES.map(c => (
+                              <option key={c} value={c}>{c}</option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
                       </div>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
-                  type="email"
-                  placeholder="E-mail principal"
-                  className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                />
+              {/* Campo E-mail */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  {mode === 'register' ? 'E-mail Principal (Gmail/Outro)' : 'E-mail ou Matrícula'}
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="email"
+                    required
+                    placeholder="seu.email@exemplo.com"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm text-slate-800"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
               </div>
 
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Sua senha"
-                  className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+              {/* Campo Senha */}
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  {mode === 'register' ? 'Criar Senha de Acesso' : 'Sua Senha'}
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    placeholder={mode === 'register' ? 'Mínimo de 4 caracteres' : 'Sua senha'}
+                    className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm text-slate-800"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
 
               {mode === 'login' && (
@@ -540,7 +643,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                   <button
                     type="button"
                     onClick={() => { setMode('forgot'); setError(null); }}
-                    className="text-xs font-semibold text-blue-600 hover:underline"
+                    className="text-xs font-semibold text-blue-600 hover:underline cursor-pointer"
                   >
                     Esqueceu a senha?
                   </button>
@@ -550,29 +653,34 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 group shadow-sm active:scale-95 disabled:opacity-50"
+                className={`w-full py-4 rounded-xl font-bold text-white transition-all flex items-center justify-center gap-2 group shadow-md active:scale-95 disabled:opacity-50 cursor-pointer ${
+                  mode === 'register' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'
+                }`}
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span>{mode === 'login' ? 'Acessar Conta' : 'Finalizar Registro'}</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>{mode === 'login' ? 'Entrar no Portal' : 'Cadastrar e Entrar'}</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>
             </form>
           )}
 
-          <div className="mt-8 text-center">
+          <div className="mt-8 text-center border-t border-slate-100 pt-6">
             {mode !== 'forgot' && (
               <button
-                onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(null); }}
-                className="text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors"
+                type="button"
+                onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
+                className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors cursor-pointer inline-flex items-center gap-1.5"
               >
-                 {mode === 'login' 
-                  ? 'Novo por aqui? Crie sua conta' 
-                  : 'Já tem uma conta? Identifique-se'}
+                 {mode === 'login' ? (
+                   <>Ainda não tem conta? <span className="text-blue-600 underline">Criar conta agora</span></>
+                 ) : (
+                   <>Já tem uma conta cadastrada? <span className="text-blue-600 underline">Fazer Login</span></>
+                 )}
               </button>
             )}
           </div>
