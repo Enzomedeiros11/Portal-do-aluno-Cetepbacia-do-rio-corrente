@@ -126,7 +126,7 @@ export default function LandingPage() {
                </div>
             </div>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-               © 2024 CETEP • PORTAL ACADÊMICO
+               © 2026 CETEP • PORTAL ACADÊMICO
             </p>
          </div>
       </footer>

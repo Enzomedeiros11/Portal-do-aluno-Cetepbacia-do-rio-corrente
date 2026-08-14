@@ -42,7 +42,7 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
     setIsAskingAi(true);
     setQuickAiResponse('');
     try {
-      const res = await askAiTeacher(quickAiQuery, user.course, user.grade);
+      const res = await askAiTeacher(quickAiQuery, user.course || 'Técnico', user.grade || '1º Ano');
       setQuickAiResponse(res);
     } catch (err) {
       toast.error('Erro ao consultar o Professor IA.');
@@ -51,8 +51,8 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
     }
   };
 
-  const onlineUsersCount = allUsers.filter(u => u.isOnline).length;
-  const classmates = allUsers.filter(u => u.course === user.course && u.id !== user.id);
+  const onlineUsersCount = (allUsers || []).filter(u => u?.isOnline).length;
+  const classmates = (allUsers || []).filter(u => u?.course === user.course && u?.id !== user.id);
 
   const handleQuickAction = (action: string) => {
     toast.success(`${action} iniciado com sucesso!`);
@@ -87,6 +87,9 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
     visible: { y: 0, opacity: 1 }
   };
 
+  const displayName = (user.name || user.email || 'Estudante').trim().split(' ')[0] || 'Estudante';
+  const displayAvatar = user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.email || 'user')}`;
+
   return (
     <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6 font-sans">
       <motion.div 
@@ -99,7 +102,7 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
         <motion.header variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-              Olá, {user.name.split(' ')[0]}
+              Olá, {displayName}
             </h1>
             <p className="text-slate-500 font-medium mt-1">
               Bem-vindo ao portal acadêmico do CETEP.
@@ -108,12 +111,12 @@ export default function Dashboard({ user, allUsers }: DashboardProps) {
           
           <div className="flex items-center gap-4 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
              <div className="text-right hidden sm:block">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{user.course}</p>
-                <p className="text-sm font-semibold text-slate-700">{user.grade}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{user.course || 'Curso Técnico'}</p>
+                <p className="text-sm font-semibold text-slate-700">{user.grade || '1º Ano'}</p>
              </div>
              <div className="h-10 w-px bg-slate-100 hidden sm:block"></div>
              <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
-                <img src={user.avatar} alt="Perfil" className="w-full h-full object-cover" />
+                <img src={displayAvatar} alt="Perfil" className="w-full h-full object-cover" />
              </div>
           </div>
         </motion.header>

@@ -166,7 +166,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
 
     // 2. Register Mode
     if (mode === 'register') {
-      if (!formData.name.trim() || !cleanEmail || !formData.password) {
+      if (!formData.name?.trim() || !cleanEmail || !formData.password) {
         setError('Por favor, preencha todos os campos do formulário (incluindo a senha).');
         setLoading(false);
         return;
@@ -178,7 +178,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
         return;
       }
 
-      const existingUser = users.find(u => u.email.toLowerCase() === cleanEmail);
+      const existingUser = (users || []).find(u => (u?.email || '').toLowerCase() === cleanEmail);
       if (existingUser) {
         setError('Este e-mail já possui uma conta cadastrada. Por favor, faça login.');
         setLoading(false);
@@ -198,21 +198,23 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
         console.warn('Firebase duplicate check fallback', err);
       }
 
-      const newUid = cleanEmail.replace(/[^a-zA-Z0-9]/g, '_');
+      const newUid = cleanEmail.replace(/[^a-zA-Z0-9]/g, '_') || `user_${Date.now()}`;
       const newUser: User = {
         id: newUid,
         name: formData.name.trim(),
         email: cleanEmail,
         password: formData.password,
         role: 'student',
-        grade: formData.grade,
-        course: formData.course,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(formData.name)}`,
+        grade: formData.grade || '1º Ano',
+        course: formData.course || 'Técnico em Informática',
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(formData.name.trim())}`,
         subjectGrades: {},
-        frequencia: 100
+        frequencia: 100,
+        isOnline: true,
+        lastSeen: new Date().toISOString()
       };
 
-      // Save to Firebase
+      // Save to Firebase (with timeout protection)
       try {
         await setDoc(doc(db, 'usuarios', newUid), {
           id: newUid,
@@ -223,20 +225,26 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
           grade: newUser.grade,
           curso: newUser.course,
           frequencia: 100,
+          avatar: newUser.avatar,
           updatedAt: new Date().toISOString()
-        });
+        }, { merge: true });
       } catch (e) {
-        console.error('Firebase save error:', e);
+        console.error('Firebase save error on register:', e);
       }
 
-      await sendWelcomeEmail(newUser.name, newUser.email);
+      // Send welcome email in background (non-blocking)
+      sendWelcomeEmail(newUser.name, newUser.email).catch((emailErr) => {
+        console.warn('Non-blocking welcome email error:', emailErr);
+      });
+
+      toast.success('Conta criada com sucesso! Bem-vindo ao CETEP.');
       onRegister(newUser);
       setLoading(false);
       return;
     }
 
     // 3. Login Mode
-    let userToLogin: User | null = users.find(u => u.email.toLowerCase() === cleanEmail) || null;
+    let userToLogin: User | null = (users || []).find(u => (u?.email || '').toLowerCase() === cleanEmail) || null;
     let storedSenha: string | null = userToLogin?.password || null;
 
     const userUid = cleanEmail.replace(/[^a-zA-Z0-9]/g, '_');

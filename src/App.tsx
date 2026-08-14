@@ -22,6 +22,7 @@ import About from './components/About';
 import Settings from './components/Settings';
 import DatabaseManager from './components/DatabaseManager';
 import Logo from './components/Logo';
+import ErrorBoundary from './components/ErrorBoundary';
 import { User } from './types';
 import { Toaster, toast } from 'sonner';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
@@ -334,26 +335,37 @@ export default function App() {
   }, []);
 
   const login = (authenticatedUser: User) => {
-    setCurrentUser(authenticatedUser);
-    if (!isSupabaseConfigured) {
+    try {
+      setCurrentUser(authenticatedUser);
       localStorage.setItem('cetep_user', JSON.stringify(authenticatedUser));
+    } catch (e) {
+      console.warn('LocalStorage save warning on login:', e);
     }
   };
 
   const register = (newUser: User) => {
-    setCurrentUser(newUser);
-    if (!isSupabaseConfigured) {
+    try {
+      setCurrentUser(newUser);
       localStorage.setItem('cetep_user', JSON.stringify(newUser));
-      updateAllUsers([...allUsers, newUser]);
+      const currentList = Array.isArray(allUsers) ? allUsers : [];
+      const updatedList = [...currentList.filter(u => u.id !== newUser.id), newUser];
+      setAllUsers(updatedList);
+      localStorage.setItem('cetep_all_users', JSON.stringify(updatedList));
+    } catch (e) {
+      console.warn('LocalStorage save warning on register:', e);
     }
   };
   
   const logout = async () => {
     if (isSupabaseConfigured) {
-      await supabase.auth.signOut();
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {}
     }
     setCurrentUser(null);
-    localStorage.removeItem('cetep_user');
+    try {
+      localStorage.removeItem('cetep_user');
+    } catch (e) {}
   };
 
   const isAuthenticated = !!currentUser;
@@ -371,98 +383,100 @@ export default function App() {
   }
 
   return (
-    <Router>
-      <Toaster position="top-center" expand={true} richColors />
-      <div className="min-h-screen font-sans bg-white text-slate-900 selection:bg-indigo-600/20">
-        <Navigation 
-          isAuthenticated={isAuthenticated} 
-          logout={logout} 
-          userRole={userRole} 
-          userEmail={currentUser?.email}
-        />
-        
-        <main>
-          <Routes>
-            {/* Intelligent Root Redirect */}
-            <Route 
-              path="/" 
-              element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/lp-video" replace />} 
-            />
-            
-            {/* Core Public Routes */}
-            <Route path="/sitemap" element={<Sitemap />} />
-            <Route path="/lp-video" element={<LandingPage />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact currentUser={currentUser} />} />
-            <Route path="/auth" element={
-              isAuthenticated ? <Navigate to="/dashboard" /> : <Auth onLogin={login} onRegister={register} users={allUsers} />
-            } />
-            
-            {/* Protected Student Routes */}
-            <Route path="/dashboard" element={
-              isAuthenticated ? <Dashboard user={currentUser} allUsers={allUsers} /> : <Navigate to="/auth" />
-            } />
-            <Route path="/journal" element={
-              isAuthenticated ? <Journal /> : <Navigate to="/auth" />
-            } />
-            <Route path="/classroom" element={
-              isAuthenticated ? <Classroom user={currentUser} allUsers={allUsers} /> : <Navigate to="/auth" />
-            } />
-            <Route path="/extra-courses" element={
-              isAuthenticated ? <ExtraCourses /> : <Navigate to="/auth" />
-            } />
-            <Route path="/internships" element={
-              isAuthenticated ? <Internships /> : <Navigate to="/auth" />
-            } />
-            <Route path="/boletim" element={
-              isAuthenticated ? <Grades user={currentUser} /> : <Navigate to="/auth" />
-            } />
-            <Route path="/assignments" element={
-              isAuthenticated ? <Assignments /> : <Navigate to="/auth" />
-            } />
-            
-            {/* Database Control Panel Route - Enzo Only */}
-            <Route path="/database" element={
-              currentUser?.email === 'enzomedeirosdasilva6@gmail.com' ? (
-                <DatabaseManager onRefreshAll={fetchAllUsers} />
-              ) : (
-                <Navigate to="/dashboard" replace />
-              )
-            } />
+    <ErrorBoundary>
+      <Router>
+        <Toaster position="top-center" expand={true} richColors />
+        <div className="min-h-screen font-sans bg-white text-slate-900 selection:bg-indigo-600/20">
+          <Navigation 
+            isAuthenticated={isAuthenticated} 
+            logout={logout} 
+            userRole={userRole} 
+            userEmail={currentUser?.email}
+          />
+          
+          <main>
+            <Routes>
+              {/* Intelligent Root Redirect */}
+              <Route 
+                path="/" 
+                element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/lp-video" replace />} 
+              />
+              
+              {/* Core Public Routes */}
+              <Route path="/sitemap" element={<Sitemap />} />
+              <Route path="/lp-video" element={<LandingPage />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact currentUser={currentUser} />} />
+              <Route path="/auth" element={
+                isAuthenticated ? <Navigate to="/dashboard" /> : <Auth onLogin={login} onRegister={register} users={allUsers} />
+              } />
+              
+              {/* Protected Student Routes */}
+              <Route path="/dashboard" element={
+                isAuthenticated ? <Dashboard user={currentUser} allUsers={allUsers} /> : <Navigate to="/auth" />
+              } />
+              <Route path="/journal" element={
+                isAuthenticated ? <Journal /> : <Navigate to="/auth" />
+              } />
+              <Route path="/classroom" element={
+                isAuthenticated ? <Classroom user={currentUser} allUsers={allUsers} /> : <Navigate to="/auth" />
+              } />
+              <Route path="/extra-courses" element={
+                isAuthenticated ? <ExtraCourses /> : <Navigate to="/auth" />
+              } />
+              <Route path="/internships" element={
+                isAuthenticated ? <Internships /> : <Navigate to="/auth" />
+              } />
+              <Route path="/boletim" element={
+                isAuthenticated ? <Grades user={currentUser} /> : <Navigate to="/auth" />
+              } />
+              <Route path="/assignments" element={
+                isAuthenticated ? <Assignments /> : <Navigate to="/auth" />
+              } />
+              
+              {/* Database Control Panel Route - Enzo Only */}
+              <Route path="/database" element={
+                currentUser?.email === 'enzomedeirosdasilva6@gmail.com' ? (
+                  <DatabaseManager onRefreshAll={fetchAllUsers} />
+                ) : (
+                  <Navigate to="/dashboard" replace />
+                )
+              } />
 
-            {/* Protected Teacher/Secretaria Route - Enzo Only */}
-            <Route path="/teachers" element={
-              currentUser?.email === 'enzomedeirosdasilva6@gmail.com' ? (
-                <Teachers 
-                  allUsers={allUsers}
-                  onUpdateUsers={updateAllUsers}
-                  currentUser={currentUser} 
-                  onRefresh={fetchAllUsers}
-                />
-              ) : (
-                <Navigate to="/dashboard" replace />
-              )
-            } />
-            <Route path="/settings" element={
-              isAuthenticated ? <Settings currentUser={currentUser} onLogout={logout} onUpdateUser={(updated) => {
-                if (currentUser) {
-                  const newUsers = allUsers.map(u => u.id === updated.id ? updated : u);
-                  updateAllUsers(newUsers);
-                  setCurrentUser(updated);
-                  localStorage.setItem('cetep_user', JSON.stringify(updated));
-                }
-              }} /> : <Navigate to="/auth" />
-            } />
-            
-            {/* Catch-all Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-        
-        <footer style={{ position: 'fixed', bottom: '10px', width: '100%', textAlign: 'center', color: '#aaa', zIndex: 100, pointerEvents: 'none' }}>
-          PORTAL DO ALUNO CETEP 🚀
-        </footer>
-      </div>
-    </Router>
+              {/* Protected Teacher/Secretaria Route - Enzo Only */}
+              <Route path="/teachers" element={
+                currentUser?.email === 'enzomedeirosdasilva6@gmail.com' ? (
+                  <Teachers 
+                    allUsers={allUsers}
+                    onUpdateUsers={updateAllUsers}
+                    currentUser={currentUser} 
+                    onRefresh={fetchAllUsers}
+                  />
+                ) : (
+                  <Navigate to="/dashboard" replace />
+                )
+              } />
+              <Route path="/settings" element={
+                isAuthenticated ? <Settings currentUser={currentUser} onLogout={logout} onUpdateUser={(updated) => {
+                  if (currentUser) {
+                    const newUsers = allUsers.map(u => u.id === updated.id ? updated : u);
+                    updateAllUsers(newUsers);
+                    setCurrentUser(updated);
+                    localStorage.setItem('cetep_user', JSON.stringify(updated));
+                  }
+                }} /> : <Navigate to="/auth" />
+              } />
+              
+              {/* Catch-all Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+          
+          <footer style={{ position: 'fixed', bottom: '10px', width: '100%', textAlign: 'center', color: '#aaa', zIndex: 100, pointerEvents: 'none' }}>
+            PORTAL DO ALUNO CETEP 🚀
+          </footer>
+        </div>
+      </Router>
+    </ErrorBoundary>
   );
 }

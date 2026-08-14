@@ -124,12 +124,11 @@ export function listenForComunicadosPushNotifications(currentUserEmail?: string)
     }
   });
 
-  // Listen to Firestore 'mensagens' for 'Geral' canal created after app mount
+  // Listen to Firestore 'mensagens' created after app mount
   const q = query(
     collection(db, 'mensagens'),
-    where('canal', '==', 'Geral'),
     orderBy('data', 'desc'),
-    limit(5)
+    limit(10)
   );
 
   let isFirstLoad = true;
@@ -143,6 +142,7 @@ export function listenForComunicadosPushNotifications(currentUserEmail?: string)
     snapshot.docChanges().forEach((change) => {
       if (change.type === 'added') {
         const data = change.doc.data();
+        if (data.canal !== 'Geral') return;
         // Check if message was posted recently
         if (data.data && new Date(data.data) >= new Date(initTime)) {
           const author = data.usuario || 'Secretaria / Professor';
