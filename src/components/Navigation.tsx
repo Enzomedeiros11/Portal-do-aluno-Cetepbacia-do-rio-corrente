@@ -129,18 +129,27 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
                 {isAuthenticated ? (
                   <button
                     onClick={() => { logout(); setIsOpen(false); }}
-                    className="w-full py-5 px-8 bg-rose-50 text-rose-600 rounded-3xl text-center font-black uppercase tracking-widest text-xs"
+                    className="w-full py-4 px-6 bg-rose-50 text-rose-600 rounded-2xl text-center font-bold text-sm cursor-pointer"
                   >
                     Encerrar Sessão
                   </button>
                 ) : (
-                  <Link
-                    to="/auth"
-                    onClick={() => setIsOpen(false)}
-                    className="block py-5 px-8 bg-indigo-600 text-white rounded-3xl text-center font-black uppercase tracking-widest text-xs shadow-xl shadow-indigo-600/20"
-                  >
-                    Entrar no Portal
-                  </Link>
+                  <div className="space-y-2.5">
+                    <Link
+                      to="/auth?mode=register"
+                      onClick={() => setIsOpen(false)}
+                      className="block py-3.5 px-6 bg-blue-600 text-white rounded-2xl text-center font-bold text-sm shadow-md shadow-blue-600/20"
+                    >
+                      Criar Conta de Aluno
+                    </Link>
+                    <Link
+                      to="/auth"
+                      onClick={() => setIsOpen(false)}
+                      className="block py-3 px-6 bg-slate-100 text-slate-700 rounded-2xl text-center font-bold text-sm hover:bg-slate-200"
+                    >
+                      Entrar no Portal
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>

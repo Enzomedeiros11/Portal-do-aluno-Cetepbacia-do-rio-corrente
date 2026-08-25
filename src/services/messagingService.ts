@@ -169,7 +169,7 @@ export function listenForComunicadosPushNotifications(currentUserEmail?: string)
             action: {
               label: 'Ver na Sala',
               onClick: () => {
-                window.location.hash = '#/classroom';
+                window.location.pathname = '/classroom';
               }
             }
           });
