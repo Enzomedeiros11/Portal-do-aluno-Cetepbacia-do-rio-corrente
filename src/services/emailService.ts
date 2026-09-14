@@ -15,7 +15,12 @@ export const sendEmail = async (params: EmailParams) => {
   const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
   // Check user preference in localStorage
-  const settings = JSON.parse(localStorage.getItem('cetep_settings') || '{}');
+  let settings: any = {};
+  try {
+    settings = JSON.parse(localStorage.getItem('cetep_settings') || '{}');
+  } catch (e) {
+    settings = {};
+  }
   if (settings.emailNotif === false) {
     console.log('Skipping email send: user disabled notifications');
     return { success: true, skipped: true };

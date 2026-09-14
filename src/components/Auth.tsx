@@ -20,26 +20,40 @@ interface AuthProps {
 
 export default function Auth({ onLogin, onRegister, users }: AuthProps) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialMode = (searchParams.get('mode') === 'register' || searchParams.get('tab') === 'register') ? 'register' : 'login';
-  const [mode, setMode] = useState<AuthMode>(initialMode);
+  const urlParamMode = searchParams.get('mode') || searchParams.get('tab');
+  const [mode, setMode] = useState<AuthMode>(() => {
+    if (urlParamMode === 'register') return 'register';
+    if (urlParamMode === 'forgot') return 'forgot';
+    return 'login';
+  });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const urlMode = searchParams.get('mode') || searchParams.get('tab');
-    if (urlMode === 'register' && mode !== 'register') {
+    if (urlMode === 'register') {
       setMode('register');
-    } else if (urlMode === 'login' && mode !== 'login') {
+    } else if (urlMode === 'login') {
       setMode('login');
+    } else if (urlMode === 'forgot') {
+      setMode('forgot');
     }
   }, [searchParams]);
 
   const switchMode = (newMode: AuthMode) => {
-    setMode(newMode);
     setError(null);
-    if (newMode !== 'forgot') {
-      setSearchParams({ mode: newMode });
+    setMode(newMode);
+    try {
+      if (newMode === 'login') {
+        setSearchParams({}, { replace: true });
+      } else if (newMode === 'register') {
+        setSearchParams({ mode: 'register' }, { replace: true });
+      } else if (newMode === 'forgot') {
+        setSearchParams({ mode: 'forgot' }, { replace: true });
+      }
+    } catch (e) {
+      console.warn('URL update warning:', e);
     }
   };
 
@@ -525,75 +539,68 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
               )}
 
               {/* REGISTER ONLY FIELDS: NOME, SÉRIE, CURSO */}
-              <AnimatePresence mode="wait">
-                {mode === 'register' && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="space-y-4"
-                  >
-                    {/* Campo 1: Nome Completo */}
+              {mode === 'register' && (
+                <div key="register-fields-container" className="space-y-4">
+                  {/* Campo 1: Nome Completo */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      Nome Completo do Aluno
+                    </label>
+                    <div className="relative">
+                      <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="text"
+                        required={mode === 'register'}
+                        placeholder="Ex: João da Silva"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm text-slate-800"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Campo 2 e 3: Série e Curso */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                        Nome Completo do Aluno
+                        Série / Ano
                       </label>
                       <div className="relative">
-                        <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                        <input
-                          type="text"
-                          required={mode === 'register'}
-                          placeholder="Ex: João da Silva"
-                          className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm text-slate-800"
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        />
+                        <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <select
+                          className="w-full pl-10 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none font-semibold text-xs text-slate-800 cursor-pointer"
+                          value={formData.grade}
+                          onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                        >
+                          {GRADES.filter(g => g !== 'Docente').map(g => (
+                            <option key={g} value={g}>{g}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       </div>
                     </div>
 
-                    {/* Campo 2 e 3: Série e Curso */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Série / Ano
-                        </label>
-                        <div className="relative">
-                          <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                          <select
-                            className="w-full pl-10 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none font-semibold text-xs text-slate-800 cursor-pointer"
-                            value={formData.grade}
-                            onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                          >
-                            {GRADES.filter(g => g !== 'Docente').map(g => (
-                              <option key={g} value={g}>{g}</option>
-                            ))}
-                          </select>
-                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                          Curso Técnico
-                        </label>
-                        <div className="relative">
-                          <BookOpen className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                          <select
-                            className="w-full pl-10 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none font-semibold text-xs text-slate-800 cursor-pointer"
-                            value={formData.course}
-                            onChange={(e) => setFormData({ ...formData, course: e.target.value })}
-                          >
-                            {COURSES.map(c => (
-                              <option key={c} value={c}>{c}</option>
-                            ))}
-                          </select>
-                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                        </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Curso Técnico
+                      </label>
+                      <div className="relative">
+                        <BookOpen className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <select
+                          className="w-full pl-10 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none font-semibold text-xs text-slate-800 cursor-pointer"
+                          value={formData.course}
+                          onChange={(e) => setFormData({ ...formData, course: e.target.value })}
+                        >
+                          {COURSES.map(c => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
+                        </select>
+                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                       </div>
                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  </div>
+                </div>
+              )}
 
               {/* Campo E-mail */}
               <div>
@@ -661,7 +668,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                   <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    <span>{mode === 'login' ? 'Entrar no Portal' : 'Cadastrar e Entrar'}</span>
+                    <span>{mode === 'login' ? 'Entrar no Portal' : 'Criar Conta e Entrar'}</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}

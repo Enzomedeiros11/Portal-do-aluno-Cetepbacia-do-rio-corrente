@@ -1,315 +1,303 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'motion/react';
-import { 
-  Zap, 
-  BookOpen, 
-  Bell, 
-  ArrowRight, 
-  Search, 
-  Calendar as CalendarIcon,
-  ChevronRight,
-  Layout,
-  Trophy,
-  Download,
-  Bot,
-  Sparkles,
-  Send
-} from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { User } from '../types';
 import { downloadBoletimPDF } from '../lib/pdfUtils';
-import { askAiTeacher } from '../services/aiTeacherService';
+import { getCompletedLessonIds } from '../data/excelCourseData';
 
 interface DashboardProps {
   user: User | null;
   allUsers: User[];
 }
 
-export default function Dashboard({ user, allUsers }: DashboardProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [quickAiQuery, setQuickAiQuery] = useState('');
-  const [quickAiResponse, setQuickAiResponse] = useState('');
-  const [isAskingAi, setIsAskingAi] = useState(false);
-  const navigate = useNavigate();
-  
+export default function Dashboard({ user }: DashboardProps) {
   if (!user) return null;
 
-  const handleAskQuickAi = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!quickAiQuery.trim() || isAskingAi) return;
+  const displayName = (user.name || user.email || 'Estudante').trim().split(' ')[0] || 'Estudante';
+  const displayAvatar = user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.email || 'user')}`;
 
-    setIsAskingAi(true);
-    setQuickAiResponse('');
+  const completedLessons = getCompletedLessonIds().length;
+
+  const handleDownloadBoletim = () => {
     try {
-      const res = await askAiTeacher(quickAiQuery, user.course || 'Técnico', user.grade || '1º Ano');
-      setQuickAiResponse(res);
-    } catch (err) {
-      toast.error('Erro ao consultar o Professor IA.');
-    } finally {
-      setIsAskingAi(false);
+      toast.info('Gerando Boletim Acadêmico Oficial em PDF...');
+      downloadBoletimPDF(user);
+      toast.success('Boletim baixado com sucesso!');
+    } catch {
+      toast.error('Erro ao gerar o arquivo PDF do boletim.');
     }
-  };
-
-  const onlineUsersCount = (allUsers || []).filter(u => u?.isOnline).length;
-  const classmates = (allUsers || []).filter(u => u?.course === user.course && u?.id !== user.id);
-
-  const handleQuickAction = (action: string) => {
-    toast.success(`${action} iniciado com sucesso!`);
-  };
-
-  const handleDownload = async (type: string) => {
-    if (type === 'Boletim') {
-      if (user) {
-        try {
-          toast.info('Gerando Boletim em PDF...');
-          downloadBoletimPDF(user);
-          toast.success('Boletim gerado com sucesso!');
-        } catch (error) {
-          toast.error('Erro ao gerar o boletim.');
-        }
-      }
-      return;
-    }
-    toast.info(`Iniciando download do ${type}...`);
   };
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
+      transition: { staggerChildren: 0.06 }
     }
   };
 
   const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
+    hidden: { y: 12, opacity: 0 },
     visible: { y: 0, opacity: 1 }
   };
 
-  const displayName = (user.name || user.email || 'Estudante').trim().split(' ')[0] || 'Estudante';
-  const displayAvatar = user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.email || 'user')}`;
+  const academicModules = [
+    {
+      title: 'Sala de Aula Virtual',
+      category: 'Ambiente de Estudo',
+      description: 'Acompanhe as aulas, materiais didáticos e comunicados oficiais dos professores em tempo real.',
+      link: '/classroom',
+      badge: 'Ativo',
+      btnText: 'Entrar na Sala'
+    },
+    {
+      title: 'Cursos Extras: Excel',
+      category: 'Capacitação Técnica',
+      description: 'Curso oficial do Zero ao Avançado com 20 aulas completas, resumos teóricos e questionários práticos.',
+      link: '/extra-courses',
+      badge: `${completedLessons}/20 Aulas`,
+      btnText: 'Acessar Curso'
+    },
+    {
+      title: 'Painel de Estágios',
+      category: 'Oportunidades',
+      description: 'Vagas de estágio técnico, posições para menor aprendiz e conexões com empresas parceiras.',
+      link: '/internships',
+      badge: 'Vagas Abertas',
+      btnText: 'Ver Oportunidades'
+    },
+    {
+      title: 'Boletim & Histórico',
+      category: 'Notas e Frequência',
+      description: 'Consulte notas por disciplina, cálculo de médias bimestrais e emita o boletim acadêmico em PDF.',
+      link: '/boletim',
+      badge: 'Média 9.2',
+      btnText: 'Consultar Notas'
+    },
+    {
+      title: 'Plantão de Dúvidas (Chat IA)',
+      category: 'Apoio Pedagógico',
+      description: 'Assistente inteligente para resolução de exercícios e esclarecimento de dúvidas 24 horas.',
+      link: '/contact?tab=ai',
+      badge: 'Online 24h',
+      btnText: 'Tirar Dúvida'
+    },
+    {
+      title: 'Jornal Acadêmico CETEP',
+      category: 'Comunicação Escolar',
+      description: 'Notícias institucionais, eventos do campus, projetos científicos e comunicados da instituição.',
+      link: '/journal',
+      badge: 'Edição Vigente',
+      btnText: 'Ler Notícias'
+    }
+  ];
+
+  const upcomingDeadlines = [
+    { title: 'Simulado Técnico Geral', date: '22 de Setembro', tag: 'Avaliação' },
+    { title: 'Entrega de Relatórios de Estágio', date: '30 de Setembro', tag: 'Prazo' },
+    { title: 'Feira de Ciência e Tecnologia CETEP', date: '15 de Outubro', tag: 'Evento' }
+  ];
+
+  const recentNotices = [
+    {
+      author: 'Coordenação Pedagógica',
+      title: 'Horários de Atendimento e Monitoria para o 3º Bimestre',
+      time: 'Publicado ontem',
+      desc: 'Plantões de monitoria acadêmica disponíveis no laboratório de informática 02.'
+    },
+    {
+      author: 'Secretaria Escolar',
+      title: 'Emissão de Boletins e Declarações de Matrícula Atualizadas',
+      time: 'Publicado há 3 dias',
+      desc: 'Documentos digitais com assinatura eletrônica disponíveis diretamente na aba Boletim.'
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6 font-sans">
+    <div className="min-h-screen bg-slate-50 pt-24 pb-16 px-4 sm:px-6 font-sans">
       <motion.div 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="container mx-auto max-w-7xl"
+        className="max-w-7xl mx-auto space-y-8"
       >
-        {/* Simplified Header */}
-        <motion.header variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-              Olá, {displayName}
-            </h1>
-            <p className="text-slate-500 font-medium mt-1">
-              Bem-vindo ao portal acadêmico do CETEP.
-            </p>
+        
+        {/* Header Banner */}
+        <motion.div 
+          variants={itemVariants}
+          className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6"
+        >
+          <div className="flex items-center gap-4 sm:gap-5">
+            <div className="w-14 h-14 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
+              <img src={displayAvatar} alt="Perfil" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-md text-[10px] font-bold uppercase tracking-wider">
+                  Matrícula Ativa
+                </span>
+                <span className="text-xs font-bold text-slate-500">
+                  {user.grade || '1º Ano'} • {user.course || 'Curso Técnico'}
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                Olá, {displayName}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+                Painel do estudante. Selecione uma das áreas abaixo para prosseguir.
+              </p>
+            </div>
           </div>
+
+          <div className="flex items-center gap-3 shrink-0 flex-wrap">
+            <button
+              onClick={handleDownloadBoletim}
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+            >
+              Baixar Boletim (PDF)
+            </button>
+            <Link
+              to="/classroom"
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
+            >
+              Ir para Sala de Aula
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* 4 Academic KPI Cards - Pure typography, no decorative icons */}
+        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          <div className="flex items-center gap-4 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-             <div className="text-right hidden sm:block">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">{user.course || 'Curso Técnico'}</p>
-                <p className="text-sm font-semibold text-slate-700">{user.grade || '1º Ano'}</p>
-             </div>
-             <div className="h-10 w-px bg-slate-100 hidden sm:block"></div>
-             <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
-                <img src={displayAvatar} alt="Perfil" className="w-full h-full object-cover" />
-             </div>
+          <div className="bg-white p-5 rounded-xl border border-slate-200">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Média Geral</p>
+            <h3 className="text-3xl font-black text-slate-900 mt-1">9.2</h3>
+            <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold rounded">
+              Acima da média
+            </span>
           </div>
-        </motion.header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Main Content Area */}
-          <div className="lg:col-span-8 space-y-6">
-            {/* Action Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <motion.div variants={itemVariants} whileHover={{ y: -2 }}>
-                <Link to="/extra-courses" className="flex flex-col items-start p-6 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-200 transition-all text-left group h-full">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4 transition-colors">
-                    <BookOpen className="w-5 h-5" />
-                  </div>
-                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">Cursos Extra</span>
-                </Link>
-              </motion.div>
+          <div className="bg-white p-5 rounded-xl border border-slate-200">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Frequência Escolar</p>
+            <h3 className="text-3xl font-black text-slate-900 mt-1">{user.frequencia || 100}%</h3>
+            <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold rounded">
+              Regularidade plena
+            </span>
+          </div>
 
-              <motion.div variants={itemVariants} whileHover={{ y: -2 }}>
-                <Link to="/internships" className="flex flex-col items-start p-6 bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 transition-all text-left group h-full">
-                   <div className="w-10 h-10 rounded-lg bg-white/20 text-white flex items-center justify-center mb-4 transition-colors">
-                      <Zap className="w-5 h-5 fill-current" />
-                   </div>
-                   <span className="text-xs font-bold uppercase tracking-wider">Painel Estágios</span>
-                </Link>
-              </motion.div>
+          <div className="bg-white p-5 rounded-xl border border-slate-200">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Curso de Excel</p>
+            <h3 className="text-3xl font-black text-slate-900 mt-1">{completedLessons} / 20</h3>
+            <span className="inline-block mt-2 px-2 py-0.5 bg-blue-50 text-blue-700 text-[11px] font-bold rounded">
+              {Math.round((completedLessons / 20) * 100)}% concluído
+            </span>
+          </div>
 
-              <motion.button 
+          <div className="bg-white p-5 rounded-xl border border-slate-200">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Situação Acadêmica</p>
+            <h3 className="text-2xl font-black text-emerald-600 mt-1">Regular</h3>
+            <span className="inline-block mt-2 px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] font-bold rounded">
+              Ano Letivo 2026
+            </span>
+          </div>
+
+        </motion.div>
+
+        {/* Academic Modules Grid - Clean, no icons */}
+        <div>
+          <div className="mb-4">
+            <h2 className="text-lg font-black text-slate-900 tracking-tight">Módulos Acadêmicos</h2>
+            <p className="text-xs text-slate-500 font-medium">Acesso direto aos recursos e ambientes do portal</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {academicModules.map((mod, idx) => (
+              <motion.div 
+                key={idx}
                 variants={itemVariants}
-                whileHover={{ y: -2 }}
-                onClick={() => handleDownload('Boletim')}
-                className="flex flex-col items-start p-6 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-200 transition-all text-left group h-full"
+                className="group"
               >
-                <div className="w-10 h-10 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center mb-4 transition-colors">
-                  <Download className="w-5 h-5" />
-                </div>
-                <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">Boletim</span>
-              </motion.button>
-            </div>
-
-            {/* Performance Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                 <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Média Geral</p>
-                    <h4 className="text-3xl font-bold text-slate-900">9.2</h4>
-                 </div>
-                 <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
-                    <Trophy className="w-5 h-5" />
-                 </div>
-              </div>
-              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                 <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Frequência</p>
-                    <h4 className="text-3xl font-bold text-slate-900">{user.frequencia || 100}%</h4>
-                 </div>
-                 <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center text-emerald-600">
-                    <Zap className="w-5 h-5 fill-current" />
-                 </div>
-              </div>
-            </div>
-
-            {/* Professor IA CETEP Widget */}
-            <div className="bg-gradient-to-br from-blue-900 to-indigo-950 text-white p-8 rounded-2xl shadow-lg relative overflow-hidden">
-              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
-                <div className="space-y-2 flex-1">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-400/30">
-                    <Bot className="w-4 h-4 text-blue-400" />
-                    <span>Professor IA CETEP</span>
-                  </div>
-                  <h3 className="text-2xl font-black text-white tracking-tight">
-                    Tire dúvidas dos seus estudos agora
-                  </h3>
-                  <p className="text-blue-200 text-xs font-medium max-w-xl">
-                    Precisa de ajuda com exercícios de {user.course}, matemática, redação ou resumos? Digite abaixo e receba resposta instantânea!
-                  </p>
-                </div>
-
                 <Link
-                  to="/contact"
-                  className="px-5 py-2.5 bg-white text-blue-900 hover:bg-blue-50 rounded-xl font-bold text-xs transition-all flex items-center gap-2 shrink-0 shadow-md"
+                  to={mod.link}
+                  className="flex flex-col justify-between h-full p-6 bg-white border border-slate-200 rounded-xl hover:border-blue-400 transition-colors text-left"
                 >
-                  <Sparkles className="w-4 h-4 text-amber-500" /> Abrir Chat Completo
-                </Link>
-              </div>
-
-              {/* Quick Prompt Input */}
-              <form onSubmit={handleAskQuickAi} className="mt-6 flex gap-2 relative z-10">
-                <input
-                  type="text"
-                  value={quickAiQuery}
-                  onChange={(e) => setQuickAiQuery(e.target.value)}
-                  placeholder={`Ex: Como resolver exercício de ${user.course}...`}
-                  className="flex-1 px-5 py-3.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-xs font-medium text-white placeholder-blue-300/70 outline-none focus:ring-2 focus:ring-blue-400"
-                />
-                <button
-                  type="submit"
-                  disabled={!quickAiQuery.trim() || isAskingAi}
-                  className="px-6 py-3.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-50 flex items-center gap-2 shrink-0 shadow-md"
-                >
-                  {isAskingAi ? 'Pensando...' : 'Perguntar'} <Send className="w-3.5 h-3.5" />
-                </button>
-              </form>
-
-              {quickAiResponse && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-4 p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 text-xs text-blue-100 whitespace-pre-wrap leading-relaxed max-h-60 overflow-y-auto">
-                  <div className="font-bold text-white mb-1 flex items-center gap-1.5">
-                    <Bot className="w-4 h-4 text-blue-300" /> Resposta do Professor IA:
-                  </div>
-                  {quickAiResponse}
-                </motion.div>
-              )}
-            </div>
-
-            {/* Feature Card */}
-            <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                  <div className="flex-1">
-                    <span className="inline-block px-3 py-1 rounded bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-wider mb-4 border border-blue-100">
-                      Novo Material
-                    </span>
-                    <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                      Sala de Aula Virtual
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        {mod.category}
+                      </span>
+                      <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-bold rounded">
+                        {mod.badge}
+                      </span>
+                    </div>
+                    
+                    <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors mb-1.5">
+                      {mod.title}
                     </h3>
-                    <p className="text-slate-500 mb-6 font-medium leading-relaxed">
-                      Assista as aulas, participe das discussões e envie seus trabalhos acadêmicos de forma rápida e segura.
+                    <p className="text-xs text-slate-500 leading-relaxed font-normal">
+                      {mod.description}
                     </p>
-                    <Link to="/classroom" className="inline-flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-lg font-bold hover:bg-black transition-all active:scale-95 group">
-                      Acessar Material <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </Link>
                   </div>
-                  <div className="w-32 h-32 bg-slate-50 rounded-lg flex items-center justify-center border border-slate-100 hidden md:flex">
-                      <Layout className="w-12 h-12 text-slate-300" />
-                  </div>
-                </div>
-            </div>
-          </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-4 space-y-6">
-            <section className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                 <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Atividades Recentes</h4>
-                 <Bell className="w-4 h-4 text-slate-300" />
-              </div>
-              
-              <div className="space-y-4">
-                {[
-                  { title: "Nota Postada", time: "Há 10 min", color: "blue" },
-                  { title: "Novo Trabalho", time: "Há 2h", color: "emerald" },
-                  { title: "Evento Escolar", time: "Amanhã", color: "rose" }
-                ].map((notif, i) => (
-                  <div key={i} className="flex gap-4 items-start group cursor-pointer hover:bg-slate-50 p-2 -mx-2 rounded-lg transition-colors">
-                    <div className={`w-1.5 h-1.5 mt-1.5 rounded-full ${
-                      notif.color === 'blue' ? 'bg-blue-500' :
-                      notif.color === 'emerald' ? 'bg-emerald-500' :
-                      'bg-rose-500'
-                    }`} />
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{notif.title}</p>
-                      <p className="text-[10px] font-medium text-slate-400 uppercase">{notif.time}</p>
-                    </div>
+                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600">
+                    <span>{mod.btnText}</span>
+                    <span>&rarr;</span>
                   </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-6">
-                   <h4 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Calendário</h4>
-                   <CalendarIcon className="w-4 h-4 text-slate-300" />
-                </div>
-                {/* Dynamic calendar representation */}
-                <div className="text-center py-4 bg-slate-50 rounded-lg border border-slate-100">
-                    <p className="text-sm font-bold text-slate-700 uppercase">
-                      {new Date().toLocaleString('pt-BR', { month: 'long', year: 'numeric' })}
-                    </p>
-                    <div className="mt-4 grid grid-cols-7 gap-1 px-4">
-                         {['D','S','T','Q','Q','S','S'].map((d, i) => <div key={i} className="text-[10px] font-bold text-slate-300">{d}</div>)}
-                         {[...Array(30)].map((_, i) => {
-                           const day = i + 1;
-                           const isToday = day === new Date().getDate();
-                           return (
-                             <div key={i} className={`text-xs p-1 rounded font-medium ${isToday ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500'}`}>
-                               {day}
-                             </div>
-                           );
-                         })}
-                    </div>
-                </div>
-            </section>
+                </Link>
+              </motion.div>
+            ))}
           </div>
         </div>
+
+        {/* Notices & Academic Calendar Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
+          
+          {/* Notices */}
+          <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-900">Mural de Avisos da Coordenação</h3>
+              <Link to="/classroom" className="text-xs font-bold text-blue-600 hover:underline">
+                Ver todos na Sala
+              </Link>
+            </div>
+
+            <div className="space-y-3">
+              {recentNotices.map((notice, nIdx) => (
+                <div key={nIdx} className="p-4 bg-slate-50 rounded-lg border border-slate-100 space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[10px] font-bold uppercase text-blue-700">
+                      {notice.author}
+                    </span>
+                    <span className="text-[10px] text-slate-400">{notice.time}</span>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-900 pt-0.5">{notice.title}</h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">{notice.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Deadlines */}
+          <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+            <h3 className="text-sm font-bold text-slate-900">Prazos e Calendário</h3>
+
+            <div className="space-y-3">
+              {upcomingDeadlines.map((item, dIdx) => (
+                <div key={dIdx} className="p-3.5 rounded-lg border border-slate-100 bg-slate-50 flex items-start justify-between gap-3">
+                  <div>
+                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-slate-200 text-slate-700">
+                      {item.tag}
+                    </span>
+                    <h5 className="text-xs font-bold text-slate-900 mt-1.5">{item.title}</h5>
+                    <p className="text-[11px] text-slate-500">{item.date}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
       </motion.div>
     </div>
   );

@@ -2,625 +2,727 @@ import { ExcelLesson } from './excelTypes';
 
 export const lessons13to16: ExcelLesson[] = [
   {
-    id: 13,
-    lessonNumber: 13,
-    title: 'Validação de Dados, Regras de Entrada e Menus Suspensos',
-    module: 'Módulo 4: Gerenciamento, Relatórios e Automação',
-    duration: '28 min',
-    summary: 'Evite erros de digitação na sua planilha. Crie listas suspensas (dropdowns), restrições de datas, notas e alertas de erro personalizados.',
-    videoUrl: 'https://www.youtube.com/embed/z5eN6Q0pD1o',
-    videoTitle: 'Aula 13: Criando Menus Suspensos e Validação de Dados Profissional',
-    videoHighlights: [
-      'Criação de Listas Suspensas (Dropdown) a partir de intervalos',
-      'Validação de Número Inteiro, Decimal e Comprimento de Texto',
-      'Mensagens de Entrada informativas ao clicar na célula',
-      'Alertas de Erro customizados (Parar, Aviso e Informações)'
+    "id": 13,
+    "lessonNumber": 13,
+    "title": "Aula 13: Objeto Tabela Oficial e Referências Estruturadas",
+    "module": "Módulo 6: Tabelas, Interatividade e Filtros Dinâmicos",
+    "duration": "27 min",
+    "summary": "Descubra o verdadeiro poder do Objeto Tabela no Excel: formatação em zebra automática, propagação de fórmulas, Linha de Totais integrada, expansão automática de linhas e colunas e Referências Estruturadas.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/Cm3GmwiQkOI",
+    "videoTitle": "Aula 14 - Trabalhando com Tabelas - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "Diferença entre intervalo comum e Objeto Tabela oficial (Ctrl + Alt + T / Ctrl + L)",
+      "Expansão automática de dados e colunas calculadas",
+      "Linha de Totais nativa com funções agregadoras instantâneas",
+      "Referências estruturadas legíveis em vez de coordenadas rígidas (Ex: [@Preço] * [@Qtd])"
     ],
-    theoryContent: {
-      introduction: 'Planilhas corporativas são preenchidas por diversas pessoas, o que frequentemente gera inconsistências: uma pessoa digita "Informática", outra digita "Info", e uma terceira digita com erro de grafia "Informatca". Isso quebra filtros, SOMASE e gráficos. A Validação de Dados impede a digitação de valores inválidos restringindo as entradas a regras pré-estabelecidas ou a um menu suspenso selecionável.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "Muitos usuários pensam que desenhar bordas pretas em torno de células significa ter uma \"tabela\". No Excel, uma Tabela Oficial é um objeto inteligente especial que revoluciona a forma como os dados são gerenciados. Ao converter uma lista em Tabela, você ganha automação de fórmulas, expansão inteligente e referências de nomes legíveis.",
+      "keyConcepts": [
         {
-          title: 'Lista Suspensa (Dropdown)',
-          description: 'Permite selecionar a opção em uma setinha ao lado da célula. A fonte pode ser digitada manualmente separada por ponto e vírgula ou apontada para um intervalo na planilha.',
-          formulaOrExample: 'Fonte: Informática;Administração;Enfermagem  ou  =$K$2:$K$10'
+          "title": "Criação da Tabela Oficial",
+          "description": "Basta clicar dentro de qualquer célula da sua base e pressionar Ctrl + Alt + T (ou Ctrl + L). O Excel detecta os limites da tabela e a transforma em um objeto dinâmico com estilo visual em listras (zebra)."
         },
         {
-          title: 'Tipos de Validação',
-          description: 'Número Inteiro (ex: idade entre 14 e 100), Decimal (ex: notas de 0,0 a 10,0), Data (ex: somente datas futuras) e Comprimento do Texto (ex: CPF com exatamente 11 dígitos).',
-          formulaOrExample: 'Notas válidas: Decimal entre 0 e 10'
+          "title": "Colunas Calculadas Automáticas",
+          "description": "Ao criar uma fórmula na primeira linha de uma nova coluna da tabela, o Excel preenche automaticamente toda a coluna até o final da tabela sem necessidade de arrastar a alça de preenchimento."
         },
         {
-          title: 'Estilos de Alerta de Erro',
-          description: 'Parar (ícone vermelho X): impede terminantemente a gravação de dados inválidos. Aviso (triângulo amarelo): alerta mas permite prosseguir se o usuário confirmar. Informações (ícone azul): apenas avisa.',
-          formulaOrExample: 'Use sempre "Parar" para integridade total do banco'
+          "title": "Linha de Totais Integrada",
+          "description": "Na guia Design da Tabela, marcar a caixa \"Linha de Totais\" (ou Ctrl + Shift + T) adiciona um rodapé com menus suspensos que calculam instantaneamente Soma, Média, Contagem ou Máximo ignorando linhas ocultas por filtros."
+        },
+        {
+          "title": "Referências Estruturadas",
+          "description": "Em vez de usar fórmulas indecifráveis como =B2*C2, a tabela usa o nome dos cabeçalhos: =[@Preço] * [@Quantidade]. Isso torna suas planilhas fáceis de auditar e entender."
         }
       ],
-      stepByStep: [
-        'Selecione a coluna que receberá a restrição (ex: Coluna de Curso C2:C100).',
-        'Vá até a guia Dados > Ferramentas de Dados > Validação de Dados.',
-        'Na aba Configurações, no campo Permitir, selecione "Lista".',
-        'No campo Fonte, digite as opções separadas por ponto e vírgula ou selecione as células onde a lista de cursos está anotada.',
-        'Vá até a aba "Alerta de Erro", digite o título "Curso Inválido" e a mensagem explicativa.',
-        'Clique em OK e teste clicando na setinha da célula.'
+      "stepByStep": [
+        "Clique em qualquer célula de uma lista contínua com cabeçalhos.",
+        "Pressione Ctrl + Alt + T e verifique se a opção \"Minha tabela tem cabeçalhos\" está marcada.",
+        "Na guia contextual \"Design da Tabela\" que surge no topo, dê um nome profissional para a tabela (ex: \"tbAlunos\" ou \"tbVendas\").",
+        "Ative a \"Linha de Totais\" na barra de ferramentas e escolha \"Média\" na coluna de notas.",
+        "Digite um novo registro na linha imediatamente abaixo da tabela: veja a tabela se expandir automaticamente e incluir a nova linha nos cálculos!"
       ],
-      keyboardShortcuts: [
-        { keys: 'Alt + Abaixo', action: 'Abrir a lista suspensa da célula selecionada usando o teclado' },
-        { keys: 'Alt + D + V', action: 'Atalho clássico para abrir a caixa de Validação de Dados' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Ctrl + Alt + T",
+          "action": "Transforma o intervalo selecionado em Tabela Oficial"
+        },
+        {
+          "keys": "Ctrl + Shift + T",
+          "action": "Ativa ou desativa a Linha de Totais da Tabela"
+        },
+        {
+          "keys": "Tab (na última célula)",
+          "action": "Cria instantaneamente uma nova linha no final da tabela"
+        }
       ],
-      proTip: 'Para criar uma lista suspensa que se atualize automaticamente quando você adicionar novos cursos à base, converta a sua lista de opções em uma Tabela do Excel (Ctrl + T) antes de apontar na validação!',
-      commonErrors: 'Separar os itens da lista suspensa por vírgula em vez de ponto e vírgula no Excel em português, fazendo todas as palavras ficarem juntas em uma única linha.'
+      "proTip": "Sempre que for alimentar gráficos, tabelas dinâmicas ou fórmulas de busca (PROCV/PROCX), utilize Tabelas Oficiais como fonte de dados. Assim, sempre que novos dados forem inseridos, seus gráficos e relatórios incluirão as novas informações sem que você precise ajustar o intervalo manualmente!",
+      "commonErrors": "Deixar linhas ou colunas totalmente em branco no meio dos dados antes de criar a tabela, fazendo com que o Excel interrompa a seleção no meio da base."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 1301,
-        question: 'Em qual guia da Faixa de Opções está localizada a ferramenta de "Validação de Dados"?',
-        options: ['Guia Inserir', 'Guia Dados', 'Guia Exibir', 'Guia Página Inicial'],
-        correctIndex: 1,
-        explanation: 'A Validação de Dados fica no grupo Ferramentas de Dados da guia Dados.'
-      },
-      {
-        id: 1302,
-        question: 'Qual caractere deve ser usado para separar os itens manuais na fonte de uma Lista Suspensa no Excel em português?',
-        options: ['Vírgula (,)', 'Ponto e vírgula (;)', 'Traço (-)', 'Barra (/)'],
-        correctIndex: 1,
-        explanation: 'No padrão brasileiro do Excel, usa-se o ponto e vírgula (;) para separar os itens da lista.'
-      },
-      {
-        id: 1303,
-        question: 'Qual estilo de Alerta de Erro IMPEDE que o usuário insira o dado inválido na célula de qualquer forma?',
-        options: ['Aviso', 'Parar (Stop)', 'Informações', 'Recomendação'],
-        correctIndex: 1,
-        explanation: 'O estilo "Parar" bloqueia a inserção, forçando o usuário a corrigir ou cancelar.'
-      },
-      {
-        id: 1304,
-        question: 'Qual atalho de teclado abre o menu suspenso de uma célula validada sem usar o mouse?',
-        options: ['Ctrl + Espaço', 'Alt + Seta para Baixo', 'Shift + Enter', 'F1'],
-        correctIndex: 1,
-        explanation: 'Alt + Seta Abaixo expande a lista suspensa na célula ativa via teclado.'
-      },
-      {
-        id: 1305,
-        question: 'Qual tipo de validação deve ser selecionado para restringir que uma coluna de notas só receba valores entre 0,0 e 10,0?',
-        options: ['Número Inteiro', 'Decimal', 'Hora', 'Comprimento do Texto'],
-        correctIndex: 1,
-        explanation: 'Como as notas podem conter frações (ex: 7,5), deve-se escolher a validação "Decimal".'
-      },
-      {
-        id: 1306,
-        question: 'Para que serve a aba "Mensagem de Entrada" na janela de Validação de Dados?',
-        options: [
-          'Para mandar um WhatsApp ao usuário',
-          'Para exibir uma dica flutuante assim que o usuário clica ou seleciona a célula',
-          'Para tocar um som de alarme',
-          'Para imprimir a folha'
+        "id": 1301,
+        "question": "Qual atalho de teclado no Excel em português converte uma lista de dados em uma Tabela Oficial?",
+        "options": [
+          "Ctrl + P",
+          "Alt + F4",
+          "Ctrl + Alt + T (ou Ctrl + L)",
+          "Ctrl + Shift + N"
         ],
-        correctIndex: 1,
-        explanation: 'A Mensagem de Entrada exibe um balão instrutivo ao posicionar o cursor na célula.'
+        "correctIndex": 2,
+        "explanation": "Ctrl + Alt + T (ou Ctrl + L em versões clássicas) cria uma Tabela Oficial do Excel."
       },
       {
-        id: 1307,
-        question: 'Para validar que um campo de CPF receba exatamente 11 dígitos, qual critério de validação deve ser usado?',
-        options: ['Qualquer valor', 'Comprimento do texto igual a 11', 'Data entre 1 e 11', 'Fórmula =SOMA'],
-        correctIndex: 1,
-        explanation: 'A opção "Comprimento do texto" permite definir o tamanho exato de caracteres permitidos.'
-      },
-      {
-        id: 1308,
-        question: 'O que o recurso "Circular Dados Inválidos" faz na planilha?',
-        options: [
-          'Exclui as linhas com erro',
-          'Desenha círculos vermelhos em volta das células que já continham dados violando a regra antes da validação ser aplicada',
-          'Muda o tamanho da fonte',
-          'Bloqueia a impressão'
+        "id": 1302,
+        "question": "Qual é o nome dado à guia especial que surge na Faixa de Opções quando você clica dentro de uma Tabela Oficial?",
+        "options": [
+          "Design da Tabela",
+          "Ferramentas de Desenho",
+          "Modo Desenvolvedor",
+          "Visualizador"
         ],
-        correctIndex: 1,
-        explanation: '"Circular Dados Inválidos" destaca em vermelho as células pré-existentes fora da regra.'
+        "correctIndex": 0,
+        "explanation": "A guia contextual \"Design da Tabela\" agrupa todos os recursos exclusivos do objeto tabela."
       },
       {
-        id: 1309,
-        question: 'O que acontece com a lista suspensa se a célula de origem na planilha for apagada ou renomeada sem os devidos cuidados?',
-        options: [
-          'A lista continua funcionando com base no histórico',
-          'A lista suspensa fica vazia ou exibe opções em branco',
-          'O Excel fecha automaticamente',
-          'A planilha é enviada para a lixeira'
+        "id": 1303,
+        "question": "O que acontece ao digitar um novo registro na linha imediatamente abaixo da última linha de uma Tabela Oficial?",
+        "options": [
+          "O Excel exibe um erro de limite",
+          "A tabela perde sua formatação",
+          "O arquivo é fechado",
+          "A tabela se expande automaticamente, incorporando a nova linha às fórmulas e formatações"
         ],
-        correctIndex: 1,
-        explanation: 'Se a fonte for excluída, a lista suspensa perde sua referência e não exibe os valores esperados.'
+        "correctIndex": 3,
+        "explanation": "As tabelas do Excel têm redimensionamento automático para novas linhas e colunas adjacentes."
       },
       {
-        id: 1310,
-        question: 'Qual é o maior benefício de aplicar validação de dados em planilhas compartilhadas?',
-        options: [
-          'Garantir padronização das informações e evitar erros humanos de digitação',
-          'Fazer o arquivo ficar com o dobro do tamanho',
-          'Impedir que a planilha seja aberta no celular',
-          'Acelerar a velocidade da internet'
+        "id": 1304,
+        "question": "O que é uma \"Referência Estruturada\"?",
+        "options": [
+          "Uma coluna de concreto da engenharia civil",
+          "Fórmula que usa os nomes dos cabeçalhos entre colchetes (ex: =[@Valor]*[@Qtd]) em vez de letras e números de células",
+          "Uma planilha sem cores",
+          "Uma macro em código binário"
         ],
-        correctIndex: 0,
-        explanation: 'A validação padroniza o banco de dados e impede falhas de digitação que quebrariam análises.'
+        "correctIndex": 1,
+        "explanation": "Referências estruturadas usam os nomes das colunas da tabela, tornando as fórmulas legíveis e intuitivas."
+      },
+      {
+        "id": 1305,
+        "question": "Qual atalho de teclado liga ou desliga instantaneamente a Linha de Totais da Tabela?",
+        "options": [
+          "Ctrl + T",
+          "Alt + T",
+          "F9",
+          "Ctrl + Shift + T"
+        ],
+        "correctIndex": 3,
+        "explanation": "Ctrl + Shift + T alterna a exibição da linha de totais no rodapé da tabela."
+      },
+      {
+        "id": 1306,
+        "question": "Qual tecla você deve pressionar quando está na última célula da última linha da tabela para adicionar uma nova linha rapidamente?",
+        "options": [
+          "Tecla Barra de Espaço",
+          "Tecla Esc",
+          "Tecla Tab",
+          "Tecla Caps Lock"
+        ],
+        "correctIndex": 2,
+        "explanation": "Pressionar Tab na última célula da tabela adiciona uma nova linha vazia automaticamente."
+      },
+      {
+        "id": 1307,
+        "question": "Qual função a Linha de Totais da tabela utiliza internamente para calcular somas sem somar linhas ocultadas por filtros?",
+        "options": [
+          "=SUBTOTAL()",
+          "=SOMA()",
+          "=OCULTO()",
+          "=FILTRO_SOMA()"
+        ],
+        "correctIndex": 0,
+        "explanation": "A linha de totais usa a função SUBTOTAL, que recalcula dinamicamente apenas as linhas visíveis."
+      },
+      {
+        "id": 1308,
+        "question": "Por que é uma boa prática nomear a tabela (ex: \"tbAlunos\") na guia Design da Tabela?",
+        "options": [
+          "Porque o Excel exige obrigatoriamente um nome de 20 letras",
+          "Porque facilita encontrar e chamar a tabela em fórmulas, gráficos e relatórios dinâmicos",
+          "Para mudar o idioma do computador",
+          "Para criar um backup na nuvem"
+        ],
+        "correctIndex": 1,
+        "explanation": "Nomear tabelas organiza o modelo de dados e facilita a escrita de fórmulas estruturadas."
+      },
+      {
+        "id": 1309,
+        "question": "O que faz o botão \"Converter em Intervalo\" na guia Design da Tabela?",
+        "options": [
+          "Apaga todos os dados da tabela",
+          "Converte texto em imagens",
+          "Transforma a Tabela Oficial de volta em um intervalo comum de células normais, preservando os dados e cores",
+          "Imprime a tabela"
+        ],
+        "correctIndex": 2,
+        "explanation": "Remove a inteligência da Tabela Oficial sem perder o conteúdo das células."
+      },
+      {
+        "id": 1310,
+        "question": "Ao escrever uma fórmula na primeira linha de uma nova coluna em uma Tabela Oficial, o que acontece?",
+        "options": [
+          "O usuário precisa arrastar a fórmula manualmente em cada linha",
+          "A tabela trava",
+          "O valor é apagado",
+          "A fórmula é propagada automaticamente para todas as linhas daquela coluna (coluna calculada)"
+        ],
+        "correctIndex": 3,
+        "explanation": "Tabelas possuem o recurso de \"Coluna Calculada\", preenchendo toda a extensão da coluna de forma automática."
       }
     ]
   },
   {
-    id: 14,
-    lessonNumber: 14,
-    title: 'Tabelas Estruturadas, Filtros Avançados e Segmentação de Dados',
-    module: 'Módulo 4: Gerenciamento, Relatórios e Automação',
-    duration: '32 min',
-    summary: 'Transforme intervalos comuns em Tabelas Inteligentes (Ctrl + T). Fórmulas calculadas automáticas, totais e Segmentações de Dados modernas.',
-    videoUrl: 'https://www.youtube.com/embed/Pj15RzBvEFE',
-    videoTitle: 'Aula 14: O Poder das Tabelas Oficiais do Excel (Ctrl + T)',
-    videoHighlights: [
-      'Formatar como Tabela oficial (Ctrl + T) e suas vantagens',
-      'Colunas Calculadas Automáticas (arraste automático de fórmulas)',
-      'Linha de Totais nativa com menus dinâmicos',
-      'Segmentação de Dados (Slicers) para filtros visuais interativos'
+    "id": 14,
+    "lessonNumber": 14,
+    "title": "Aula 14: Segmentação de Dados (Slicers) e Filtros Interativos",
+    "module": "Módulo 6: Tabelas, Interatividade e Filtros Dinâmicos",
+    "duration": "26 min",
+    "summary": "Aprenda a transformar filtros tradicionais em botões visuais interativos modernos com a Segmentação de Dados (Slicers) em Tabelas e Tabelas Dinâmicas, permitindo seleções múltiplas e layouts executivos.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/0zywbT1qHlY",
+    "videoTitle": "Aula 15 - Segmentação de Dados - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "O que é uma Segmentação de Dados e sua superioridade sobre filtros convencionais",
+      "Inserção de Slicers em Tabelas Oficiais e Tabelas Dinâmicas",
+      "Configuração visual: estilos, quantidade de colunas, altura e largura dos botões",
+      "Multisseleção com Ctrl e botão Limpar Filtros (Alt + C)"
     ],
-    theoryContent: {
-      introduction: 'Muitas pessoas pensam que apenas colocar bordas pretas em células já cria uma "tabela" no Excel. Isso é apenas um intervalo formatado. Quando você clica em "Formatar como Tabela" (ou usa o atalho Ctrl + T), o Excel transforma aquele bloco de dados em um Objeto Tabela estruturado. Isso significa que ao adicionar uma nova linha, todas as fórmulas, formatações e regras se expandem sozinhas sem você precisar fazer nada.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "O filtro tradicional com a setinha cinza no cabeçalho da coluna é funcional, mas pouco atraente em apresentações executivas. A Segmentação de Dados (Slicer) substitui essa experiência por botões visuais interativos semelhantes aos de aplicativos modernos: ao clicar em um botão, toda a tabela ou dashboard é filtrada instantaneamente com transição suave.",
+      "keyConcepts": [
         {
-          title: 'Referências Estruturadas',
-          description: 'Em vez de referências crípticas como =C2*D2, as Tabelas utilizam nomes semânticos como =[@Preço] * [@Quantidade]. Isso torna a leitura da fórmula extremamente profissional e intuitiva.',
-          formulaOrExample: '=[@Nota1] * 0,4 + [@Nota2] * 0,6'
+          "title": "O que é a Segmentação de Dados (Slicer)",
+          "description": "Um componente visual flutuante composto por botões que representam os valores únicos de uma coluna da sua tabela (ex: nomes de cursos, cidades, status de matrículas ou anos)."
         },
         {
-          title: 'Expansão Dinâmica',
-          description: 'Ao digitar um novo registro imediatamente na linha de baixo ou pressionar a tecla Tab na última célula, a tabela cresce automaticamente incorporando as cores, fórmulas e validações.',
-          formulaOrExample: 'Não é necessário arrastar fórmulas manualmente!'
+          "title": "Como Inserir Slicers",
+          "description": "Selecione qualquer célula da sua Tabela Oficial (ou Tabela Dinâmica), vá na guia \"Inserir\" ou na guia \"Design da Tabela\" e clique em \"Inserir Segmentação de Dados\". Marque as colunas desejadas e clique em OK."
         },
         {
-          title: 'Segmentação de Dados (Slicers)',
-          description: 'Botões visuais e elegantes que funcionam como filtros de um clique. Ao clicar no botão "Informática", a tabela inteira é filtrada instantaneamente sem precisar abrir o menu do cabeçalho.',
-          formulaOrExample: 'Design da Tabela > Inserir Segmentação de Dados'
+          "title": "Personalização do Layout dos Botões",
+          "description": "Ao clicar no painel do segmentador, surge a guia \"Segmentação de Dados\". Nela você pode configurar a quantidade de colunas (transformando uma lista vertical em uma barra horizontal de botões elegantes) e escolher estilos de cores vibrantes ou discretas."
+        },
+        {
+          "title": "Interatividade e Multisseleção",
+          "description": "Clique em um botão para filtrar apenas aquele item. Segure a tecla Ctrl para selecionar mais de uma opção ao mesmo tempo. Use o botão no canto superior direito do segmentador para limpar todos os filtros."
         }
       ],
-      stepByStep: [
-        'Clique em qualquer célula dentro da sua base de dados.',
-        'Pressione o atalho Ctrl + T.',
-        'Marque a caixa "Minha tabela tem cabeçalhos" e clique em OK.',
-        'Na nova guia que surge no topo (Design da Tabela), marque a opção "Linha de Totais".',
-        'Clique em "Inserir Segmentação de Dados", marque a coluna Curso e Turno e organize os botões na tela.'
+      "stepByStep": [
+        "Certifique-se de que sua base de dados já está convertida em Tabela Oficial (Ctrl + Alt + T).",
+        "Com a tabela selecionada, vá na guia \"Inserir\" -> \"Segmentação de Dados\".",
+        "Marque as caixas \"Curso\" e \"Status\" e clique em OK.",
+        "Posicione os dois painéis de segmentação lado a lado acima da tabela.",
+        "Selecione a segmentação de \"Curso\", vá na guia superior Segmentação e altere o número de Colunas para 3 ou 4 para dispor os botões horizontalmente.",
+        "Clique sobre o curso \"Informática\" e veja a tabela filtrar em tempo real!"
       ],
-      keyboardShortcuts: [
-        { keys: 'Ctrl + T', action: 'Converter o intervalo atual em Objeto Tabela Estruturada' },
-        { keys: 'Ctrl + Shift + L', action: 'Ligar ou desligar os botões de filtro no cabeçalho' },
-        { keys: 'Alt + Seta Abaixo', action: 'Abrir as opções de filtro e classificação da coluna selecionada' },
-        { keys: 'Tab', action: 'Na última célula da tabela, cria uma nova linha formatada automaticamente' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Alt + C",
+          "action": "Limpa os filtros aplicados dentro da segmentação de dados selecionada"
+        },
+        {
+          "keys": "Ctrl + Clique",
+          "action": "Seleciona múltiplos botões na segmentação de dados"
+        },
+        {
+          "keys": "Shift + Clique",
+          "action": "Seleciona um intervalo contínuo de botões na segmentação"
+        }
       ],
-      proTip: 'Sempre dê um nome significativo para sua tabela na guia Design da Tabela (ex: TabelaAlunos ou BaseVendas). Isso facilita chamar essa tabela diretamente em fórmulas como =PROCV(A2; TabelaAlunos; 3; 0)!',
-      commonErrors: 'Deixar linhas ou colunas totalmente em branco no meio do intervalo, fazendo o Excel cortar a tabela pela metade ao apertar Ctrl + T.'
+      "proTip": "Em dashboards corporativos, organize suas segmentações de dados no topo ou em uma coluna lateral esquerda, com botões bem dimensionados e cores coordenadas com o tema da sua planilha. Isso entrega uma experiência digna de software sob medida!",
+      "commonErrors": "Tentar inserir Segmentação de Dados em um intervalo simples de células que não foi transformado previamente em Tabela Oficial ou em Tabela Dinâmica."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 1401,
-        question: 'Qual é o atalho de teclado para converter um intervalo comum em uma Tabela Estruturada oficial no Excel?',
-        options: ['Ctrl + T', 'Ctrl + B', 'Ctrl + N', 'Ctrl + Shift + T'],
-        correctIndex: 0,
-        explanation: 'Ctrl + T (Tabela) converte o intervalo selecionado em um objeto de Tabela oficial.'
-      },
-      {
-        id: 1402,
-        question: 'O que é uma "Coluna Calculada Automática" em uma Tabela do Excel?',
-        options: [
-          'Um cálculo feito pela inteligência artificial sem você digitar nada',
-          'Quando você digita a fórmula na primeira linha, a tabela replica o cálculo automaticamente para todas as outras linhas',
-          'Uma coluna que só aceita números primos',
-          'Um erro do sistema'
+        "id": 1401,
+        "question": "O que é a \"Segmentação de Dados\" (Slicer) no Microsoft Excel?",
+        "options": [
+          "Uma ferramenta para cortar a planilha em duas partes",
+          "Um filtro visual interativo através de botões modernos que facilitam a filtragem de dados com um clique",
+          "Uma função matemática para calcular raízes cúbicas",
+          "Um vírus de computador"
         ],
-        correctIndex: 1,
-        explanation: 'Tabelas estruturadas propagam a fórmula digitada em uma célula para toda a coluna instantaneamente.'
+        "correctIndex": 1,
+        "explanation": "A Segmentação de Dados cria botões visuais intuitivos para filtrar dados com agilidade."
       },
       {
-        id: 1403,
-        question: 'Qual é o nome dado aos botões visuais interativos que permitem filtrar tabelas e relatórios com apenas um clique?',
-        options: ['Segmentação de Dados (Slicers)', 'Macro Botões', 'Filtro Solar', 'Gatilhos'],
-        correctIndex: 0,
-        explanation: 'Segmentação de Dados (Slicers) cria botões clicáveis elegantes para filtragem instantânea.'
-      },
-      {
-        id: 1404,
-        question: 'O que acontece ao pressionar a tecla Tab enquanto estiver na última célula da última linha de uma Tabela do Excel?',
-        options: [
-          'A tabela é excluída',
-          'Uma nova linha em branco é inserida e formatada automaticamente na tabela',
-          'O cursor vai para a célula A1',
-          'O arquivo é salvo'
+        "id": 1402,
+        "question": "Em quais estruturas de dados do Excel a Segmentação de Dados pode ser inserida diretamente?",
+        "options": [
+          "Em qualquer célula de texto avulsa",
+          "Apenas em planilhas salvas como PDF",
+          "Apenas em gráficos 3D",
+          "Em Tabelas Oficiais do Excel e em Tabelas Dinâmicas"
         ],
-        correctIndex: 1,
-        explanation: 'Pressionar Tab no fim de uma tabela expande a estrutura adicionando uma nova linha pronta para digitação.'
+        "correctIndex": 3,
+        "explanation": "Slicers operam nativamente sobre Tabelas Oficiais e Tabelas Dinâmicas."
       },
       {
-        id: 1405,
-        question: 'Como são chamadas as fórmulas escritas com os nomes das colunas da tabela (ex: =[@Valor]*[@Qtd])?',
-        options: ['Referências Estruturadas', 'Fórmulas Secretas', 'Expressões Numéricas', 'Códigos Binários'],
-        correctIndex: 0,
-        explanation: 'Referências estruturadas substituem endereços de células pelos nomes reais dos cabeçalhos da tabela.'
-      },
-      {
-        id: 1406,
-        question: 'O que o recurso "Linha de Totais" da Tabela oficial permite fazer?',
-        options: [
-          'Adiciona uma linha no rodapé com menus suspensos para calcular Soma, Média, Contagem ou Máximo dos dados filtrados',
-          'Apaga os dados duplicados',
-          'Calcula a conta bancária do usuário',
-          'Muda a cor do cabeçalho'
+        "id": 1403,
+        "question": "Como selecionar dois ou mais botões simultaneamente em uma segmentação de dados?",
+        "options": [
+          "Segurando a tecla Ctrl enquanto clica nos botões desejados",
+          "Pressionando a barra de espaço três vezes",
+          "Dando um soco no teclado",
+          "Fechando o Excel"
         ],
-        correctIndex: 0,
-        explanation: 'A Linha de Totais aplica funções subtotais dinâmicas que recalculam apenas as linhas visíveis.'
+        "correctIndex": 0,
+        "explanation": "A tecla Ctrl permite a multisseleção de filtros não adjacentes."
       },
       {
-        id: 1407,
-        question: 'O que a função SUBTOTAL faz de diferente em relação à função SOMA tradicional?',
-        options: [
-          'Ela ignora linhas ocultas por filtros, somando apenas os dados que estão visíveis na tela',
-          'Ela soma de trás para frente',
-          'Ela divide por dois',
-          'Ela só soma números ímpares'
+        "id": 1404,
+        "question": "Como dispor os botões de uma segmentação de dados em formato horizontal em vez de uma coluna vertical comprida?",
+        "options": [
+          "Girar a tela do monitor",
+          "Aumentar o zoom do navegador",
+          "Na guia Segmentação, alterar o número de \"Colunas\" para 2, 3 ou mais",
+          "Não é possível mudar a orientação dos botões"
         ],
-        correctIndex: 0,
-        explanation: 'SUBTOTAL respeita os filtros aplicados, desconsiderando linhas que foram temporariamente ocultadas.'
+        "correctIndex": 2,
+        "explanation": "O ajuste de \"Colunas\" divide os botões em múltiplas colunas horizontais elegantes."
       },
       {
-        id: 1408,
-        question: 'Onde podemos alterar o nome padrão da tabela (ex: de Tabela1 para "Matrículas2026")?',
-        options: [
-          'Na guia Design da Tabela, no campo "Nome da Tabela" no canto esquerdo',
-          'No Painel de Controle do Windows',
-          'Na Barra de Status',
-          'No botão Iniciar'
+        "id": 1405,
+        "question": "Qual atalho de teclado limpa os filtros da segmentação selecionada de volta para mostrar tudo?",
+        "options": [
+          "Ctrl + W",
+          "Alt + C",
+          "Shift + Del",
+          "F2"
         ],
-        correctIndex: 0,
-        explanation: 'Na guia contextual Design da Tabela, no canto esquerdo, fica a caixa com o nome da tabela.'
+        "correctIndex": 1,
+        "explanation": "Alt + C limpa instantaneamente a filtragem daquele segmentador ativo."
       },
       {
-        id: 1409,
-        question: 'Qual atalho liga ou desliga rapidamente as setinhas de filtro no cabeçalho das colunas?',
-        options: ['Ctrl + Shift + L', 'Ctrl + F', 'Alt + F4', 'Ctrl + P'],
-        correctIndex: 0,
-        explanation: 'Ctrl + Shift + L ativa e desativa os botões de autofiltro na planilha.'
-      },
-      {
-        id: 1410,
-        question: 'É possível converter uma Tabela estruturada de volta para um intervalo normal de células se for necessário?',
-        options: [
-          'Não, o processo é irreversível',
-          'Sim, clicando no botão "Converter em Intervalo" na guia Design da Tabela',
-          'Apenas reinstalando o Excel',
-          'Apenas colando no Bloco de Notas'
+        "id": 1406,
+        "question": "O que acontece visualmente com botões cujos dados não possuem nenhum registro correspondente devido a outro filtro ativo?",
+        "options": [
+          "Eles ficam desbotados (opacos/cinzas), indicando que não há itens disponíveis com aquela combinação",
+          "Os botões explodem",
+          "O Excel apaga os botões permanentemente",
+          "O computador trava"
         ],
-        correctIndex: 1,
-        explanation: 'O comando "Converter em Intervalo" desfaz a estrutura da tabela preservando dados e formatação.'
+        "correctIndex": 0,
+        "explanation": "A segmentação desbota visualmente opções que não possuem registros correspondentes na filtragem atual."
+      },
+      {
+        "id": 1407,
+        "question": "Onde fica localizado o botão \"Inserir Segmentação de Dados\" na Faixa de Opções?",
+        "options": [
+          "Na Guia Revisão",
+          "Na Guia Ajuda",
+          "Na Barra de Status",
+          "Na Guia Inserir, grupo Filtros"
+        ],
+        "correctIndex": 3,
+        "explanation": "Está situado na guia Inserir (no grupo Filtros) e também na guia contextual Design da Tabela."
+      },
+      {
+        "id": 1408,
+        "question": "É possível aplicar estilos de cores personalizados na segmentação para harmonizar com a empresa?",
+        "options": [
+          "Não, os botões só podem ser cinzas",
+          "Apenas se você souber programar em C++",
+          "Sim, através da galeria de Estilos de Segmentação de Dados na guia dedicada",
+          "Apenas na versão paga para smartphones"
+        ],
+        "correctIndex": 2,
+        "explanation": "A guia Segmentação oferece dezenas de estilos e permite criar temas de cores personalizados."
+      },
+      {
+        "id": 1409,
+        "question": "Para que serve o recurso \"Conexões de Relatório\" de uma Segmentação de Dados?",
+        "options": [
+          "Para conectar a mesma segmentação a múltiplas Tabelas Dinâmicas simultaneamente",
+          "Para conectar a impressora ao Wi-Fi",
+          "Para enviar relatórios por correio",
+          "Para criar um gráfico de pizza"
+        ],
+        "correctIndex": 0,
+        "explanation": "Conexões de Relatório vinculam um único conjunto de botões a vários relatórios e gráficos ao mesmo tempo."
+      },
+      {
+        "id": 1410,
+        "question": "Qual é o impacto de usar Segmentações de Dados na experiência de um gestor que analisa a planilha?",
+        "options": [
+          "Deixa o gestor confuso",
+          "Torna a navegação rápida, amigável e acessível mesmo para quem não domina filtros avançados do Excel",
+          "Impossibilita salvar o arquivo",
+          "Aumenta o tamanho do arquivo em 10 Gigabytes"
+        ],
+        "correctIndex": 1,
+        "explanation": "Slicers trazem usabilidade executiva de ponta e facilidade absoluta de análise gerencial."
       }
     ]
   },
   {
-    id: 15,
-    lessonNumber: 15,
-    title: 'Tabelas Dinâmicas (Pivot Tables) e Gráficos Dinâmicos',
-    module: 'Módulo 4: Gerenciamento, Relatórios e Automação',
-    duration: '38 min',
-    summary: 'A ferramenta de inteligência analítica mais poderosa do Excel. Resuma centenas de milhares de linhas em segundos sem escrever nenhuma fórmula.',
-    videoUrl: 'https://www.youtube.com/embed/LqE-jU9y9XQ',
-    videoTitle: 'Aula 15: Tabelas Dinâmicas do Zero ao Avançado no Excel',
-    videoHighlights: [
-      'Os 4 quadrantes da Tabela Dinâmica: Filtros, Colunas, Linhas e Valores',
-      'Agrupamento automático de datas por Mês, Trimestre e Ano',
-      'Cálculos avançados: % do Total Geral e Variação Percentual',
-      'Criação de Gráficos Dinâmicos conectados'
+    "id": 15,
+    "lessonNumber": 15,
+    "title": "Aula 15: Gráficos Essenciais (Colunas, Barras, Linhas e Pizza)",
+    "module": "Módulo 7: Visualização Gráfica de Dados",
+    "duration": "28 min",
+    "summary": "Aprenda os princípios da comunicação visual de dados: escolha o tipo ideal de gráfico (Colunas, Barras, Linhas e Pizza/Rosca), domine títulos, eixos, rótulos de dados e o atalho instantâneo Alt + F1.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/RFZN-Sacvdg",
+    "videoTitle": "Aula 16 - Gráficos Parte 1 - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "Princípios de storytelling e escolha do tipo de gráfico correto",
+      "Gráficos de Colunas vs. Barras (quando usar cada um)",
+      "Gráficos de Linhas para tendências no tempo e Gráficos de Pizza/Rosca para proporções",
+      "Anatomia completa de um gráfico profissional e atalho instantâneo Alt + F1"
     ],
-    theoryContent: {
-      introduction: 'Se uma base de dados possui 50.000 linhas de vendas, tentar responder "Qual curso teve mais matrículas no primeiro trimestre?" usando fórmulas exigiria dezenas de SOMASES e CONT.SES complexos. A Tabela Dinâmica (Pivot Table) faz isso em menos de 5 segundos através do sistema de arrastar e soltar campos.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "Tabelas repletas de números são excelentes para armazenar informações, mas são lentas para tomada de decisão. Gráficos transformam esses dados em histórias visuais instantâneas. Aprender qual gráfico escolher para cada situação é a diferença entre um relatório que convence a diretoria e um que causa confusão.",
+      "keyConcepts": [
         {
-          title: 'Os 4 Quadrantes Analíticos',
-          description: '1. Linhas: categorias que aparecem na vertical. 2. Colunas: categorias na horizontal (cruzamento matricial). 3. Valores: campos numéricos para somar, contar ou tirar média. 4. Filtros: segmentação geral do relatório.',
-          formulaOrExample: 'Linhas: Curso | Valores: Contagem de Alunos'
+          "title": "Gráfico de Colunas vs. Barras",
+          "description": "Gráfico de Colunas (vertical): ideal para comparar categorias distintas ou séries temporais curtas (meses). Gráfico de Barras (horizontal): indispensável quando os nomes das categorias são longos (ex: nomes de cursos técnicos ou departamentos) e para exibir rankings (do maior para o menor)."
         },
         {
-          title: 'Mostrar Valores Como (% do Total)',
-          description: 'Clicando com o botão direito no valor numérico > "Mostrar Valores Como", você transforma totais brutos em participações percentuais relativas (% do Total Geral ou % da Linha Pai).',
-          formulaOrExample: 'Ex: Informática representa 38,5% do total da escola'
+          "title": "Gráfico de Linhas",
+          "description": "Projetado especificamente para mostrar evolução e tendência contínua ao longo do tempo (dias, semanas, meses, trimestres ou anos)."
         },
         {
-          title: 'O Botão Atualizar (Alt + F5)',
-          description: 'Diferente das fórmulas normais, as Tabelas Dinâmicas gravam um cache de memória. Se você alterar ou adicionar dados na tabela original, deve obrigatoriamente clicar com o botão direito e selecionar "Atualizar" para refletir as mudanças.',
-          formulaOrExample: 'Atalho para atualizar: Alt + F5'
+          "title": "Gráfico de Pizza ou Rosca",
+          "description": "Mostra a relação entre as partes e um todo (100%). Regra de ouro corporativa: use apenas se houver no máximo 4 ou 5 categorias e quando as fatias tiverem diferenças expressivas de proporção."
+        },
+        {
+          "title": "Anatomia do Gráfico",
+          "description": "Título do Gráfico (objetivo e informativo), Eixos (Horizontal X e Vertical Y), Linhas de Grade (devem ser discretas), Rótulos de Dados (valores sobre as colunas) e Legenda."
         }
       ],
-      stepByStep: [
-        'Clique em qualquer célula da sua base de dados (de preferência já formatada como Tabela Ctrl + T).',
-        'Vá até a guia Inserir > Tabela Dinâmica > Da Tabela/Intervalo.',
-        'Escolha "Nova Planilha" e clique em OK.',
-        'No painel direito "Campos da Tabela Dinâmica", arraste "Curso" para o quadrante Linhas.',
-        'Arraste "Mensalidade" para o quadrante Valores (o Excel aplicará Soma de Mensalidade).',
-        'Arraste "Turno" para Colunas para cruzar os dados.',
-        'Na guia Inserir, clique em "Gráfico Dinâmico" para gerar um gráfico interativo simultâneo.'
+      "stepByStep": [
+        "Selecione as colunas de \"Curso\" e \"Média de Notas\" da sua tabela.",
+        "Pressione o atalho Alt + F1 para que o Excel gere instantaneamente um gráfico de colunas padrão na mesma planilha.",
+        "Clique no título do gráfico e digite um título claro: \"Média de Desempenho por Curso - CETEP 2026\".",
+        "Clique no botão verde de \"+\" no canto do gráfico (\"Elementos do Gráfico\") e ative \"Rótulos de Dados\".",
+        "Clique com o botão direito sobre qualquer coluna e selecione \"Formatar Série de Dados\" para reduzir a \"Largura do Espaçamento\" para 80% a 100%, deixando as colunas mais elegantes e encorpadas."
       ],
-      keyboardShortcuts: [
-        { keys: 'Alt + F5', action: 'Atualizar a Tabela Dinâmica ativa' },
-        { keys: 'Ctrl + Alt + F5', action: 'Atualizar TODAS as tabelas dinâmicas e conexões da pasta de trabalho' },
-        { keys: 'F11', action: 'Criar um gráfico dinâmico em uma folha exclusiva instantaneamente' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Alt + F1",
+          "action": "Cria instantaneamente um gráfico de colunas padrão incorporado na planilha ativa"
+        },
+        {
+          "keys": "F11",
+          "action": "Cria instantaneamente um gráfico em uma nova aba exclusiva dedicada a gráficos"
+        },
+        {
+          "keys": "Ctrl + 1 (com gráfico selecionado)",
+          "action": "Abre o painel lateral completo \"Formatar Gráfico\""
+        }
       ],
-      proTip: 'Sempre crie sua Tabela Dinâmica a partir de uma Tabela Estruturada (Ctrl + T). Assim, quando novas linhas entrarem na base no mês que vem, basta clicar em "Atualizar" que a Tabela Dinâmica captará tudo automaticamente sem precisar alterar o intervalo de origem!',
-      commonErrors: 'Alterar valores na planilha de dados e esquecer de clicar em "Atualizar" na Tabela Dinâmica, apresentando números desatualizados em reuniões.'
+      "proTip": "Evite gráficos em 3D (tridimensionais com efeito de sombra)! O 3D distorce a percepção ótica das proporções das fatias e colunas, prejudicando a interpretação matemática correta dos dados pelo espectador.",
+      "commonErrors": "Criar gráficos de pizza com 15 fatias minúsculas e cores parecidas, tornando impossível distinguir os dados sem esforço visual excessivo."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 1501,
-        question: 'Qual é a principal finalidade de uma Tabela Dinâmica (Pivot Table) no Excel?',
-        options: [
-          'Digitar textos longos',
-          'Resumir, agrupar, cruzar e analisar grandes volumes de dados de forma rápida e sem fórmulas manuais',
-          'Criar planilhas que se autodestroem',
-          'Fazer animações em 3D'
+        "id": 1501,
+        "question": "Qual atalho de teclado no Excel gera um gráfico de colunas padrão instantaneamente na planilha atual a partir dos dados selecionados?",
+        "options": [
+          "Ctrl + G",
+          "F5",
+          "Ctrl + Shift + G",
+          "Alt + F1"
         ],
-        correctIndex: 1,
-        explanation: 'Tabelas Dinâmicas são o principal recurso de Business Intelligence e síntese analítica do Excel.'
+        "correctIndex": 3,
+        "explanation": "O atalho Alt + F1 cria de forma instantânea um gráfico na mesma planilha."
       },
       {
-        id: 1502,
-        question: 'Quais são os 4 quadrantes fundamentais do painel de Campos da Tabela Dinâmica?',
-        options: [
-          'Norte, Sul, Leste e Oeste',
-          'Filtros, Colunas, Linhas e Valores',
-          'Entrada, Processamento, Memória e Saída',
-          'Soma, Média, Máximo e Mínimo'
+        "id": 1502,
+        "question": "O que acontece se você pressionar a tecla F11 com os dados da tabela selecionados?",
+        "options": [
+          "O Excel fecha o arquivo",
+          "O gráfico é criado em uma nova aba de planilha dedicada exclusivamente a ele",
+          "A tabela é impressa em papel",
+          "O monitor entra em modo descanso"
         ],
-        correctIndex: 1,
-        explanation: 'Os 4 quadrantes são: Filtros, Colunas, Linhas e Valores.'
+        "correctIndex": 1,
+        "explanation": "A tecla F11 gera o gráfico em uma aba própria de gráfico (Chart Sheet)."
       },
       {
-        id: 1503,
-        question: 'O que deve ser feito na Tabela Dinâmica após adicionar ou alterar dados na base de dados de origem?',
-        options: [
-          'Reiniciar o computador',
-          'Clicar com o botão direito e escolher "Atualizar" (ou pressionar Alt + F5)',
-          'Excluir o Excel',
-          'Salvar com outro nome'
+        "id": 1503,
+        "question": "Qual tipo de gráfico é o mais recomendado para demonstrar a evolução de notas ou faturamento ao longo dos 12 meses do ano?",
+        "options": [
+          "Gráfico de Pizza 3D",
+          "Gráfico de Radar",
+          "Gráfico de Linhas",
+          "Gráfico de Dispersão pura"
         ],
-        correctIndex: 1,
-        explanation: 'Tabelas Dinâmicas utilizam cache e precisam ser atualizadas (Refresh / Alt + F5) para ler novos dados.'
+        "correctIndex": 2,
+        "explanation": "Gráficos de Linhas são os mais indicados para acompanhar continuidade e tendências no tempo."
       },
       {
-        id: 1504,
-        question: 'O que o Excel faz por padrão quando você arrasta um campo que contém TEXTO para o quadrante de Valores?',
-        options: [
-          'Aplica a função SOMA',
-          'Aplica automaticamente a função CONTAGEM',
-          'Gera um erro de sintaxe',
-          'Apaga o texto'
+        "id": 1504,
+        "question": "Quando o Gráfico de Barras horizontais é preferível em relação ao de Colunas verticais?",
+        "options": [
+          "Quando os rótulos de texto das categorias são extensos (ex: nomes compridos de cursos) ou para rankings",
+          "Apenas aos domingos",
+          "Nunca, barras horizontais são proibidas",
+          "Apenas para números negativos"
         ],
-        correctIndex: 1,
-        explanation: 'Como textos não podem ser somados, o Excel adota nativamente a Contagem como operação padrão.'
+        "correctIndex": 0,
+        "explanation": "Barras horizontais oferecem amplo espaço para a leitura linear de nomes extensos de categorias."
       },
       {
-        id: 1505,
-        question: 'Qual atalho de teclado atualiza TODAS as tabelas dinâmicas da pasta de trabalho simultaneamente?',
-        options: ['Ctrl + Alt + F5', 'Ctrl + S', 'Shift + Esc', 'Alt + F4'],
-        correctIndex: 0,
-        explanation: 'Ctrl + Alt + F5 executa o comando "Atualizar Tudo" em toda a pasta de trabalho.'
+        "id": 1505,
+        "question": "Qual é a boa prática recomendada para o uso de Gráficos de Pizza ou Rosca?",
+        "options": [
+          "Usar sempre com mais de 20 categorias",
+          "Usar apenas efeito 3D inclinado",
+          "Limitar o uso a no máximo 4 a 5 categorias para não poluir a compreensão do todo (100%)",
+          "Colocar todas as fatias da mesma cor"
+        ],
+        "correctIndex": 2,
+        "explanation": "Gráficos circulares só funcionam bem visualmente com poucas fatias e proporções contrastantes."
       },
       {
-        id: 1506,
-        question: 'O que o recurso "Mostrar Valores Como > % do Total Geral" faz nos números da Tabela Dinâmica?',
-        options: [
-          'Acrescenta 10% de imposto em todas as células',
-          'Converte os valores absolutos na porcentagem que cada linha representa em relação ao todo (100%)',
-          'Multiplica todos os números por 100',
-          'Esconde os valores'
+        "id": 1506,
+        "question": "Para que servem os \"Rótulos de Dados\" em um gráfico?",
+        "options": [
+          "Para mudar o nome do arquivo",
+          "Para criar links para a internet",
+          "Para desenhar bordas na tela",
+          "Para exibir o valor numérico exato no topo de cada coluna ou ponto do gráfico"
         ],
-        correctIndex: 1,
-        explanation: 'Ele calcula a proporção percentual que cada item tem sobre o total global da tabela.'
+        "correctIndex": 3,
+        "explanation": "Rótulos de dados mostram a grandeza exata diretamente sobre as barras, dispensando a leitura visual no eixo."
       },
       {
-        id: 1507,
-        question: 'Como agrupar um campo de datas na Tabela Dinâmica para visualizar os dados consolidados por Mês ou Trimestre?',
-        options: [
-          'Clicar com o botão direito em uma data dentro da Tabela Dinâmica e selecionar a opção "Agrupar"',
-          'Digitar as datas uma a uma à mão',
-          'Excluir as colunas de dias',
-          'Mudar o fuso horário'
+        "id": 1507,
+        "question": "Por que profissionais de dados e finanças evitam gráficos com efeitos 3D (tridimensionais)?",
+        "options": [
+          "Porque o Excel cobra taxa extra por 3D",
+          "Porque a perspectiva 3D distorce a percepção visual do tamanho real dos dados",
+          "Porque não cabem na folha A4",
+          "Porque não funcionam em computadores comuns"
         ],
-        correctIndex: 0,
-        explanation: 'A ferramenta "Agrupar" agrupa instantaneamente datas em Anos, Trimestres, Meses ou Dias.'
+        "correctIndex": 1,
+        "explanation": "O ângulo de inclinação 3D engana o cérebro humano sobre as proporções reais dos dados."
       },
       {
-        id: 1508,
-        question: 'Um Gráfico Dinâmico conectado a uma Tabela Dinâmica se comporta de que maneira?',
-        options: [
-          'Ele é totalmente fixo e estático',
-          'Ele se atualiza e reflete instantaneamente qualquer filtro ou agrupamento feito na Tabela Dinâmica',
-          'Ele só pode ser visto com óculos 3D',
-          'Ele não aceita legendas'
+        "id": 1508,
+        "question": "Onde você clica para adicionar ou remover rapidamente elementos como Linhas de Grade, Legenda e Título no gráfico?",
+        "options": [
+          "No botão flutuante com o símbolo de \"+\" (Elementos do Gráfico) ao lado do gráfico selecionado",
+          "Na Barra de Status",
+          "No Painel de Controle do Windows",
+          "No menu Ajuda"
         ],
-        correctIndex: 1,
-        explanation: 'O Gráfico Dinâmico é interativo e sincronizado em tempo real com a Tabela Dinâmica correspondente.'
+        "correctIndex": 0,
+        "explanation": "O botão de \"+\" permite ativar e desativar componentes do gráfico de forma prática."
       },
       {
-        id: 1509,
-        question: 'Por que é uma boa prática construir Tabelas Dinâmicas a partir de Tabelas Oficiais (Ctrl + T)?',
-        options: [
-          'Porque a Tabela Dinâmica reconhece automaticamente novas linhas inseridas na base sem precisar redefinir o intervalo',
-          'Porque o arquivo fica protegido contra hackers',
-          'Porque o Excel não permite fazer de outra forma',
-          'Porque gasta menos bateria'
+        "id": 1509,
+        "question": "O que o ajuste de \"Largura do Espaçamento\" faz nas propriedades de um Gráfico de Colunas?",
+        "options": [
+          "Muda a resolução do monitor",
+          "Aumenta o tamanho da fonte do título",
+          "Altera a velocidade do mouse",
+          "Controla o espaço vazio entre uma coluna e outra, tornando as colunas mais largas ou mais finas"
         ],
-        correctIndex: 0,
-        explanation: 'O dinamismo da tabela oficial expande a fonte de dados da tabela dinâmica de forma transparente.'
+        "correctIndex": 3,
+        "explanation": "Reduzir a largura do espaçamento alarga as colunas, conferindo um visual corporativo moderno."
       },
       {
-        id: 1510,
-        question: 'Para retirar um campo que foi colocado por engano em um quadrante da Tabela Dinâmica, basta:',
-        options: [
-          'Desinstalar o Microsoft Office',
-          'Arrastar o campo para fora do painel ou desmarcar sua caixa de seleção na lista',
-          'Pressionar a tecla Esc 10 vezes',
-          'Fechar a tampa do notebook'
+        "id": 1510,
+        "question": "Se você alterar um número na tabela que alimenta o gráfico, o que acontece com a coluna correspondente no gráfico?",
+        "options": [
+          "O gráfico é deletado",
+          "O usuário precisa recriar o gráfico do zero",
+          "O gráfico atualiza sua altura imediatamente em tempo real",
+          "Nada muda até o próximo ano"
         ],
-        correctIndex: 1,
-        explanation: 'Basta arrastar o campo para fora da área dos quadrantes para removê-lo da visualização.'
+        "correctIndex": 2,
+        "explanation": "Gráficos do Excel são dinamicamente conectados às células de origem e se recalculam em tempo real."
       }
     ]
   },
   {
-    id: 16,
-    lessonNumber: 16,
-    title: 'Dashboards Executivos, Gráficos Modernos e Noções de Macros',
-    module: 'Módulo 4: Gerenciamento, Relatórios e Automação',
-    duration: '42 min',
-    summary: 'Construção de painéis profissionais de controle (KPIs), design sem linhas de grade, gráficos combinados e gravação de sua primeira Macro.',
-    videoUrl: 'https://www.youtube.com/embed/5T5uQk67f1k',
-    videoTitle: 'Aula 16: Criando um Dashboard Executivo e Automação no Excel',
-    videoHighlights: [
-      'Princípios de UI/UX em Dashboards (limpeza visual e contraste)',
-      'Cartões de Indicadores Chave (KPIs) com formas e valores vinculados',
-      'Gráficos Combinados (Colunas com Eixo Secundário de Linha)',
-      'Gravação da Primeira Macro VBA para automação de tarefas rotineiras'
+    "id": 16,
+    "lessonNumber": 16,
+    "title": "Aula 16: Gráficos Avançados (Combinação, Eixo Secundário e Sparklines)",
+    "module": "Módulo 7: Visualização Gráfica de Dados",
+    "duration": "29 min",
+    "summary": "Aprenda a construir Gráficos Combinados (Colunas + Linhas com Eixo Secundário), Linhas de Tendência com projeções e Minigráficos (Sparklines) embutidos dentro de células individuais.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/ytgxP6amJhs",
+    "videoTitle": "Aula 17 - Gráficos Parte 2 - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "Gráficos Combinados (Combo Charts): Coluna e Linha juntos",
+      "Configuração do Eixo Secundário para métricas de escalas distintas (R$ vs %)",
+      "Minigráficos (Sparklines): tendências compactas direto na célula",
+      "Linhas de Tendência e formatação avançada para relatórios gerenciais"
     ],
-    theoryContent: {
-      introduction: 'O ápice da jornada no Excel é a entrega de valor através de Dashboards Executivos e automações. Um Dashboard é uma tela única que resume os indicadores mais cruciais de um negócio ou instituição (como notas, frequência, custos e metas) permitindo aos gestores tomar decisões em segundos. Finalizaremos explorando como gravar Macros para automatizar tarefas repetitivas.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "Muitas análises de negócios envolvem comparar métricas com ordens de grandeza completamente distintas no mesmo período: por exemplo, comparar a Receita Bruta (na casa dos milhões de reais) com a Margem de Lucro (uma porcentagem entre 5% e 30%). Se colocados na mesma escala, o percentual parecerá uma linha colada no chão. A solução profissional para isso é o Gráfico Combinado com Eixo Secundário.",
+      "keyConcepts": [
         {
-          title: 'Design Limpo (Ocultar Linhas de Grade)',
-          description: 'A primeira regra de ouro de um Dashboard profissional é ir na guia Exibir e desmarcar a opção "Linhas de Grade". Um fundo limpo (branco ou cinza suave #F8FAFC) com cartões brancos e sombras discretas cria um aspecto moderno de aplicativo.',
-          formulaOrExample: 'Guia Exibir > Desmarcar "Linhas de Grade"'
+          "title": "Gráfico Combinado (Misto)",
+          "description": "Permite que diferentes séries de dados dentro do mesmo gráfico sejam representadas por tipos visuais diferentes: a série de faturamento é desenhada como Colunas agrupadas, enquanto a série de margem é desenhada como uma Linha com marcadores."
         },
         {
-          title: 'Cartões de KPI Dinâmicos',
-          description: 'Inserir uma forma (Retângulo com Cantos Arredondados), clicar na barra de fórmulas, digitar = e clicar na célula que contém o total calculado. O número no cartão passará a se atualizar sozinho.',
-          formulaOrExample: 'Forma selecionada > Barra de Fórmulas: =Resumo!$B$1'
+          "title": "Eixo Secundário",
+          "description": "Um segundo eixo vertical posicionado no lado direito do gráfico. O eixo esquerdo mede a grandeza monetária (R$), enquanto o eixo direito mede a grandeza percentual (%), garantindo clareza visual para ambas as séries."
         },
         {
-          title: 'Introdução a Macros e Gravador',
-          description: 'Uma Macro é uma sequência gravada de ações em código VBA (Visual Basic for Applications). Ao acionar o "Gravador de Macros", o Excel registra cada clique, filtro e formatação, permitindo repetir todo o trabalho instantaneamente ao apertar um botão.',
-          formulaOrExample: 'Guia Desenvolvedor > Gravar Macro (Salvar como .xlsm)'
+          "title": "Minigráficos (Sparklines)",
+          "description": "Localizados na guia Inserir -> Minigráficos (Linha, Coluna, Ganhos/Perdas). São minúsculos gráficos desenhados inteiramente dentro de uma única célula da planilha, ideais para tabelas densas com acompanhamento mês a mês."
+        },
+        {
+          "title": "Linha de Tendência (Trendline)",
+          "description": "Uma reta ou curva analítica projetada sobre os pontos do gráfico (linear, exponencial ou polinomial) que indica a direção do crescimento ou queda dos dados ao longo do tempo."
         }
       ],
-      stepByStep: [
-        'Crie uma nova planilha chamada "Dashboard".',
-        'Vá na guia Exibir e desmarque "Linhas de Grade" e "Títulos".',
-        'Crie um cabeçalho executivo no topo com o logotipo do CETEP e título do painel.',
-        'Insira 4 retângulos com cantos arredondados para exibir os 4 principais KPIs (Total de Alunos, Média Geral, Taxa de Aprovação, Evasão).',
-        'Insira um Gráfico de Colunas Dinâmico e conecte-o a uma Segmentação de Dados vinculada aos Cursos.',
-        'Para automatizar: vá na guia Desenvolvedor, clique em "Gravar Macro", realize a formatação e clique em "Parar Gravação".',
-        'Lembre-se de salvar a pasta de trabalho no formato especial "Pasta de Trabalho Habilitada para Macro do Excel (.xlsm)".'
+      "stepByStep": [
+        "Selecione sua tabela com as colunas Mês, Vendas (R$) e Margem (%).",
+        "Vá na guia \"Inserir\" -> \"Gráficos Recomendados\" -> aba \"Todos os Gráficos\" -> \"Combinação\".",
+        "Para a série Vendas, selecione o tipo \"Coluna Agrupada\".",
+        "Para a série Margem, selecione o tipo \"Linha\" e marque a caixa \"Eixo Secundário\". Clique em OK.",
+        "Para adicionar minigráficos: selecione a célula ao lado da série temporal, vá em Inserir -> Minigráficos -> Linha, selecione o intervalo dos meses e tecle Enter."
       ],
-      keyboardShortcuts: [
-        { keys: 'Alt + F11', action: 'Abrir o editor do Visual Basic (VBA) do Excel' },
-        { keys: 'Alt + F8', action: 'Exibir a lista de Macros disponíveis para executar' },
-        { keys: 'Ctrl + P', action: 'Visualizar impressão e exportação do Dashboard em PDF' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Alt + N + S + L",
+          "action": "Atalho para inserir Minigráfico de Linha na célula"
+        },
+        {
+          "keys": "Alt + N + S + C",
+          "action": "Atalho para inserir Minigráfico de Coluna na célula"
+        }
       ],
-      proTip: 'Ao trabalhar com arquivos que contêm Macros, NUNCA salve como .xlsx comum, pois o Excel removerá todo o código gravado! Escolha sempre o tipo "Pasta de Trabalho Habilitada para Macro do Excel (*.xlsm)".',
-      commonErrors: 'Poluir o dashboard com cores berrantes, 3D ou fontes ilegíveis. O bom dashboard prioriza a facilidade de leitura e a tomada de decisões ágil.'
+      "proTip": "Nos Minigráficos (Sparklines), ative a opção \"Ponto Alto\" e \"Ponto Baixo\" na guia Design do Minigráfico com cores contrastantes (ex: verde para o pico e vermelho para a queda). Isso entrega um resumo executivo instantâneo para quem bate o olho na tabela!",
+      "commonErrors": "Esquecer de habilitar o Eixo Secundário em um gráfico misto, fazendo com que a série de porcentagem ou de valores pequenos fique achatada no valor zero na base do gráfico."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 1601,
-        question: 'Qual é o primeiro passo visual recomendado para dar uma aparência profissional de painel/aplicativo a um Dashboard no Excel?',
-        options: [
-          'Pintar tudo de amarelo fluorescente',
-          'Ir na guia Exibir e desmarcar a opção "Linhas de Grade"',
-          'Instalar jogos no computador',
-          'Aumentar o zoom para 400%'
+        "id": 1601,
+        "question": "Quando é fundamental utilizar um \"Gráfico Combinado com Eixo Secundário\"?",
+        "options": [
+          "Quando comparamos duas métricas com grandezas ou escalas muito diferentes (como Valores em Reais e Taxas Percentuais)",
+          "Apenas quando usamos computadores da Apple",
+          "Quando a planilha tem mais de 100 abas",
+          "Para desenhar plantas de casas"
         ],
-        correctIndex: 1,
-        explanation: 'Desmarcar as linhas de grade remove a aparência crua de grade e cria uma área limpa de design.'
+        "correctIndex": 0,
+        "explanation": "O eixo secundário permite que grandezas divergentes (ex: R$ 1.000.000 e 15%) convivam no mesmo gráfico sem achatamento."
       },
       {
-        id: 1602,
-        question: 'O que significa a sigla KPI em gestão e análise de dados?',
-        options: [
-          'Key Performance Indicator (Indicador-Chave de Desempenho)',
-          'Keyboard Protocol Interface',
-          'Kit Para Impressão',
-          'Kernel Process Integration'
+        "id": 1602,
+        "question": "Onde o Eixo Secundário é posicionado por padrão no gráfico do Excel?",
+        "options": [
+          "No topo horizontal",
+          "No chão da planilha",
+          "No lado direito vertical do gráfico",
+          "No meio das colunas"
         ],
-        correctIndex: 0,
-        explanation: 'KPI significa Key Performance Indicator, métrica essencial para acompanhar o sucesso de metas.'
+        "correctIndex": 2,
+        "explanation": "O eixo principal fica na vertical esquerda e o eixo secundário na vertical direita."
       },
       {
-        id: 1603,
-        question: 'Como conectar o texto de uma Forma geométrica (caixa de KPI) ao valor dinâmico de uma célula calculada?',
-        options: [
-          'Digitar o valor fixo com o teclado',
-          'Selecionar a forma, clicar na Barra de Fórmulas, digitar o sinal de igual (=) e clicar na célula com o resultado',
-          'Colar como imagem estática',
-          'Não é possível vincular formas a células'
+        "id": 1603,
+        "question": "O que são \"Minigráficos\" (Sparklines) no Excel?",
+        "options": [
+          "Gráficos para relógios de pulso",
+          "Gráficos minúsculos que cabem inteiramente dentro de uma única célula da planilha",
+          "Ícones decorativos sem dados reais",
+          "Gráficos impressos em miniatura"
         ],
-        correctIndex: 1,
-        explanation: 'Ao vincular a forma via barra de fórmulas (=Célula), ela passa a refletir qualquer alteração em tempo real.'
+        "correctIndex": 1,
+        "explanation": "Sparklines são gráficos compactos embutidos diretamente na célula que ilustram tendências sem ocupar espaço."
       },
       {
-        id: 1604,
-        question: 'Para que serve um "Gráfico Combinado" no Excel?',
-        options: [
-          'Para desenhar dois tipos de gráficos juntos (ex: Colunas para Faturamento e Linha para Margem) com eixos de escalas diferentes',
-          'Para juntar planilhas de dois computadores',
-          'Para misturar texto com fotos',
-          'Para gráficos em preto e branco'
+        "id": 1604,
+        "question": "Em qual guia da Faixa de Opções encontramos as opções para inserir Minigráficos?",
+        "options": [
+          "Guia Exibir",
+          "Guia Fórmulas",
+          "Guia Arquivo",
+          "Guia Inserir, grupo Minigráficos"
         ],
-        correctIndex: 0,
-        explanation: 'Gráficos combinados permitem plotar grandezas distintas (como valores em R$ e porcentagens) no mesmo visual.'
+        "correctIndex": 3,
+        "explanation": "Estão localizados na guia Inserir no grupo dedicado a Minigráficos."
       },
       {
-        id: 1605,
-        question: 'Qual é a linguagem de programação interna utilizada pelo Excel para criar e editar Macros?',
-        options: ['Python', 'VBA (Visual Basic for Applications)', 'JavaScript', 'HTML5'],
-        correctIndex: 1,
-        explanation: 'O VBA é a linguagem de programação nativa integrada às ferramentas do Microsoft Office.'
-      },
-      {
-        id: 1606,
-        question: 'Qual atalho de teclado abre o ambiente de desenvolvimento do Editor do VBA no Excel?',
-        options: ['Ctrl + V', 'Alt + F11', 'Shift + F5', 'Ctrl + Alt + Del'],
-        correctIndex: 1,
-        explanation: 'Alt + F11 abre diretamente o ambiente de desenvolvimento (VBE) do VBA.'
-      },
-      {
-        id: 1607,
-        question: 'Qual extensão de arquivo DEVE ser utilizada para salvar uma pasta de trabalho que contém códigos de Macros gravadas?',
-        options: ['.xlsx', '.xlsm (Pasta de Trabalho Habilitada para Macro)', '.txt', '.csv'],
-        correctIndex: 1,
-        explanation: 'Arquivos com macros devem ser salvos como .xlsm para que o Excel preserve o código executável.'
-      },
-      {
-        id: 1608,
-        question: 'O recurso "Gravador de Macros" serve para:',
-        options: [
-          'Gravar a voz do usuário pelo microfone',
-          'Gravar os passos e cliques executados na planilha e traduzi-los automaticamente em código de automação',
-          'Gravar vídeos para o YouTube',
-          'Salvar a senha da rede'
+        "id": 1605,
+        "question": "Quais são os três tipos disponíveis de Minigráficos no Excel?",
+        "options": [
+          "Linha, Coluna e Ganhos/Perdas",
+          "Pizza, Rosca e Pirâmide",
+          "3D, 2D e Holograma",
+          "Soma, Média e Contagem"
         ],
-        correctIndex: 1,
-        explanation: 'O Gravador de Macros converte as ações manuais do usuário em rotinas reutilizáveis de código.'
+        "correctIndex": 0,
+        "explanation": "Os três modelos nativos de sparklines são: Linha, Coluna e Ganhos/Perdas."
       },
       {
-        id: 1609,
-        question: 'Como atribuir uma Macro para que ela seja disparada ao clicar em um botão bonito desenhado na planilha?',
-        options: [
-          'Clicar com o botão direito na forma/botão e selecionar "Atribuir Macro..."',
-          'Renomear o botão para "Executar"',
-          'Dar um chute na mesa',
-          'Não é possível vincular botões a macros'
+        "id": 1606,
+        "question": "Qual recurso em Minigráficos permite destacar com cores especiais o melhor e o pior resultado do período?",
+        "options": [
+          "Pintar com o balde de tinta comum",
+          "Marcar as opções \"Ponto Alto\" e \"Ponto Baixo\"",
+          "Formatação Condicional de texto",
+          "Não é possível destacar pontos"
         ],
-        correctIndex: 0,
-        explanation: 'Clicando com o botão direito na forma e selecionando "Atribuir Macro", o clique do usuário roda o script.'
+        "correctIndex": 1,
+        "explanation": "As caixas de seleção \"Ponto Alto\" e \"Ponto Baixo\" adicionam marcadores coloridos diferenciados."
       },
       {
-        id: 1610,
-        question: 'Qual é o princípio fundamental de design que garante a eficácia de um Dashboard no ambiente corporativo?',
-        options: [
-          'Usar todas as 20 fontes diferentes do computador',
-          'Clareza, objetividade, foco nas decisões do usuário e ausência de ruídos visuais desnecessários',
-          'Inserir dezenas de animações piscantes',
-          'Ocupar o máximo de páginas possíveis'
+        "id": 1607,
+        "question": "O que uma \"Linha de Tendência\" (Trendline) adicionada a um gráfico de linhas demonstra?",
+        "options": [
+          "O nome do autor da planilha",
+          "A data de expiração do software",
+          "A trajetória geral e o padrão de direção histórica dos dados (se está subindo ou caindo)",
+          "A velocidade da internet"
         ],
-        correctIndex: 1,
-        explanation: 'A clareza, simplicidade e foco nas métricas certas definem um dashboard executivo de alto impacto.'
+        "correctIndex": 2,
+        "explanation": "A Linha de Tendência calcula matematicamente a inclinação média e a projeção dos dados."
+      },
+      {
+        "id": 1608,
+        "question": "Como se remove um Minigráfico de uma célula (já que a tecla Delete do teclado não o apaga)?",
+        "options": [
+          "Quebrar o computador",
+          "Excluir a pasta de trabalho",
+          "Reiniciar o roteador",
+          "Clicar na guia Minigráfico -> botão \"Limpar\" -> Limpar Minigráficos Selecionados"
+        ],
+        "correctIndex": 3,
+        "explanation": "Minigráficos são objetos gráficos embutidos e devem ser removidos pelo comando \"Limpar Minigráficos\"."
+      },
+      {
+        "id": 1609,
+        "question": "Em um gráfico combinado de Vendas e Margem, qual é a combinação visual mais clássica e recomendada?",
+        "options": [
+          "Ambos em Gráficos de Pizza",
+          "Vendas em Colunas Agrupadas e Margem em Linha com marcadores no Eixo Secundário",
+          "Vendas em círculos e Margem em triângulos",
+          "Tudo em barras pretas"
+        ],
+        "correctIndex": 1,
+        "explanation": "Colunas para volume e Linha para taxa percentual é o padrão internacional de visualização de dados."
+      },
+      {
+        "id": 1610,
+        "question": "Qual é o caminho no Excel para selecionar o tipo \"Combinação\" ao criar ou alterar um gráfico?",
+        "options": [
+          "Guia Inserir -> Gráficos Recomendados -> aba Todos os Gráficos -> Combinação",
+          "Guia Exibir -> Zoom",
+          "Guia Revisão -> Dicionário",
+          "Guia Dados -> Filtro"
+        ],
+        "correctIndex": 0,
+        "explanation": "Na janela \"Inserir Gráfico\", a última categoria da lista é \"Combinação\"."
       }
     ]
   }

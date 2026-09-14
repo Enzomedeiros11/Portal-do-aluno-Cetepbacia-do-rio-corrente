@@ -2,553 +2,730 @@ import { ExcelLesson } from './excelTypes';
 
 export const lessons5to8: ExcelLesson[] = [
   {
-    id: 5,
-    lessonNumber: 5,
-    title: 'Funções de Texto Essenciais e Limpeza de Dados',
-    module: 'Módulo 2: Manipulação de Dados, Textos e Datas',
-    duration: '28 min',
-    summary: 'Tratamento de strings, união de textos (& e CONCAT), padronização de maiúsculas/minúsculas e extração de caracteres.',
-    videoUrl: 'https://www.youtube.com/embed/5T5uQk67f1k',
-    videoTitle: 'Aula 05: Funções de Texto e Tratamento de Dados no Excel',
-    videoHighlights: [
-      'Concatenação de textos usando & (e comercial) e CONCAT',
-      'Padronização com MAIÚSCULA, MINÚSCULA e PRI.MAIÚSCULA',
-      'Extração de caracteres com ESQUERDA, DIREITA e EXT.TEXTO',
-      'Limpeza de espaços indesejados com ARRUMAR'
+    "id": 5,
+    "lessonNumber": 5,
+    "title": "Aula 05: Funções de Texto e Manipulação de Caracteres",
+    "module": "Módulo 3: Manipulação de Textos e Datas",
+    "duration": "25 min",
+    "summary": "Aprenda a padronizar, limpar, juntar e extrair dados textuais com as funções MAIÚSCULA, MINÚSCULA, PRI.MAIÚSCULA, CONCATENAR / &, ESQUERDA, DIREITA, EXT.TEXTO e ARRUMAR.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/BBOfpehpLbQ",
+    "videoTitle": "Aula 06 - Funções de Texto - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "Padronização de maiúsculas e minúsculas (MAIÚSCULA, MINÚSCULA, PRI.MAIÚSCULA)",
+      "União de textos e valores com o operador & e a função CONCAT",
+      "Extração de pedaços de textos com ESQUERDA, DIREITA e EXT.TEXTO",
+      "Limpeza de espaços indesejados com a função ARRUMAR"
     ],
-    theoryContent: {
-      introduction: 'Bases de dados importadas de sistemas escolares, ERPs ou planilhas compartilhadas frequentemente chegam com textos despadronizados: nomes em maiúsculas misturadas, códigos com espaços sobrando ou nomes e sobrenomes em colunas separadas. As funções de texto do Excel permitem higienizar, concatenar e transformar essas informações com rapidez e precisão cirúrgica.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "Bases de dados reais importadas de sistemas escolares, ERPs ou cadastros na web frequentemente vêm desorganizadas: nomes em letras minúsculas misturadas, códigos de matrícula grudados ou espaços extras em branco. As funções de texto do Excel permitem tratar, higienizar e transformar essas cadeias de caracteres em segundos.",
+      "keyConcepts": [
         {
-          title: 'Concatenação (& e CONCAT)',
-          description: 'O operador comercial (&) une textos ou conteúdos de células em uma única sequência. Para incluir espaços ou pontuações, coloque-os entre aspas duplas (" ").',
-          formulaOrExample: '=A2 & " " & B2  (Resultado: "Enzo Medeiros")'
+          "title": "Padronização de Caixas de Texto",
+          "description": "=MAIÚSCULA(texto) converte tudo para maiúsculas. =MINÚSCULA(texto) converte tudo para minúsculas. =PRI.MAIÚSCULA(texto) coloca apenas a primeira letra de cada palavra em maiúscula (ideal para nomes próprios de alunos e cidades).",
+          "formulaOrExample": "=PRI.MAIÚSCULA(\"joão da silva\") resulta em \"João Da Silva\""
         },
         {
-          title: 'Padronização de Caixa',
-          description: 'MAIÚSCULA transforma tudo em letras garrafais. MINÚSCULA deixa tudo minúsculo. PRI.MAIÚSCULA deixa a primeira letra de cada palavra em maiúscula (ideal para nomes próprios).',
-          formulaOrExample: '=PRI.MAIÚSCULA("joão da silva") -> "João Da Silva"'
+          "title": "Concatenação (União de Textos)",
+          "description": "Você pode juntar duas ou mais células usando o operador comercial & ou a função =CONCAT(texto1; texto2). Para incluir espaços entre as palavras, concatene \" \".",
+          "formulaOrExample": "=A2 & \" \" & B2 junta Nome e Sobrenome com um espaço"
         },
         {
-          title: 'Extração de Pedaços de Texto',
-          description: 'ESQUERDA(texto; num_caracteres) extrai do início. DIREITA(texto; num_caracteres) extrai do final. EXT.TEXTO(texto; inicio; num_caracteres) extrai do meio.',
-          formulaOrExample: '=ESQUERDA("CETEP2026"; 5) -> "CETEP"'
+          "title": "Extração de Caracteres",
+          "description": "=ESQUERDA(texto; num) pega os primeiros caracteres da esquerda. =DIREITA(texto; num) pega os últimos caracteres do final. =EXT.TEXTO(texto; posição_inicial; num) extrai do meio do texto.",
+          "formulaOrExample": "=ESQUERDA(\"CETEP2026\"; 5) resulta em \"CETEP\""
+        },
+        {
+          "title": "Limpeza com ARRUMAR",
+          "description": "A função =ARRUMAR(texto) remove todos os espaços duplicados entre palavras e todos os espaços invisíveis no início e no final do texto.",
+          "formulaOrExample": "=ARRUMAR(\"  Excel   Avançado  \") resulta em \"Excel Avançado\""
         }
       ],
-      stepByStep: [
-        'Abra uma planilha contendo uma coluna de Nomes (Coluna A) e Sobrenomes (Coluna B).',
-        'Na coluna C, digite: =PRI.MAIÚSCULA(A2 & " " & B2) para unir e formatar o nome.',
-        'Se o texto veio com espaços duplicados antes ou depois da palavra, envolva com =ARRUMAR(C2).',
-        'Para saber o tamanho exato de um código ou CPF, use =NÚM.CARACT(A2).',
-        'Copie a fórmula para toda a base com duplo clique na alça de preenchimento.'
+      "stepByStep": [
+        "Selecione uma coluna vazia ao lado do nome despadronizado do aluno.",
+        "Digite =PRI.MAIÚSCULA(A2) e tecle Enter.",
+        "Ao lado, crie um código de identificação juntando as 3 primeiras letras do curso com o ano: =ESQUERDA(B2; 3) & \"-2026\".",
+        "Dê um duplo clique na alça de preenchimento para aplicar a todas as linhas.",
+        "Copie a coluna gerada e use \"Colar Especial -> Valores\" caso queira descartar as fórmulas e fixar os textos definitivos."
       ],
-      keyboardShortcuts: [
-        { keys: 'Ctrl + E', action: 'Preenchimento Relâmpago (Flash Fill) - detecta padrões de texto e preenche sozinho' },
-        { keys: 'Ctrl + L', action: 'Abrir caixa de diálogo Localizar e Substituir' },
-        { keys: 'Ctrl + U', action: 'Substituir diretamente caracteres em massa' },
-        { keys: 'Alt + Abaixo', action: 'Abrir lista suspensa com valores já digitados na coluna' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Ctrl + C e depois Alt + C + V",
+          "action": "Atalho clássico para Colar Especial como Valores"
+        },
+        {
+          "keys": "Ctrl + E",
+          "action": "Preenchimento Relâmpago (Flash Fill) para deduzir padrões de texto automaticamente"
+        }
       ],
-      proTip: 'O atalho Ctrl + E (Preenchimento Relâmpago) é uma das maiores inovações do Excel: basta digitar manualmente o resultado esperado para a primeira linha e pressionar Ctrl + E na linha de baixo que o Excel deduz a regra automaticamente!',
-      commonErrors: 'Esquecer de colocar aspas duplas (" ") ao concatenar palavras ou espaços fixos, gerando o erro de nome inválido #NOME?.'
+      "proTip": "Se ao tentar concatenar duas células os textos ficarem grudados (ex: \"CarlosSilva\"), lembre-se de concatenar explicitamente o espaço entre aspas duplas: =A2 & \" \" & B2.",
+      "commonErrors": "Esquecer que a função EXT.TEXTO precisa saber a partir de qual posição de caractere ela deve iniciar a extração no segundo argumento."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 501,
-        question: 'Qual operador de teclado é utilizado para concatenar (juntar) dois textos ou células no Excel?',
-        options: ['#', '&', '@', '$'],
-        correctIndex: 1,
-        explanation: 'O caractere comercial (&) é o operador de concatenação no Excel.'
+        "id": 501,
+        "question": "Qual função do Excel transforma um texto todo digitado em minúsculas para que a primeira letra de cada palavra fique em maiúscula?",
+        "options": [
+          "=MAIÚSCULA()",
+          "=CAPITALIZAR()",
+          "=PRI.MAIÚSCULA()",
+          "=AJUSTAR()"
+        ],
+        "correctIndex": 2,
+        "explanation": "A função =PRI.MAIÚSCULA() deixa apenas a primeira letra de cada palavra em maiúsculo."
       },
       {
-        id: 502,
-        question: 'Qual função converte a primeira letra de cada palavra em maiúscula e todas as outras em minúsculas?',
-        options: ['=MAIÚSCULA()', '=PRIMEIRA()', '=PRI.MAIÚSCULA()', '=CAPITALIZAR()'],
-        correctIndex: 2,
-        explanation: 'A função =PRI.MAIÚSCULA() ajusta nomes próprios deixando a primeira letra de cada palavra em maiúscula.'
+        "id": 502,
+        "question": "Qual operador de texto é usado no Excel para concatenar (juntar) conteúdos de células?",
+        "options": [
+          "& (e comercial)",
+          "#",
+          "@",
+          "$"
+        ],
+        "correctIndex": 0,
+        "explanation": "O operador & (e comercial) é o símbolo nativo de concatenação no Excel."
       },
       {
-        id: 503,
-        question: 'O que retorna a fórmula: =ESQUERDA("EXCEL2026"; 5)?',
-        options: ['"2026"', '"EXCEL"', '"E"', '"EX"'],
-        correctIndex: 1,
-        explanation: 'A função =ESQUERDA(texto; 5) extrai os 5 primeiros caracteres a partir da esquerda, resultando em "EXCEL".'
+        "id": 503,
+        "question": "Se a célula A1 contém o texto \"CETEP-BA\", qual é o resultado da fórmula =ESQUERDA(A1; 5)?",
+        "options": [
+          "\"-BA\"",
+          "\"CETEP-\"",
+          "\"BA\"",
+          "\"CETEP\""
+        ],
+        "correctIndex": 3,
+        "explanation": "Os primeiros 5 caracteres da esquerda para a direita de \"CETEP-BA\" são C-E-T-E-P."
       },
       {
-        id: 504,
-        question: 'Qual é a função do Excel responsável por remover espaços indesejados no início e no final de um texto?',
-        options: ['=LIMPAR()', '=ARRUMAR()', '=TIRARESPAÇO()', '=AJUSTAR()'],
-        correctIndex: 1,
-        explanation: 'A função =ARRUMAR() remove espaços extras no início, no fim e reduz múltiplos espaços internos a um só.'
+        "id": 504,
+        "question": "Qual é a utilidade prática da função =ARRUMAR(texto)?",
+        "options": [
+          "Colocar os números em ordem crescente",
+          "Remover espaços em branco adicionais no início, fim e espaços duplos no meio do texto",
+          "Apagar células vazias",
+          "Mudar a cor da fonte"
+        ],
+        "correctIndex": 1,
+        "explanation": "ARRUMAR elimina espaços excessivos causados por erros de digitação ou importações de sistemas externos."
       },
       {
-        id: 505,
-        question: 'Qual atalho de teclado ativa o "Preenchimento Relâmpago" (Flash Fill) no Excel?',
-        options: ['Ctrl + E', 'Ctrl + F', 'Ctrl + P', 'Ctrl + T'],
-        correctIndex: 0,
-        explanation: 'Ctrl + E aciona o Preenchimento Relâmpago, reconhecendo padrões de digitação automaticamente.'
+        "id": 505,
+        "question": "Qual fórmula junta o Primeiro Nome (A2) e o Sobrenome (B2) garantindo um espaço em branco entre eles?",
+        "options": [
+          "=A2 + B2",
+          "=A2 & B2",
+          "=A2 & Espaço & B2",
+          "=A2 & \" \" & B2"
+        ],
+        "correctIndex": 3,
+        "explanation": "O espaço deve ser delimitado entre aspas duplas: =A2 & \" \" & B2."
       },
       {
-        id: 506,
-        question: 'Como representar um espaço em branco dentro de uma fórmula de concatenação?',
-        options: ['ESPAÇO()', '" "', 'BLANK', '{ }'],
-        correctIndex: 1,
-        explanation: 'Qualquer texto ou espaço literal em fórmulas do Excel deve ser delimitado por aspas duplas (" ").'
+        "id": 506,
+        "question": "Qual função retorna a quantidade total de caracteres (incluindo letras, números e espaços) de um texto?",
+        "options": [
+          "=TAMANHO()",
+          "=CONTAR.LETRAS()",
+          "=NÚM.CARACT()",
+          "=COMPRIMENTO()"
+        ],
+        "correctIndex": 2,
+        "explanation": "A função =NÚM.CARACT(texto) conta o número exato de caracteres presentes no texto."
       },
       {
-        id: 507,
-        question: 'Qual função conta a quantidade total de caracteres (incluindo letras, números e espaços) em uma célula?',
-        options: ['=TAMANHO()', '=NÚM.CARACT()', '=CONT.TEXTO()', '=LEN()'],
-        correctIndex: 1,
-        explanation: '=NÚM.CARACT() retorna o número de caracteres contidos em uma cadeia de texto.'
+        "id": 507,
+        "question": "Para extrair os últimos 4 dígitos de um código alfanumérico contido em C3, qual função deve ser empregada?",
+        "options": [
+          "=DIREITA(C3; 4)",
+          "=FINAL(C3; 4)",
+          "=ÚLTIMO(C3; 4)",
+          "=SUBTEXTO(C3; 4)"
+        ],
+        "correctIndex": 0,
+        "explanation": "A função =DIREITA(texto; núm_caracteres) extrai caracteres a partir da extremidade direita."
       },
       {
-        id: 508,
-        question: 'Qual é o resultado da fórmula =DIREITA("CETEP-BA"; 2)?',
-        options: ['"CE"', '"BA"', '"-BA"', '"P-BA"'],
-        correctIndex: 1,
-        explanation: 'A função DIREITA extrai os últimos 2 caracteres a partir do final do texto, que são "BA".'
+        "id": 508,
+        "question": "Qual é o resultado da fórmula =MINÚSCULA(\"EXCEL 2026\")?",
+        "options": [
+          "\"Excel 2026\"",
+          "\"excel 2026\"",
+          "\"EXCEL\"",
+          "Erro #VALOR!"
+        ],
+        "correctIndex": 1,
+        "explanation": "MINÚSCULA converte todas as letras alfabéticas em caracteres minúsculos, mantendo números inalterados."
       },
       {
-        id: 509,
-        question: 'Qual função converte todo o texto de uma célula para letras minúsculas?',
-        options: ['=BAIXO()', '=MINÚSCULA()', '=MENOR()', '=LOWERCASE()'],
-        correctIndex: 1,
-        explanation: '=MINÚSCULA() transforma todos os caracteres em minúsculos.'
+        "id": 509,
+        "question": "Se a célula A1 tem o texto \"CÓD-9874\", qual fórmula extrai os 4 números do meio/fim usando EXT.TEXTO?",
+        "options": [
+          "=EXT.TEXTO(A1; 1; 4)",
+          "=EXT.TEXTO(A1; 4; 5)",
+          "=EXT.TEXTO(A1; 5; 4)",
+          "=MEIO(A1; 4)"
+        ],
+        "correctIndex": 2,
+        "explanation": "A posição inicial é o 5º caractere (onde começa o 9), extraindo os 4 caracteres seguintes."
       },
       {
-        id: 510,
-        question: 'Qual o erro retornado pelo Excel quando digitamos o nome de uma função incorretamente?',
-        options: ['#DIV/0!', '#NOME?', '#N/D', '#REF!'],
-        correctIndex: 1,
-        explanation: 'O erro #NOME? indica que o Excel não reconheceu a fórmula ou o nome digitado.'
+        "id": 510,
+        "question": "Qual recurso de inteligência do Excel permite preencher automaticamente padrões de texto pelo atalho Ctrl + E?",
+        "options": [
+          "AutoSoma",
+          "Macro Automática",
+          "Filtro Avançado",
+          "Preenchimento Relâmpago (Flash Fill)"
+        ],
+        "correctIndex": 3,
+        "explanation": "O Preenchimento Relâmpago reconhece o padrão digitado pelo usuário e replica instantaneamente em toda a coluna."
       }
     ]
   },
   {
-    id: 6,
-    lessonNumber: 6,
-    title: 'Funções de Data e Hora no Excel',
-    module: 'Módulo 2: Manipulação de Dados, Textos e Datas',
-    duration: '27 min',
-    summary: 'Como o Excel armazena datas (números seriais), funções HOJE, AGORA, cálculos de prazos e dias úteis.',
-    videoUrl: 'https://www.youtube.com/embed/6i2x7M4Oa0E',
-    videoTitle: 'Aula 06: Dominando Datas, Prazos e Horas no Excel',
-    videoHighlights: [
-      'O conceito de Número Serial de Datas (1 = 01/01/1900)',
-      'Funções voláteis: =HOJE() e =AGORA()',
-      'Extração com DIA, MÊS, ANO e HORA',
-      'Cálculo de dias úteis com DIATRABALHOTOTAL'
+    "id": 6,
+    "lessonNumber": 6,
+    "title": "Aula 06: Funções de Data e Cálculos de Prazos",
+    "module": "Módulo 3: Manipulação de Textos e Datas",
+    "duration": "26 min",
+    "summary": "Compreenda como o Excel interpreta datas como números seriais, utilize as funções HOJE, AGORA, DIA, MÊS, ANO, DATA, calcule diferenças e prazos úteis com DIATRABALHOTOTAL.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/_1-Euxg1ncc",
+    "videoTitle": "Aula 07 - Funções de Data - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "Como o Excel armazena datas (sistema serial de números a partir de 1900)",
+      "Funções voláteis temporais: HOJE() e AGORA()",
+      "Desmembramento de datas em DIA(), MÊS() e ANO()",
+      "Cálculo de dias corridos e dias úteis com DIATRABALHOTOTAL"
     ],
-    theoryContent: {
-      introduction: 'Para o Excel, uma data não é um texto: é um número inteiro que representa quantos dias se passaram desde o dia 1 de janeiro de 1900. Por exemplo, o número serial 1 representa 01/01/1900, e o número 45.000 representa uma data em 2023. As horas são representadas por frações decimais (0,5 = 12 horas ao meio-dia). Por causa dessa lógica matemática, subtrair duas datas calcula instantaneamente a quantidade de dias entre elas.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "O Excel trata datas internamente como números inteiros sequenciais (números seriais), onde o número 1 representa o dia 01/01/1900. Cada dia subsequente adiciona +1 ao número. As horas são frações decimais do dia (ex: 0,5 equivale a 12:00 do meio-dia). Por causa dessa lógica brilhante, você pode somar ou subtrair dias de uma data com simples operações matemáticas.",
+      "keyConcepts": [
         {
-          title: 'Função HOJE() vs. AGORA()',
-          description: 'A função =HOJE() não aceita argumentos e retorna a data corrente do sistema. A função =AGORA() retorna a data e a hora atual com minutos e segundos. São funções voláteis que se recalculam a cada abertura de planilha.',
-          formulaOrExample: '=HOJE()  ->  14/09/2026 | =AGORA() -> 14/09/2026 15:30'
+          "title": "Funções HOJE() e AGORA()",
+          "description": "A função =HOJE() retorna a data atual do sistema (atualizada dinamicamente a cada abertura ou cálculo da planilha). A função =AGORA() retorna a data atual acompanhada do horário exato.",
+          "formulaOrExample": "=HOJE() retorna a data de hoje | =AGORA() retorna data e hora"
         },
         {
-          title: 'Cálculo de Idade ou Diferenças (DATADIF)',
-          description: 'Embora oculta do preenchimento automático por compatibilidade com o antigo Lotus 1-2-3, a função DATADIF calcula com perfeição anos ("Y"), meses ("M") ou dias ("D") completos decorridos.',
-          formulaOrExample: '=DATADIF(data_nascimento; HOJE(); "Y")'
+          "title": "Extração: DIA, MÊS e ANO",
+          "description": "=DIA(data) extrai o dia do mês (1 a 31). =MÊS(data) extrai o número do mês (1 a 12). =ANO(data) extrai os 4 dígitos do ano.",
+          "formulaOrExample": "=MÊS(\"15/08/2026\") resulta em 8"
         },
         {
-          title: 'Dias Úteis (DIATRABALHOTOTAL)',
-          description: 'Calcula quantos dias de trabalho existem entre duas datas, excluindo automaticamente finais de semana (sábado e domingo) e feriados customizados.',
-          formulaOrExample: '=DIATRABALHOTOTAL(data_inicio; data_fim; intervalo_feriados)'
+          "title": "Construção com a Função DATA",
+          "description": "A função =DATA(ano; mês; dia) monta uma data válida garantindo que não haja ambiguidades de formatação regional.",
+          "formulaOrExample": "=DATA(2026; 12; 25) resulta em 25/12/2026"
+        },
+        {
+          "title": "Cálculo de Dias Úteis: DIATRABALHOTOTAL",
+          "description": "Calcula o número de dias úteis entre duas datas, excluindo automaticamente fins de semana (sábados e domingos) e opcionalmente uma lista de feriados.",
+          "formulaOrExample": "=DIATRABALHOTOTAL(data_inicial; data_final; [feriados])"
         }
       ],
-      stepByStep: [
-        'Para inserir a data de hoje fixa (estática), selecione a célula e aperte o atalho Ctrl + ; (ponto e vírgula).',
-        'Para calcular a data de entrega de um projeto com prazo de 45 dias corridos: =A2 + 45.',
-        'Para calcular quantos dias de atraso um pagamento possui: =HOJE() - B2 (onde B2 é a data de vencimento).',
-        'Para extrair apenas o ano de uma data: =ANO(A2).',
-        'Para calcular dias úteis: =DIATRABALHOTOTAL(A2; B2).'
+      "stepByStep": [
+        "Na célula A1, digite =HOJE() para obter a data atual.",
+        "Na célula B1, digite o prazo de entrega: =A1 + 30 para adicionar 30 dias corridos.",
+        "Para calcular a idade de um aluno a partir da data de nascimento em C2, use: =INT((HOJE() - C2) / 365,25).",
+        "Para calcular quantos dias úteis restam para a entrega de um projeto, digite =DIATRABALHOTOTAL(HOJE(); B1).",
+        "Pressione Enter e formate a célula como Número Geral."
       ],
-      keyboardShortcuts: [
-        { keys: 'Ctrl + ;', action: 'Inserir a data atual estática na célula' },
-        { keys: 'Ctrl + Shift + ;', action: 'Inserir a hora atual estática na célula' },
-        { keys: 'Ctrl + Shift + #', action: 'Formatar como data abreviada (DD/MM/AAAA)' },
-        { keys: 'F9', action: 'Recalcular todas as fórmulas da planilha imediatamente' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Ctrl + ;",
+          "action": "Insere a data atual fixa (estática) na célula selecionada"
+        },
+        {
+          "keys": "Ctrl + Shift + ;",
+          "action": "Insere a hora atual fixa (estática) na célula selecionada"
+        },
+        {
+          "keys": "Ctrl + Shift + 3",
+          "action": "Aplica a formatação rápida de Data (dd-mmm-aa)"
+        }
       ],
-      proTip: 'Se você digitar uma data e a célula exibir um número estranho como 46123, não se assuste: apenas mude o formato de número da célula para "Data Abreviada". O número 46123 é a data real sob a ótica do Excel!',
-      commonErrors: 'Digitar a função =HOJE sem abrir e fechar os parênteses. Deve ser sempre =HOJE() vazia, sem parâmetros internos.'
+      "proTip": "Se você precisa que a data atual nunca se altere no futuro (por exemplo, a data em que um aluno realizou a matrícula), use o atalho Ctrl + ; em vez da função =HOJE(), pois a função se atualiza todos os dias.",
+      "commonErrors": "Digitar datas com barras invertidas ou traços fora do padrão do Windows, fazendo o Excel interpretar a data como texto comum e impossibilitando subtrações de prazos."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 601,
-        question: 'Qual atalho de teclado insere a data atual estática diretamente na célula selecionada?',
-        options: ['Ctrl + ;', 'Ctrl + D', 'Alt + D', 'Ctrl + Shift + D'],
-        correctIndex: 0,
-        explanation: 'Ctrl + ; insere a data corrente do sistema operacional de forma estática.'
-      },
-      {
-        id: 602,
-        question: 'Qual é a diferença entre a função =HOJE() e a função =AGORA()?',
-        options: [
-          'Não há diferença',
-          '=HOJE() retorna apenas a data, enquanto =AGORA() retorna a data e o horário atual',
-          '=AGORA() só funciona de noite',
-          '=HOJE() requer que você digite o ano dentro dos parênteses'
+        "id": 601,
+        "question": "Como o Excel armazena internamente qualquer data?",
+        "options": [
+          "Como uma imagem bitmap",
+          "Como um número serial contínuo onde cada dia equivale a uma unidade inteira (+1)",
+          "Como um código binário criptografado",
+          "Como um texto puro que não aceita contas"
         ],
-        correctIndex: 1,
-        explanation: '=HOJE() retorna somente a data atual, enquanto =AGORA() traz data e hora completas.'
+        "correctIndex": 1,
+        "explanation": "Para o Excel, uma data é um número serial: o dia 1 corresponde a 01/01/1900."
       },
       {
-        id: 603,
-        question: 'Como o Excel armazena internamente qualquer data?',
-        options: [
-          'Como uma imagem JPEG invisível',
-          'Como um número serial sequencial, iniciando em 1 para 01/01/1900',
-          'Como uma palavra de texto fixa',
-          'Como um endereço IP'
+        "id": 602,
+        "question": "Qual função do Excel retorna sempre a data do dia atual sem incluir a hora?",
+        "options": [
+          "=DATAATUAL()",
+          "=AGORA()",
+          "=DIA.ATUAL()",
+          "=HOJE()"
         ],
-        correctIndex: 1,
-        explanation: 'Datas no Excel são números seriais, o que permite operações matemáticas diretas.'
+        "correctIndex": 3,
+        "explanation": "A função =HOJE() retorna exclusivamente a data atual."
       },
       {
-        id: 604,
-        question: 'Qual fórmula calcula corretamente o prazo final somando 30 dias à data da célula A1?',
-        options: ['=A1 + 30', '=SOMA(A1; 30_DIAS)', '=DATE_ADD(A1; 30)', '=A1 * 30'],
-        correctIndex: 0,
-        explanation: 'Como cada dia inteiro equivale ao valor 1, basta somar 30 à data: =A1 + 30.'
-      },
-      {
-        id: 605,
-        question: 'Qual função conta apenas os dias úteis entre duas datas, excluindo sábados e domingos?',
-        options: ['=DIASÚTEIS()', '=DIATRABALHOTOTAL()', '=CONTAR.ÚTEIS()', '=WORKDAYS()'],
-        correctIndex: 1,
-        explanation: 'A função =DIATRABALHOTOTAL() calcula o número de dias úteis entre duas datas.'
-      },
-      {
-        id: 606,
-        question: 'Qual função extrai apenas o valor numérico do ano de uma data contida em B2?',
-        options: ['=YEAR()', '=ANO(B2)', '=EXTRAIR.ANO(B2)', '=DATA.ANO(B2)'],
-        correctIndex: 1,
-        explanation: '=ANO(B2) retorna o ano com 4 dígitos da data indicada.'
-      },
-      {
-        id: 607,
-        question: 'O que o argumento "Y" faz na função =DATADIF(A1; A2; "Y")?',
-        options: [
-          'Retorna o resultado em dias de ontem (Yesterday)',
-          'Retorna o número de anos completos decorridos (Years)',
-          'Multiplica a data por 100',
-          'Gera um erro de sintaxe'
+        "id": 603,
+        "question": "Qual é a diferença entre a função =HOJE() e a função =AGORA()?",
+        "options": [
+          "=AGORA() retorna tanto a data quanto a hora e minuto atuais, enquanto =HOJE() retorna apenas a data",
+          "Não há diferença",
+          "=HOJE() só funciona aos finais de semana",
+          "=AGORA() é paga"
         ],
-        correctIndex: 1,
-        explanation: '"Y" indica Years (anos completos entre a data inicial e a data final).'
+        "correctIndex": 0,
+        "explanation": "=AGORA() inclui a data e a hora atual na célula."
       },
       {
-        id: 608,
-        question: 'Se a célula A1 contém uma data e ao subtrair A2 de A1 o Excel exibir "45", o que isso significa?',
-        options: [
-          'Existem 45 dias corridos de diferença entre as duas datas',
-          'A fórmula falhou',
-          'O valor corresponde a 45 semanas',
-          'A data é do ano de 1945'
+        "id": 604,
+        "question": "Qual atalho de teclado insere a data atual de forma estática (fixa) na célula sem fórmula?",
+        "options": [
+          "Ctrl + D",
+          "Alt + D",
+          "Ctrl + ;",
+          "F12"
         ],
-        correctIndex: 0,
-        explanation: 'A subtração simples entre duas datas no Excel retorna a diferença exata em dias corridos.'
+        "correctIndex": 2,
+        "explanation": "O atalho Ctrl + ; insere a data de hoje fixa, que não muda nos dias seguintes."
       },
       {
-        id: 609,
-        question: 'Qual é o resultado numérico interno correspondente a 12 horas (meio-dia) no Excel?',
-        options: ['12', '0,5', '24', '720'],
-        correctIndex: 1,
-        explanation: 'Como 1 dia inteiro = 1, meio dia (12 horas) é representado pelo decimal 0,5.'
-      },
-      {
-        id: 610,
-        question: 'As funções =HOJE() e =AGORA() são chamadas de "voláteis" porque:',
-        options: [
-          'Apagam os dados do usuário se faltar energia',
-          'Se recalculam automaticamente toda vez que a planilha é recalculada ou reaberta',
-          'Só funcionam em notebooks novos',
-          'Não podem ser impressas'
+        "id": 605,
+        "question": "Para somar 15 dias corridos a uma data que está na célula A1, qual fórmula simples pode ser usada?",
+        "options": [
+          "=SOMA_DIAS(A1; 15)",
+          "=A1 + 15",
+          "=A1 * 15",
+          "=A1 & 15"
         ],
-        correctIndex: 1,
-        explanation: 'Funções voláteis recalculam seus valores toda vez que o Excel recalcula qualquer célula.'
+        "correctIndex": 1,
+        "explanation": "Como cada dia vale 1, basta somar 15 diretamente à data: =A1 + 15."
+      },
+      {
+        "id": 606,
+        "question": "Qual função é ideal para calcular a quantidade de dias úteis entre duas datas excluindo sábados e domingos?",
+        "options": [
+          "=DIATRABALHOTOTAL()",
+          "=DIASÚTEIS()",
+          "=CALC.DIAS()",
+          "=SEMANA.TOTAL()"
+        ],
+        "correctIndex": 0,
+        "explanation": "=DIATRABALHOTOTAL(data_inicial; data_final; [feriados]) calcula exatamente os dias úteis."
+      },
+      {
+        "id": 607,
+        "question": "Qual é a ordem correta dos argumentos da função =DATA() no Excel?",
+        "options": [
+          "=DATA(dia; mês; ano)",
+          "=DATA(mês; dia; ano)",
+          "=DATA(ano; dia; mês)",
+          "=DATA(ano; mês; dia)"
+        ],
+        "correctIndex": 3,
+        "explanation": "A função DATA exige os argumentos na ordem: =DATA(ano; mês; dia)."
+      },
+      {
+        "id": 608,
+        "question": "Se uma data está na célula B2 (\"10/10/2026\"), qual fórmula extrai apenas o número do mês?",
+        "options": [
+          "=EXT.MÊS(B2)",
+          "=NUMERO.MES(B2)",
+          "=MES(B2) ou =MÊS(B2)",
+          "=DATA.MES(B2)"
+        ],
+        "correctIndex": 2,
+        "explanation": "A função =MÊS(B2) extrai o valor numérico do mês (neste caso, 10)."
+      },
+      {
+        "id": 609,
+        "question": "Se você subtrair uma data anterior de uma data posterior (=B2 - A2), qual informação o Excel exibirá?",
+        "options": [
+          "A quantidade de dias corridos transcorridos entre as duas datas",
+          "O nome do dia da semana",
+          "Uma mensagem de erro",
+          "O ano de nascimento"
+        ],
+        "correctIndex": 0,
+        "explanation": "A subtração simples entre duas datas resulta na quantidade exata de dias decorridos."
+      },
+      {
+        "id": 610,
+        "question": "O que a função =DIA.DA.SEMANA(data) retorna?",
+        "options": [
+          "Apenas a palavra \"Sábado\"",
+          "Um número de 1 a 7 representando o dia da semana (por padrão 1 = Domingo)",
+          "Quantos dias faltam para o ano novo",
+          "A previsão do tempo"
+        ],
+        "correctIndex": 1,
+        "explanation": "Retorna um número de 1 a 7 indicando o dia da semana correspondente."
       }
     ]
   },
   {
-    id: 7,
-    lessonNumber: 7,
-    title: 'Lógica Condicional Básica: A Função SE e Operadores Relacionais',
-    module: 'Módulo 2: Manipulação de Dados, Textos e Datas',
-    duration: '32 min',
-    summary: 'A função mais famosa do Excel. Testes lógicos, comparações (>, <, =, <>) e tomada de decisões automatizada.',
-    videoUrl: 'https://www.youtube.com/embed/jZ8N7zU2qF0',
-    videoTitle: 'Aula 07: Como Funciona a Função SE no Excel Passo a Passo',
-    videoHighlights: [
-      'Sintaxe da função: =SE(teste_lógico; valor_se_verdadeiro; valor_se_falso)',
-      'Operadores de comparação (>, <, >=, <=, =, <>)',
-      'Cálculo de Aprovação de Alunos (Média >= 7,0)',
-      'Retorno de textos com aspas vs. retorno de números e cálculos'
+    "id": 7,
+    "lessonNumber": 7,
+    "title": "Aula 07: Funções Estatísticas e Agregações Condicionais",
+    "module": "Módulo 4: Análise Estatística e Formatação Avançada",
+    "duration": "27 min",
+    "summary": "Aprenda a analisar conjuntos de dados com MÁXIMO, MÍNIMO, MÉDIA, CONT.NÚM, CONT.VALORES, CONTAR.VAZIO e as poderosas funções condicionais CONT.SE e SOMASE.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/KD1Re8pEnlo",
+    "videoTitle": "Aula 08 - Funções Estastísticas - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "Identificação de extremos com MÁXIMO() e MÍNIMO()",
+      "Diferença crucial entre CONT.NÚM() e CONT.VALORES()",
+      "Contagens com critérios específicos usando CONT.SE()",
+      "Somas acumuladas sob condição com a função SOMASE()"
     ],
-    theoryContent: {
-      introduction: 'A função SE é a espinha dorsal de qualquer análise de tomada de decisão em planilhas. Ela avalia uma condição lógica que pode resultar em apenas duas possibilidades: VERDADEIRO ou FALSO. Se a condição for verdadeira, o Excel executa a primeira ação; caso seja falsa, executa a segunda.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "Planilhas profissionais exigem sumarização rápida de indicadores: saber a maior nota, o menor custo, a média de faturamento ou quantos alunos atendem a determinados requisitos. O Excel disponibiliza funções estatísticas descritivas e funções agregadoras condicionais (SE) que economizam horas de filtragem manual.",
+      "keyConcepts": [
         {
-          title: 'Sintaxe Completa da Função SE',
-          description: '=SE(teste_lógico; valor_se_verdadeiro; [valor_se_falso]). O teste compara duas coisas. Se a resposta for sim, entrega o segundo argumento; se for não, entrega o terceiro.',
-          formulaOrExample: '=SE(Média >= 7; "Aprovado"; "Reprovado")'
+          "title": "MÁXIMO e MÍNIMO",
+          "description": "=MÁXIMO(intervalo) localiza o maior valor numérico de uma série. =MÍNIMO(intervalo) localiza o menor valor numérico.",
+          "formulaOrExample": "=MÁXIMO(C2:C100) encontra a maior nota da turma"
         },
         {
-          title: 'Operadores Relacionais',
-          description: 'Maior (>), Menor (<), Maior ou Igual (>=), Menor ou Igual (<=), Igual (=) e Diferente (<>).',
-          formulaOrExample: 'A1 <> 0  (significa "A1 é diferente de zero")'
+          "title": "CONT.NÚM vs. CONT.VALORES",
+          "description": "A função =CONT.NÚM conta apenas células que contêm valores numéricos. Já a função =CONT.VALORES conta qualquer célula que não esteja vazia (incluindo textos, códigos, letras e números).",
+          "formulaOrExample": "=CONT.VALORES(A2:A100) conta o total de inscritos cadastrados"
         },
         {
-          title: 'Textos com Aspas Duplas',
-          description: 'Ao retornar mensagens textuais como "Aprovado", "Meta Atingida" ou "Pendente", o texto DEVE obrigatoriamente estar entre aspas duplas. Números e fórmulas não levam aspas.',
-          formulaOrExample: '=SE(B2 > 1000; B2 * 0,1; 0)'
+          "title": "CONT.SE (Contagem Condicional)",
+          "description": "Conta quantas células em um intervalo atendem a um critério especificado entre aspas.",
+          "formulaOrExample": "=CONT.SE(D2:D100; \"Aprovado\") ou =CONT.SE(C2:C100; \">=7\")"
+        },
+        {
+          "title": "SOMASE (Soma Condicional)",
+          "description": "Soma os valores de um intervalo somente se as células correspondentes cumprirem a condição.",
+          "formulaOrExample": "=SOMASE(B2:B100; \"Informática\"; C2:C100) soma as mensalidades apenas do curso de Informática"
         }
       ],
-      stepByStep: [
-        'Clique na célula de Situação da nota do aluno (ex: E2).',
-        'Digite =SE( e observe a dica de sintaxe do Excel.',
-        'Selecione a célula da média (ex: D2), digite o operador >= e o valor 7: =SE(D2>=7;',
-        'Digite entre aspas o que acontece se verdadeiro: "Aprovado";',
-        'Digite entre aspas o que acontece se falso: "Recuperação")',
-        'Pressione Enter e propague a fórmula pela coluna com duplo clique na alça.'
+      "stepByStep": [
+        "Calcule a média geral das notas da turma: =MÉDIA(C2:C50).",
+        "Identifique a nota mais alta com =MÁXIMO(C2:C50) e a mais baixa com =MÍNIMO(C2:C50).",
+        "Conte quantos alunos fizeram a prova (células numéricas preenchidas): =CONT.NÚM(C2:C50).",
+        "Conte quantos alunos tiraram nota igual ou superior a 7: =CONT.SE(C2:C50; \">=7\").",
+        "Some o valor total das vendas efetuadas pela vendedora \"Mariana\": =SOMASE(A2:A50; \"Mariana\"; D2:D50)."
       ],
-      keyboardShortcuts: [
-        { keys: 'Shift + F3', action: 'Abrir o assistente "Inserir Função" para preencher argumentos guiados' },
-        { keys: 'Ctrl + A', action: 'Com uma função digitada na barra, abre a janela de argumentos dela' },
-        { keys: 'Tab', action: 'Autocompletar o nome da função sugerida pelo IntelliSense do Excel' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Ctrl + Shift + Seta Abaixo",
+          "action": "Seleciona todos os dados da coluna até o final da lista"
+        },
+        {
+          "keys": "Alt + M + U",
+          "action": "Abre a lista rápida de funções estatísticas e médias na Faixa de Opções"
+        }
       ],
-      proTip: 'Use a tecla Tab para completar nomes de funções! Quando você começar a digitar =S e a palavra SE aparecer selecionada na lista, aperte Tab. O Excel preenche o nome e abre o parêntese para você automaticamente.',
-      commonErrors: 'Esquecer o terceiro argumento (valor se falso). Se você omitir o valor se falso e o teste der falso, o Excel exibirá a palavra feia "FALSO" na sua planilha.'
+      "proTip": "Na função SOMASE, se o intervalo de critério for o mesmo intervalo que você deseja somar, o terceiro argumento ([intervalo_soma]) é opcional! Por exemplo: =SOMASE(C2:C50; \">1000\") somará diretamente todos os valores maiores que 1000 naquele mesmo intervalo.",
+      "commonErrors": "Esquecer de colocar os operadores de comparação entre aspas duplas no critério do CONT.SE, por exemplo escrever =CONT.SE(A1:A10; >=7) em vez do correto =CONT.SE(A1:A10; \">=7\")."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 701,
-        question: 'Quantos argumentos a função =SE() aceita na sua estrutura padrão?',
-        options: ['1 argumento', '2 argumentos', '3 argumentos', '5 argumentos'],
-        correctIndex: 2,
-        explanation: 'A estrutura padrão possui 3 argumentos: teste_lógico, valor_se_verdadeiro e valor_se_falso.'
-      },
-      {
-        id: 702,
-        question: 'Qual operador representa "diferente de" no Excel?',
-        options: ['!=', '<>', '=/=', '><'],
-        correctIndex: 1,
-        explanation: 'No Excel, o operador de diferença é formado por menor e maior juntos: <>.'
-      },
-      {
-        id: 703,
-        question: 'Se a célula A1 tiver o valor 8, qual será o resultado de: =SE(A1>=7; "Aprovado"; "Reprovado")?',
-        options: ['"Reprovado"', '"Aprovado"', '7', '8'],
-        correctIndex: 1,
-        explanation: 'Como 8 é maior ou igual a 7, o teste é VERDADEIRO, retornando "Aprovado".'
-      },
-      {
-        id: 704,
-        question: 'Por que palavras como "Aprovado" devem ser digitadas entre aspas duplas (" ") dentro da função SE?',
-        options: [
-          'Para que a fonte fique colorida',
-          'Para o Excel entender que se trata de uma cadeia de texto e não de uma fórmula ou nome de variável',
-          'Porque o teclado obriga',
-          'Para deixar o texto em itálico'
+        "id": 701,
+        "question": "Qual função retorna o maior valor numérico encontrado dentro de um intervalo de células?",
+        "options": [
+          "=MAIOR_VALOR()",
+          "=SUPERIOR()",
+          "=TOPO()",
+          "=MÁXIMO()"
         ],
-        correctIndex: 1,
-        explanation: 'Aspas duplas identificam textos literais no Excel. Sem aspas, o Excel procura uma função de mesmo nome e dá erro #NOME?.'
+        "correctIndex": 3,
+        "explanation": "A função =MÁXIMO(intervalo) localiza o número mais alto da seleção."
       },
       {
-        id: 705,
-        question: 'Qual é o resultado da fórmula =SE(10 < 5; 100; 200)?',
-        options: ['100', '200', '10', 'FALSO'],
-        correctIndex: 1,
-        explanation: '10 não é menor do que 5 (é FALSO), portanto o Excel retorna o valor do terceiro argumento: 200.'
-      },
-      {
-        id: 706,
-        question: 'O que o Excel exibe se o teste lógico for FALSO e você tiver omitido o terceiro argumento da função SE?',
-        options: ['0', 'FALSO', 'ERRO', 'Vazio'],
-        correctIndex: 1,
-        explanation: 'Se o argumento valor_se_falso for omitido e o teste resultar em falso, o Excel retorna o valor lógico FALSO.'
-      },
-      {
-        id: 707,
-        question: 'Qual é a representação correta do operador "maior ou igual a" no Excel?',
-        options: ['=>', '>=', '≥', '>=='],
-        correctIndex: 1,
-        explanation: 'O sinal de maior vem antes do igual: >=.'
-      },
-      {
-        id: 708,
-        question: 'Qual fórmula concede 10% de bônus sobre o valor da célula B2 apenas se as vendas em B2 forem maiores que 5000, e zero caso contrário?',
-        options: [
-          '=SE(B2 > 5000; B2 * 0,10; 0)',
-          '=SE(B2 = 5000; 10%; 0)',
-          '=B2 * 10% + 5000',
-          '=SE(B2 < 5000; B2 * 0,10; 0)'
+        "id": 702,
+        "question": "Qual é a diferença fundamental entre as funções =CONT.NÚM() e =CONT.VALORES()?",
+        "options": [
+          "CONT.VALORES só conta dinheiro",
+          "CONT.NÚM conta apenas números; CONT.VALORES conta qualquer célula não vazia (números e textos)",
+          "CONT.NÚM é mais rápida",
+          "Não há qualquer diferença entre elas"
         ],
-        correctIndex: 0,
-        explanation: 'Se B2 > 5000, calcula B2 * 0,10 (10%), senão retorna 0.'
+        "correctIndex": 1,
+        "explanation": "CONT.NÚM ignora textos e conta estritamente números. CONT.VALORES conta tudo o que não está vazio."
       },
       {
-        id: 709,
-        question: 'Ao começar a digitar o nome de uma função no Excel, qual tecla autocompleta o nome sugerido?',
-        options: ['Espaço', 'Tab', 'Shift', 'Backspace'],
-        correctIndex: 1,
-        explanation: 'A tecla Tab autocompleta funções a partir da lista suspensa do IntelliSense.'
+        "id": 703,
+        "question": "Qual função conta quantas células em um intervalo estão totalmente em branco (vazias)?",
+        "options": [
+          "=SEM_DADO()",
+          "=VAZIO.TOTAL()",
+          "=CONT.VAZIO() ou =CONTAR.VAZIO()",
+          "=NULO()"
+        ],
+        "correctIndex": 2,
+        "explanation": "A função =CONTAR.VAZIO(intervalo) calcula exatamente as células desprovidas de qualquer conteúdo."
       },
       {
-        id: 710,
-        question: 'A expressão lógica "5 = 5" resulta em qual valor lógico interno no Excel?',
-        options: ['1', 'VERDADEIRO', 'IGUAL', 'CORRETO'],
-        correctIndex: 1,
-        explanation: 'Comparações no Excel retornam os estados booleanos VERDADEIRO ou FALSO.'
+        "id": 704,
+        "question": "Qual fórmula conta quantas vezes a palavra \"Aprovado\" aparece na coluna D (de D2 até D50)?",
+        "options": [
+          "=CONT.SE(D2:D50; \"Aprovado\")",
+          "=SOMASE(D2:D50; \"Aprovado\")",
+          "=SOMA(D2:D50; \"Aprovado\")",
+          "=CONTAR(D2:D50 = \"Aprovado\")"
+        ],
+        "correctIndex": 0,
+        "explanation": "A função =CONT.SE(intervalo; critério) realiza a contagem sob critérios textuais ou numéricos."
+      },
+      {
+        "id": 705,
+        "question": "Como deve ser escrito o critério para contar números maiores que 50 na função CONT.SE?",
+        "options": [
+          ">50",
+          "MaiorQue(50)",
+          "\">50\"",
+          "50>"
+        ],
+        "correctIndex": 2,
+        "explanation": "Operadores condicionais em funções como CONT.SE devem ser envolvidos por aspas duplas: \" >50\"."
+      },
+      {
+        "id": 706,
+        "question": "Qual é a estrutura correta dos argumentos da função =SOMASE?",
+        "options": [
+          "=SOMASE([intervalo_soma]; critérios; intervalo)",
+          "=SOMASE(critérios; intervalo)",
+          "=SOMASE(soma; teste; resultado)",
+          "=SOMASE(intervalo; critérios; [intervalo_soma])"
+        ],
+        "correctIndex": 3,
+        "explanation": "A sintaxe é: =SOMASE(intervalo_do_teste; critério_desejado; [intervalo_com_valores_a_somar])."
+      },
+      {
+        "id": 707,
+        "question": "Qual função calcula o valor da média aritmética de um intervalo desconsiderando células vazias?",
+        "options": [
+          "=MEDIANA()",
+          "=MÉDIA()",
+          "=MÉDIA.POND()",
+          "=DIVISÃO()"
+        ],
+        "correctIndex": 1,
+        "explanation": "A função =MÉDIA(intervalo) calcula a média aritmética dos valores numéricos informados."
+      },
+      {
+        "id": 708,
+        "question": "Qual função calcula a média aritmética somente dos itens que cumprem determinada condição?",
+        "options": [
+          "=MÉDIASE()",
+          "=MÉDIA.COND()",
+          "=SE.MÉDIA()",
+          "=MÉDIA.SELETIVA()"
+        ],
+        "correctIndex": 0,
+        "explanation": "A função =MÉDIASE(intervalo; critério; [intervalo_média]) calcula médias sob filtros condicionais."
+      },
+      {
+        "id": 709,
+        "question": "Se a célula C1 tem o valor 10, C2 tem \"CETEP\" e C3 está em branco, qual o resultado de =CONT.NÚM(C1:C3)?",
+        "options": [
+          "3",
+          "2",
+          "0",
+          "1"
+        ],
+        "correctIndex": 3,
+        "explanation": "Apenas a célula C1 contém um número; C2 é texto e C3 está vazia, logo o resultado é 1."
+      },
+      {
+        "id": 710,
+        "question": "Qual função do Excel retorna o menor valor numérico de uma série de dados?",
+        "options": [
+          "=MENOR_NUMERO()",
+          "=BAIXO()",
+          "=MÍNIMO()",
+          "=REDUZIDO()"
+        ],
+        "correctIndex": 2,
+        "explanation": "A função =MÍNIMO(intervalo) extrai o menor valor da lista analisada."
       }
     ]
   },
   {
-    id: 8,
-    lessonNumber: 8,
-    title: 'Lógica Condicional Avançada: SE Aninhado, E, OU e SEERRO',
-    module: 'Módulo 2: Manipulação de Dados, Textos e Datas',
-    duration: '35 min',
-    summary: 'Múltiplas condições na mesma fórmula. Funções E(), OU(), aninhamento de testes e blindagem de planilhas com SEERRO.',
-    videoUrl: 'https://www.youtube.com/embed/s5tq0jN68zQ',
-    videoTitle: 'Aula 08: SE Aninhado, Funções E, OU e Tratamento de Erros com SEERRO',
-    videoHighlights: [
-      'SE Aninhado para mais de duas saídas (Aprovado, Recuperação, Reprovado)',
-      'A função E() para exigir todas as condições verdadeiras',
-      'A função OU() para exigir pelo menos uma condição verdadeira',
-      'Tratamento profissional de erros com a função SEERRO()'
+    "id": 8,
+    "lessonNumber": 8,
+    "title": "Aula 08: Formatação Condicional e Destaques Visuais",
+    "module": "Módulo 4: Análise Estatística e Formatação Avançada",
+    "duration": "28 min",
+    "summary": "Aprenda a destacar dados visualmente com Formatação Condicional: regras de maior/menor que, texto que contém, barras de dados dinâmicas, escalas de cor e conjuntos de ícones.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/BmzcDLSvOWg",
+    "videoTitle": "Aula 09 - Formatação Condicional - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "Regras de Realce de Células (Maior que, Menor que, Está Entre, Valores Duplicados)",
+      "Regras de Primeiros e Últimos (10 Primeiros Itens, Acima da Média)",
+      "Barras de Dados, Escalas de Cor e Conjuntos de Ícones (Semáforos)",
+      "Gerenciador de Regras de Formatação Condicional e limpeza de regras"
     ],
-    theoryContent: {
-      introduction: 'No dia a dia profissional, decisões raramente são binárias. Frequentemente temos 3 ou mais faixas de classificação (ex: Ótimo, Bom, Regular, Ruim) ou precisamos exigir que dois critérios aconteçam ao mesmo tempo (ex: Nota >= 7 E Frequência >= 75%). Para resolver esses cenários, utilizamos o aninhamento de funções SE e combinamos operadores lógicos com as funções E e OU.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "A Formatação Condicional é uma das ferramentas mais impactantes do Excel para tomada rápida de decisões. Em vez de ler linha por linha de uma tabela com centenas de registros, a formatação condicional aplica cores de preenchimento, fontes em negrito ou ícones automaticamente com base no valor de cada célula.",
+      "keyConcepts": [
         {
-          title: 'Função E(cond1; cond2; ...)',
-          description: 'Retorna VERDADEIRO apenas se TODOS os testes forem simultaneamente verdadeiros. Se um único falhar, retorna FALSO.',
-          formulaOrExample: '=SE(E(Nota>=7; Frequência>=75); "Aprovado"; "Reprovado")'
+          "title": "Regras de Realce de Células",
+          "description": "Permite pintar células que satisfazem condições diretas: É Maior Do Que, É Menor Do Que, Está Entre, É Igual A, Texto que Contém (ex: destacar todas as células com a palavra \"Reprovado\" em vermelho suave) e Valores Duplicados."
         },
         {
-          title: 'Função OU(cond1; cond2; ...)',
-          description: 'Retorna VERDADEIRO se PELO MENOS UM dos testes for verdadeiro. Só retorna FALSO se todas as condições falharem.',
-          formulaOrExample: '=SE(OU(Vendas>10000; ClientesNovos>=5); "Bônus Concedido"; "Sem Bônus")'
+          "title": "Barras de Dados",
+          "description": "Desenha uma barra horizontal colorida dentro da própria célula, cujo comprimento é proporcional ao número contido nela, simulando um minigráfico de barras direto na tabela."
         },
         {
-          title: 'Função SEERRO(cálculo; valor_se_erro)',
-          description: 'Mascara e protege a planilha contra erros visuais como #N/D, #DIV/0! ou #VALOR!. Se o cálculo der certo, exibe o resultado. Se der erro, exibe o valor alternativo (ex: 0 ou "-").',
-          formulaOrExample: '=SEERRO(A1/B1; 0)'
+          "title": "Escalas de Cor",
+          "description": "Aplica um gradiente de cores térmicas (ex: verde para valores altos, amarelo para intermediários e vermelho para valores baixos), proporcionando uma visão de mapa de calor (heatmap)."
+        },
+        {
+          "title": "Conjuntos de Ícones (Semáforos)",
+          "description": "Insere símbolos visuais como círculos verdes, amarelos e vermelhos, bandeiras ou setas indicativas de crescimento e queda com base em percentis ou valores fixos."
         }
       ],
-      stepByStep: [
-        'Identifique o número de saídas possíveis: se você tem 3 resultados, precisará de 2 funções SE.',
-        'Escreva o primeiro teste mais rigoroso: =SE(D2>=7; "Aprovado";',
-        'No argumento valor_se_falso, abra outro SE: SE(D2>=5; "Recuperação"; "Reprovado"))',
-        'Conte quantos parênteses foram abertos e feche todos no final.',
-        'Para tratar divisões ou buscas, envolva a fórmula inteira com =SEERRO(sua_formula; "Valor Não Encontrado").'
+      "stepByStep": [
+        "Selecione a coluna de notas dos alunos (ex: C2:C40).",
+        "Na guia Página Inicial, clique em \"Formatação Condicional\" -> \"Regras de Realce das Células\" -> \"É Menor do que...\".",
+        "Digite 7 e escolha o preenchimento \"Preenchimento Vermelho Claro com Texto Vermelho Escuro\". Clique em OK.",
+        "Selecione novamente o intervalo e adicione outra regra: \"É Maior do que...\" 6,9 com \"Preenchimento Verde Claro com Texto Verde Escuro\".",
+        "Abra \"Gerenciar Regras\" para visualizar todas as regras ativas na seleção e ajustar suas prioridades."
       ],
-      keyboardShortcuts: [
-        { keys: 'F9', action: 'Avaliar uma parte selecionada da fórmula para ver o resultado parcial na barra' },
-        { keys: 'Ctrl + Z', action: 'Desfazer a avaliação de F9 antes de apertar Enter' },
-        { keys: 'Alt + Enter', action: 'Inserir uma quebra de linha na Barra de Fórmulas para organizar fórmulas longas' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Alt + C + L + R",
+          "action": "Abre a lista de regras de Formatação Condicional pelo teclado"
+        },
+        {
+          "keys": "Alt + C + L + C",
+          "action": "Abre o menu para Limpar Regras da planilha inteira"
+        }
       ],
-      proTip: 'Aperte Alt + Enter dentro da Barra de Fórmulas para quebrar linhas e identar cada nível da sua função SE aninhada. Isso torna fórmulas gigantes extremamente fáceis de ler e dar manutenção!',
-      commonErrors: 'Fechar os parênteses no lugar errado ao aninhar o segundo SE. Lembre-se: o segundo SE deve ser inserido como argumento do primeiro, sem o sinal de igual.'
+      "proTip": "Para identificar rapidamente se existem CPFs, códigos de matrícula ou e-mails cadastrados em duplicidade na sua base, selecione a coluna inteira, vá em Formatação Condicional -> Regras de Realce de Células -> Valores Duplicados. O Excel pintará instantaneamente todos os cadastros repetidos!",
+      "commonErrors": "Criar múltiplas regras sobrepostas sem gerenciar as ordens de precedência ou esquecer de limpar regras antigas, deixando a planilha lenta e visualmente confusa."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 801,
-        question: 'Quando a função =E(teste1; teste2) retorna VERDADEIRO?',
-        options: [
-          'Quando pelo menos um dos testes for verdadeiro',
-          'Apenas quando TODOS os testes dentro dela forem simultaneamente verdadeiros',
-          'Quando ambos forem falsos',
-          'Nunca retorna verdadeiro'
+        "id": 801,
+        "question": "O que faz a ferramenta de \"Formatação Condicional\" no Excel?",
+        "options": [
+          "Muda a formatação visual (cores, bordas, ícones) automaticamente conforme o valor contido na célula",
+          "Altera o valor matemático das células sem avisar",
+          "Exclui células com notas baixas",
+          "Cria uma nova aba na pasta de trabalho"
         ],
-        correctIndex: 1,
-        explanation: 'A função E() é restritiva: exige que 100% dos testes sejam verdadeiros.'
+        "correctIndex": 0,
+        "explanation": "A Formatação Condicional altera a estética da célula dinamicamente baseada em critérios lógicos."
       },
       {
-        id: 802,
-        question: 'Quando a função =OU(teste1; teste2) retorna VERDADEIRO?',
-        options: [
-          'Apenas se todos os testes forem falsos',
-          'Se pelo menos uma das condições for verdadeira',
-          'Somente se ambas forem números pares',
-          'Apenas no final da planilha'
+        "id": 802,
+        "question": "Onde se localiza o botão \"Formatação Condicional\" na interface padrão do Excel?",
+        "options": [
+          "Na Guia Arquivo",
+          "Na Guia Revisão",
+          "Na Guia Página Inicial, no grupo Estilo",
+          "Na Barra de Status"
         ],
-        correctIndex: 1,
-        explanation: 'A função OU() é inclusiva: basta que uma condição seja satisfeita para retornar VERDADEIRO.'
+        "correctIndex": 2,
+        "explanation": "Está situado no grupo Estilo da guia Página Inicial."
       },
       {
-        id: 803,
-        question: 'Para classificar alunos entre Aprovado, Recuperação e Reprovado (3 resultados possíveis), de quantas funções SE aninhadas precisamos no mínimo?',
-        options: ['1 função SE', '2 funções SE', '3 funções SE', '5 funções SE'],
-        correctIndex: 1,
-        explanation: 'A regra é: Número de funções SE = Número de resultados possíveis - 1 (3 - 1 = 2).'
-      },
-      {
-        id: 804,
-        question: 'Para que serve a função =SEERRO(valor; valor_se_erro)?',
-        options: [
-          'Para provocar erros na planilha propositalmente',
-          'Para capturar e substituir mensagens de erro do Excel por um valor amigável (como 0 ou texto)',
-          'Para enviar um e-mail de alerta',
-          'Para formatar a célula em vermelho'
+        "id": 803,
+        "question": "Qual regra de realce é mais indicada para encontrar cadastros ou e-mails repetidos por engano em uma coluna?",
+        "options": [
+          "Texto que Contém",
+          "Valores Duplicados",
+          "Está Entre",
+          "Menor do que"
         ],
-        correctIndex: 1,
-        explanation: 'SEERRO intercepta erros como #DIV/0! e #N/D, retornando um resultado alternativo limpo.'
+        "correctIndex": 1,
+        "explanation": "A opção \"Valores Duplicados\" identifica e colore automaticamente dados que se repetem."
       },
       {
-        id: 805,
-        question: 'Qual é o resultado de =SEERRO(100/0; "Erro no Cálculo")?',
-        options: ['#DIV/0!', '"Erro no Cálculo"', '0', '100'],
-        correctIndex: 1,
-        explanation: 'Como 100/0 gera divisão por zero (#DIV/0!), o SEERRO captura o erro e retorna "Erro no Cálculo".'
-      },
-      {
-        id: 806,
-        question: 'Qual fórmula aprova um aluno somente se sua Nota (A1) for >= 7 E sua Frequência (B1) for >= 75%?',
-        options: [
-          '=SE(OU(A1>=7; B1>=0,75); "Aprovado"; "Reprovado")',
-          '=SE(E(A1>=7; B1>=0,75); "Aprovado"; "Reprovado")',
-          '=SE(A1+B1 >= 75; "Aprovado"; "Reprovado")',
-          '=E(SE(A1>=7); SE(B1>=75))'
+        "id": 804,
+        "question": "O que o recurso de \"Barras de Dados\" exibe dentro da célula?",
+        "options": [
+          "Um código de barras para leitura ótica",
+          "Um link para um site externo",
+          "Uma mensagem de erro",
+          "Uma barra colorida proporcional ao valor numérico da célula"
         ],
-        correctIndex: 1,
-        explanation: 'Usa-se a combinação SE + E: =SE(E(A1>=7; B1>=0,75); "Aprovado"; "Reprovado").'
+        "correctIndex": 3,
+        "explanation": "As Barras de Dados preenchem a célula com uma barra cujo tamanho reflete a magnitude do número."
       },
       {
-        id: 807,
-        question: 'Qual atalho dentro da Barra de Fórmulas cria uma quebra de linha para organizar fórmulas aninhadas?',
-        options: ['Enter', 'Alt + Enter', 'Ctrl + Enter', 'Shift + Enter'],
-        correctIndex: 1,
-        explanation: 'Alt + Enter insere uma quebra de linha visual dentro da célula ou na barra de fórmulas.'
-      },
-      {
-        id: 808,
-        question: 'Qual é o resultado da expressão lógica: =OU(10 > 20; 5 = 5)?',
-        options: ['FALSO', 'VERDADEIRO', '#VALOR!', '0'],
-        correctIndex: 1,
-        explanation: 'Embora 10 > 20 seja falso, 5 = 5 é verdadeiro. Como é a função OU, o resultado final é VERDADEIRO.'
-      },
-      {
-        id: 809,
-        question: 'Se na função =SEERRO(A1/B1; 0) o valor de A1 for 50 e B1 for 2, qual será o resultado?',
-        options: ['0', '25', '#DIV/0!', '50'],
-        correctIndex: 1,
-        explanation: 'Como não há erro (50 / 2 = 25), o SEERRO retorna o resultado matemático normal: 25.'
-      },
-      {
-        id: 810,
-        question: 'Ao aninhar uma segunda função SE dentro da primeira, devemos colocar o sinal de igual (=) antes do segundo SE?',
-        options: [
-          'Sim, sempre',
-          'Não, o sinal de igual só deve ser colocado uma única vez no início da fórmula',
-          'Tanto faz',
-          'Apenas se a planilha for salva na nuvem'
+        "id": 805,
+        "question": "Qual recurso de formatação condicional simula um mapa de calor com gradientes bicolores ou tricolores?",
+        "options": [
+          "Escalas de Cor",
+          "Pincel de Cor",
+          "Tinta Dinâmica",
+          "Filtro Térmico"
         ],
-        correctIndex: 1,
-        explanation: 'O sinal de igual só é inserido no começo absoluto da fórmula; funções aninhadas entram diretamente pelo nome.'
+        "correctIndex": 0,
+        "explanation": "As Escalas de Cor utilizam transições suaves de cores para indicar valores altos, médios e baixos."
+      },
+      {
+        "id": 806,
+        "question": "Para sinalizar metas atingidas, atenção ou risco através de círculos verde, amarelo e vermelho, qual categoria deve ser escolhida?",
+        "options": [
+          "Regras de Primeiros",
+          "Conjuntos de Ícones",
+          "Superfície",
+          "Linhas de Grade"
+        ],
+        "correctIndex": 1,
+        "explanation": "Conjuntos de Ícones oferecem semáforos, setas e formas indicativas de status."
+      },
+      {
+        "id": 807,
+        "question": "O que acontece com a formatação condicional se o valor de uma célula for alterado pelo usuário?",
+        "options": [
+          "Nada muda, a cor fica congelada para sempre",
+          "A planilha é bloqueada com senha",
+          "A formatação visual se adapta instantaneamente ao novo valor da célula",
+          "A fórmula é apagada"
+        ],
+        "correctIndex": 2,
+        "explanation": "A formatação é 100% dinâmica e recalcula a apresentação visual em tempo real."
+      },
+      {
+        "id": 808,
+        "question": "Onde podemos visualizar, editar a ordem de prioridade ou excluir regras de formatação condicional existentes?",
+        "options": [
+          "No Bloco de Notas",
+          "No Windows Explorer",
+          "Na Lixeira",
+          "No Gerenciador de Regras de Formatação Condicional"
+        ],
+        "correctIndex": 3,
+        "explanation": "O Gerenciador de Regras lista todas as regras ativas na seleção ou na planilha inteira para controle total."
+      },
+      {
+        "id": 809,
+        "question": "Qual regra destaca rapidamente os 10 maiores faturamentos de uma lista com 500 vendedores?",
+        "options": [
+          "Valores Únicos",
+          "10 Primeiros Itens",
+          "Acima da Média",
+          "Texto Específico"
+        ],
+        "correctIndex": 1,
+        "explanation": "Regras de Primeiros/Últimos -> 10 Primeiros Itens destaca os líderes do ranking."
+      },
+      {
+        "id": 810,
+        "question": "Qual é o caminho mais seguro para remover todas as formatações condicionais de uma seleção sem apagar os dados?",
+        "options": [
+          "Formatação Condicional -> Limpar Regras -> Limpar Regras das Células Selecionadas",
+          "Deletar as células",
+          "Fechar o Excel sem salvar",
+          "Digitar zero em tudo"
+        ],
+        "correctIndex": 0,
+        "explanation": "Limpar Regras remove o efeito visual condicional preservando todos os dados intactos."
       }
     ]
   }

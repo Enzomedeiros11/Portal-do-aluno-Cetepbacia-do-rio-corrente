@@ -307,7 +307,7 @@ export default function App() {
   };
 
   useEffect(() => {
-    document.title = "PORTAL DO ALUNO CETEP";
+    document.title = "CETEP";
   }, []);
 
   const login = (authenticatedUser: User) => {
@@ -322,13 +322,21 @@ export default function App() {
   const register = (newUser: User) => {
     try {
       setCurrentUser(newUser);
-      localStorage.setItem('cetep_user', JSON.stringify(newUser));
+      try {
+        localStorage.setItem('cetep_user', JSON.stringify(newUser));
+      } catch (err) {
+        console.warn('LocalStorage save cetep_user error:', err);
+      }
       const currentList = Array.isArray(allUsers) ? allUsers : [];
-      const updatedList = [...currentList.filter(u => u.id !== newUser.id), newUser];
+      const updatedList = [...currentList.filter(u => u?.id !== newUser.id), newUser];
       setAllUsers(updatedList);
-      localStorage.setItem('cetep_all_users', JSON.stringify(updatedList));
+      try {
+        localStorage.setItem('cetep_all_users', JSON.stringify(updatedList));
+      } catch (err) {
+        console.warn('LocalStorage save cetep_all_users error:', err);
+      }
     } catch (e) {
-      console.warn('LocalStorage save warning on register:', e);
+      console.warn('Registration state handler warning:', e);
     }
   };
   
@@ -451,10 +459,6 @@ export default function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
-          
-          <footer style={{ position: 'fixed', bottom: '10px', width: '100%', textAlign: 'center', color: '#aaa', zIndex: 100, pointerEvents: 'none' }}>
-            PORTAL DO ALUNO CETEP 🚀
-          </footer>
         </div>
       </Router>
     </ErrorBoundary>

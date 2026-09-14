@@ -343,7 +343,7 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                     <div className="flex items-center gap-2 mb-1 px-1 justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] font-bold text-slate-900 uppercase tracking-tight">
-                          {msg.canal === 'Geral' ? '📢 COMUNICADO GERAL' : msg.usuario}
+                          {msg.canal === 'Geral' ? 'COMUNICADO GERAL' : msg.usuario}
                         </span>
                         {msg.email?.toLowerCase() === 'enzomedeirosdasilva6@gmail.com' && (
                           <span className="px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[9px] font-black rounded">PROFE ENZO</span>
@@ -510,8 +510,8 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
             <div>
               <p className="text-xs font-extrabold text-slate-900">
                 {isEnzoOrTeacher 
-                  ? '👑 Acesso Especial Concedido (Professor / Admin Enzo Medeiros)' 
-                  : `🎓 Aluno registrado no ${user?.grade || 'Ano Atual'} • ${user?.course || 'Curso Técnico'}`}
+                  ? 'Acesso Especial Concedido (Professor / Admin Enzo Medeiros)' 
+                  : `Aluno registrado no ${user?.grade || 'Ano Atual'} • ${user?.course || 'Curso Técnico'}`}
               </p>
               <p className="text-[11px] text-slate-500 font-medium mt-0.5">
                 {isEnzoOrTeacher 

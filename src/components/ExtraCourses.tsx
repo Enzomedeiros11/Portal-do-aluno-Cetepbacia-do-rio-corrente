@@ -39,8 +39,8 @@ export default function ExtraCourses() {
     {
       id: 'excel',
       title: 'Excel do Zero ao Avançado',
-      desc: 'Curso completo com 16 aulas estruturadas: 1º Vídeo aula, 2º Aula teórica com fórmulas e atalhos, e 3º Questionário com 10 questões por aula.',
-      duration: '16 Aulas (40h)',
+      desc: 'Curso completo com Introdução + 20 aulas estruturadas: 1º Vídeo aula (Créditos: Prime Cursos do Brasil), 2º Aula teórica com fórmulas e atalhos, e 3º Questionário com 10 questões por aula.',
+      duration: '20 Aulas (50h)',
       rating: '5.0',
       difficulty: 'Do Zero ao Avançado',
       hasFullContent: true

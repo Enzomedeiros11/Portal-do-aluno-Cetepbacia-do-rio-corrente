@@ -80,11 +80,11 @@ export async function requestPushNotificationPermission(user?: { id?: string; em
         updatedAt: new Date().toISOString()
       }, { merge: true });
 
-      toast.success('🔔 Notificações Push ativadas! Você receberá avisos sobre novos comunicados.');
+      toast.success('Notificações Push ativadas! Você receberá avisos sobre novos comunicados.');
       
       // Test notification
       if (Notification.permission === 'granted') {
-        new Notification('🔔 Notificações CETEP Ativadas', {
+        new Notification('Notificações CETEP Ativadas', {
           body: 'Você receberá avisos em tempo real quando professores postarem novos comunicados!',
           icon: '/favicon.ico'
         });
@@ -113,7 +113,7 @@ export function listenForComunicadosPushNotifications(currentUserEmail?: string)
     if (messaging) {
       onMessage(messaging, (payload) => {
         console.log('Foreground FCM Message received:', payload);
-        const title = payload.notification?.title || '📢 Novo Comunicado Oficial CETEP';
+        const title = payload.notification?.title || 'Novo Comunicado Oficial CETEP';
         const body = payload.notification?.body || 'Um novo comunicado foi postado no portal.';
 
         if ('Notification' in window && Notification.permission === 'granted') {
@@ -146,7 +146,7 @@ export function listenForComunicadosPushNotifications(currentUserEmail?: string)
         // Check if message was posted recently
         if (data.data && new Date(data.data) >= new Date(initTime)) {
           const author = data.usuario || 'Secretaria / Professor';
-          const title = `📢 Novo Comunicado de ${author}`;
+          const title = `Novo Comunicado de ${author}`;
           const body = data.texto || 'Confira o novo comunicado no portal escolar.';
 
           // 1. Native Browser Push Notification

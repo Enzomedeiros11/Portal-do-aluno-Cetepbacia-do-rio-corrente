@@ -140,11 +140,11 @@ export default function Contact({ currentUser }: ContactProps) {
   };
 
   const quickPrompts = [
-    { label: '💡 Explicar lógica de programação', query: 'Pode me explicar os conceitos básicos de lógica de programação com exemplos em JavaScript?' },
-    { label: '🩺 Cálculo de dose (Enfermagem)', query: 'Como faço para calcular o gotejamento de soro e doses de medicação na enfermagem?' },
-    { label: '📊 Dicas de Gestão e Administração', query: 'Quais são os principais conceitos de administração e marketing para cursos técnicos?' },
-    { label: '✍️ Estrutura de Redação', query: 'Como estruturar uma tese e argumentos fortes para uma redação escolar?' },
-    { label: '📐 Resolução de Exatas passo a passo', query: 'Pode me ensinar como resolver regra de três composta e equações?' }
+    { label: 'Explicar lógica de programação', query: 'Pode me explicar os conceitos básicos de lógica de programação com exemplos em JavaScript?' },
+    { label: 'Cálculo de dose (Enfermagem)', query: 'Como faço para calcular o gotejamento de soro e doses de medicação na enfermagem?' },
+    { label: 'Dicas de Gestão e Administração', query: 'Quais são os principais conceitos de administração e marketing para cursos técnicos?' },
+    { label: 'Estrutura de Redação', query: 'Como estruturar uma tese e argumentos fortes para uma redação escolar?' },
+    { label: 'Resolução de Exatas passo a passo', query: 'Pode me ensinar como resolver regra de três composta e equações?' }
   ];
 
   return (

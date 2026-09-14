@@ -83,7 +83,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             </div>
 
             {this.state.error && (
-              <details className="mt-6 text-left border-t border-slate-100 pt-4">
+              <details open className="mt-6 text-left border-t border-slate-100 pt-4">
                 <summary className="text-[10px] font-bold text-slate-400 cursor-pointer uppercase tracking-wider">
                   Detalhes técnicos do erro
                 </summary>

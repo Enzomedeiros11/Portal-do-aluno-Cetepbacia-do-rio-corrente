@@ -2,579 +2,758 @@ import { ExcelLesson } from './excelTypes';
 
 export const lessons1to4: ExcelLesson[] = [
   {
-    id: 1,
-    lessonNumber: 1,
-    title: 'Introdução ao Excel e Anatomia da Interface',
-    module: 'Módulo 1: Fundamentos e Navegação',
-    duration: '22 min',
-    summary: 'Compreenda a estrutura de pastas de trabalho, linhas, colunas, células, faixa de opções e atalhos de navegação essenciais.',
-    videoUrl: 'https://www.youtube.com/embed/z5eN6Q0pD1o',
-    videoTitle: 'Aula 01: Primeiros Passos no Excel e Interface Completa',
-    videoHighlights: [
-      'Estrutura de Pastas de Trabalho (.xlsx) e Planilhas',
-      'Faixa de Opções, Guias e Barra de Acesso Rápido',
-      'Barra de Fórmulas e Caixa de Nome',
-      'Navegação rápida com teclado (Ctrl + Setas)'
+    "id": 1,
+    "lessonNumber": 1,
+    "title": "Aula 01: Interface do Excel e Navegação",
+    "module": "Módulo 1: Fundamentos e Interface",
+    "duration": "22 min",
+    "summary": "Aprenda detalhadamente como funciona a interface moderna do Excel: Faixa de Opções, Guias, Barra de Fórmulas, Caixa de Nome, linhas, colunas, células e atalhos rápidos de navegação.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/J9jSCL61a4k",
+    "videoTitle": "Aula 02 - Interface do Excel - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "Faixa de Opções e organização por guias temáticas",
+      "Caixa de Nome e Barra de Fórmulas",
+      "Dimensões da planilha: 1.048.576 linhas e 16.384 colunas (A a XFD)",
+      "Barra de Status e atalhos rápidos de movimentação pelo teclado"
     ],
-    theoryContent: {
-      introduction: 'O Microsoft Excel é a ferramenta de planilhas mais utilizada no mundo corporativo e acadêmico. Uma planilha eletrônica é organizada em uma grade bidimensional composta por linhas identificadas por números (1 a 1.048.576) e colunas identificadas por letras (A a XFD). A interseção de uma linha com uma coluna forma uma célula (como A1, C15, Z100), que armazena dados, rótulos ou fórmulas.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "A interface do Microsoft Excel foi projetada para oferecer acesso rápido e intuitivo a centenas de ferramentas analíticas. O ambiente de trabalho é centrado na Faixa de Opções (Ribbon) no topo, na Barra de Fórmulas logo abaixo e em uma imensa grade bidimensional composta por colunas (identificadas por letras de A a XFD) e linhas (identificadas por números de 1 a 1.048.576). Conhecer cada centímetro da interface é o primeiro passo para ganhar velocidade e confiança profissional.",
+      "keyConcepts": [
         {
-          title: 'Célula Ativa e Caixa de Nome',
-          description: 'A célula que está atualmente selecionada com a borda destacada chama-se Célula Ativa. A Caixa de Nome, localizada à esquerda da Barra de Fórmulas, exibe o endereço exato dessa célula ou intervalo nomeado.',
-          formulaOrExample: 'Endereço: B4 (Coluna B, Linha 4)'
+          "title": "Faixa de Opções e Guias",
+          "description": "A barra superior onde as ferramentas são agrupadas por contexto: Página Inicial (formatação e edição rápida), Inserir (gráficos, tabelas e ilustrações), Fórmulas (biblioteca de cálculos), Dados (filtros e validações), Revisão (ortografia e proteção) e Exibir (modos de tela e linhas de grade)."
         },
         {
-          title: 'Barra de Fórmulas',
-          description: 'Espaço localizado acima da grade onde o conteúdo real da célula é exibido e editado. Enquanto a célula na grade pode mostrar o resultado numérico calculado, a barra de fórmulas mostra o cálculo original.',
-          formulaOrExample: 'Exemplo na célula: 50 | Barra de Fórmulas: =25*2'
+          "title": "Caixa de Nome e Célula Ativa",
+          "description": "A Célula Ativa é aquela que está atualmente selecionada com a borda em destaque. A Caixa de Nome, situada no canto superior esquerdo da grade, exibe o endereço exato dessa célula ou o nome do intervalo selecionado.",
+          "formulaOrExample": "Endereço: B4 (Coluna B, Linha 4)"
         },
         {
-          title: 'Pasta de Trabalho vs. Planilha',
-          description: 'O arquivo completo salvo no computador (.xlsx) é chamado de Pasta de Trabalho. Dentro de uma pasta de trabalho, podemos criar múltiplas abas chamadas Planilhas (Plan1, Plan2, etc.).'
+          "title": "Barra de Fórmulas",
+          "description": "Espaço onde você visualiza e edita o conteúdo real de uma célula (o valor bruto digitado ou a fórmula que gerou o cálculo exibido na grade).",
+          "formulaOrExample": "Na célula vê-se: 150 | Na Barra de Fórmulas: =50*3"
+        },
+        {
+          "title": "Barra de Status",
+          "description": "Localizada na parte inferior da janela do Excel. Quando você seleciona células com números, ela calcula instantaneamente a Média, Contagem e Soma sem que você precise digitar nenhuma fórmula, além de conter os controles de Zoom."
         }
       ],
-      stepByStep: [
-        'Abra o Microsoft Excel e selecione "Pasta de trabalho em branco".',
-        'Observe a Faixa de Opções no topo (Página Inicial, Inserir, Fórmulas, Dados, etc.).',
-        'Clique na célula A1 e digite "Portal CETEP", pressionando Enter para descer para a célula A2.',
-        'Use as setas do teclado ou as teclas de navegação para se mover entre as células.',
-        'Clique duas vezes na guia inferior "Plan1" para renomeá-la para "Dados 2026".'
+      "stepByStep": [
+        "Abra o Excel e observe a Faixa de Opções no topo.",
+        "Clique na célula A1, digite seu nome e pressione Enter para descer para a célula A2.",
+        "Pressione Tab para avançar para a célula B2 e Shift + Tab para retornar à A2.",
+        "Selecione a Caixa de Nome no topo esquerdo, digite \"Z50\" e tecle Enter para saltar diretamente para aquela célula distante.",
+        "Pressione Ctrl + Home para retornar instantaneamente para a célula A1 da planilha."
       ],
-      keyboardShortcuts: [
-        { keys: 'Ctrl + O', action: 'Criar uma nova pasta de trabalho em branco' },
-        { keys: 'Ctrl + B', action: 'Salvar a pasta de trabalho atual' },
-        { keys: 'Ctrl + Setas', action: 'Navegar até a última célula preenchida na direção selecionada' },
-        { keys: 'Ctrl + Home', action: 'Retornar imediatamente à célula A1 da planilha' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Ctrl + Home",
+          "action": "Retorna imediatamente para a primeira célula (A1)"
+        },
+        {
+          "keys": "Ctrl + End",
+          "action": "Vai para a última célula utilizada na planilha"
+        },
+        {
+          "keys": "Ctrl + Setas",
+          "action": "Salta até o início ou fim de blocos preenchidos de dados"
+        },
+        {
+          "keys": "Shift + Espaço",
+          "action": "Seleciona a linha inteira da célula atual"
+        },
+        {
+          "keys": "Ctrl + Espaço",
+          "action": "Seleciona a coluna inteira da célula atual"
+        }
       ],
-      proTip: 'Para selecionar todas as células de uma tabela de forma instantânea sem precisar arrastar o mouse, basta clicar em qualquer célula preenchida e pressionar Ctrl + T.',
-      commonErrors: 'Digitar dados e esquecer de pressionar Enter ou Tab, deixando o Excel em modo de edição e travando botões da Faixa de Opções.'
+      "proTip": "Para ocultar temporariamente a Faixa de Opções e ganhar mais espaço visual na tela da planilha, basta dar um duplo clique sobre o nome de qualquer guia ou pressionar o atalho Ctrl + F1.",
+      "commonErrors": "Digitar uma informação e clicar diretamente em outro comando antes de teclar Enter ou Tab, mantendo o Excel em modo de edição e bloqueando diversos botões da Faixa de Opções."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 101,
-        question: 'Qual é o nome dado à interseção entre uma coluna e uma linha no Excel?',
-        options: ['Segmento', 'Célula', 'Bloco', 'Vetor'],
-        correctIndex: 1,
-        explanation: 'A interseção de uma linha com uma coluna é chamada de célula, como a célula A1.'
-      },
-      {
-        id: 102,
-        question: 'Onde no Excel é possível visualizar o endereço da célula que está selecionada no momento?',
-        options: ['Barra de Status', 'Caixa de Nome', 'Barra de Título', 'Painel de Controle'],
-        correctIndex: 1,
-        explanation: 'A Caixa de Nome fica à esquerda da Barra de Fórmulas e mostra o endereço da célula ativa.'
-      },
-      {
-        id: 103,
-        question: 'Qual é a extensão padrão de arquivo de uma pasta de trabalho moderna no Excel?',
-        options: ['.doc', '.xlsx', '.pdf', '.txt'],
-        correctIndex: 1,
-        explanation: 'Desde a versão 2007, o Excel utiliza o formato XML compactado com a extensão .xlsx.'
-      },
-      {
-        id: 104,
-        question: 'Qual atalho de teclado salva o arquivo atual no Excel em português?',
-        options: ['Ctrl + S', 'Ctrl + B', 'Ctrl + P', 'Ctrl + Z'],
-        correctIndex: 1,
-        explanation: 'No Excel em português do Brasil, o atalho para Salvar é Ctrl + B (no padrão inglês é Ctrl + S).'
-      },
-      {
-        id: 105,
-        question: 'Quantas linhas uma única planilha do Excel moderno possui?',
-        options: ['65.536', '1.048.576', '500.000', '10.000.000'],
-        correctIndex: 1,
-        explanation: 'O Excel moderno possui exatamente 1.048.576 linhas e 16.384 colunas por planilha.'
-      },
-      {
-        id: 106,
-        question: 'Como as colunas e as linhas são respectivamente identificadas no Excel?',
-        options: [
-          'Linhas por letras e colunas por números',
-          'Colunas por letras e linhas por números',
-          'Ambas por números decimais',
-          'Ambas por caracteres alfabéticos'
+        "id": 101,
+        "question": "Qual é o nome dado ao elemento superior do Excel onde ficam organizadas as guias como Página Inicial, Inserir e Fórmulas?",
+        "options": [
+          "Barra de Tarefas",
+          "Menu Iniciar",
+          "Faixa de Opções (Ribbon)",
+          "Barra de Status"
         ],
-        correctIndex: 1,
-        explanation: 'As colunas são identificadas por letras (A, B, C... XFD) e as linhas por números (1, 2, 3...).'
+        "correctIndex": 2,
+        "explanation": "A Faixa de Opções (Ribbon) é o painel superior principal que reúne todos os comandos e ferramentas em guias temáticas."
       },
       {
-        id: 107,
-        question: 'O que acontece ao pressionar a tecla "Enter" após digitar um valor em uma célula?',
-        options: [
-          'O valor é apagado',
-          'O valor é confirmado e o cursor move-se para a célula de baixo',
-          'A planilha é fechada',
-          'Uma nova planilha é inserida'
+        "id": 102,
+        "question": "Onde na interface do Excel é possível visualizar o endereço da célula ativa no momento?",
+        "options": [
+          "Na Caixa de Nome",
+          "Na Barra de Status",
+          "No Painel de Controle",
+          "Na Barra de Título"
         ],
-        correctIndex: 1,
-        explanation: 'Ao pressionar Enter, o dado é gravado na célula e a seleção desce para a linha imediatamente inferior.'
+        "correctIndex": 0,
+        "explanation": "A Caixa de Nome, localizada à esquerda da Barra de Fórmulas, indica qual célula ou intervalo está selecionado."
       },
       {
-        id: 108,
-        question: 'Qual atalho permite ir diretamente para a célula A1 da planilha ativa?',
-        options: ['Ctrl + Home', 'Ctrl + End', 'Shift + Esc', 'Alt + F4'],
-        correctIndex: 0,
-        explanation: 'Ctrl + Home move imediatamente o foco da seleção para o início da planilha (célula A1).'
-      },
-      {
-        id: 109,
-        question: 'Qual é a diferença fundamental entre uma Pasta de Trabalho e uma Planilha no Excel?',
-        options: [
-          'Não há diferença, são termos exatamente sinônimos',
-          'A Pasta de Trabalho é o arquivo que pode conter várias Planilhas (abas)',
-          'A Planilha é o arquivo e a Pasta é o computador',
-          'A Pasta armazena apenas gráficos e a Planilha armazena apenas números'
+        "id": 103,
+        "question": "Quantas linhas no total existem em uma planilha padrão do Microsoft Excel moderno?",
+        "options": [
+          "65.536 linhas",
+          "500.000 linhas",
+          "100.000 linhas",
+          "1.048.576 linhas"
         ],
-        correctIndex: 1,
-        explanation: 'A Pasta de Trabalho é o arquivo (.xlsx) que agrupa uma ou mais folhas de cálculo (planilhas/abas).'
+        "correctIndex": 3,
+        "explanation": "O Excel moderno (.xlsx) possui exatamente 1.048.576 linhas numeradas sequencialmente."
       },
       {
-        id: 110,
-        question: 'O que a Barra de Fórmulas do Excel exibe?',
-        options: [
-          'Apenas a hora do sistema operacional',
-          'O conteúdo real ou fórmula contida na célula selecionada',
-          'A lista de impressoras disponíveis',
-          'O histórico de senhas do usuário'
+        "id": 104,
+        "question": "Qual é a última coluna disponível em uma planilha padrão do Excel?",
+        "options": [
+          "ZZ",
+          "XFD",
+          "ABC",
+          "ZZZ"
         ],
-        correctIndex: 1,
-        explanation: 'A Barra de Fórmulas exibe o texto, número ou fórmula exata da célula selecionada para edição.'
+        "correctIndex": 1,
+        "explanation": "As colunas vão de A até a coluna XFD (totalizando 16.384 colunas)."
+      },
+      {
+        "id": 105,
+        "question": "Qual é a tecla utilizada para confirmar o valor digitado e avançar uma célula para a DIREITA?",
+        "options": [
+          "Enter",
+          "Espaço",
+          "Esc",
+          "Tab"
+        ],
+        "correctIndex": 3,
+        "explanation": "A tecla Tab desloca a seleção para a célula imediatamente à direita; Shift+Tab move para a esquerda."
+      },
+      {
+        "id": 106,
+        "question": "Qual atalho de teclado leva o cursor imediatamente de volta para a célula A1 da planilha?",
+        "options": [
+          "Ctrl + A",
+          "Alt + F4",
+          "Ctrl + Home",
+          "Ctrl + Z"
+        ],
+        "correctIndex": 2,
+        "explanation": "O atalho Ctrl + Home retorna a seleção para o início da planilha (célula A1)."
+      },
+      {
+        "id": 107,
+        "question": "Ao selecionar um conjunto de células numéricas, onde o Excel exibe automaticamente a Soma, Contagem e Média instantâneas?",
+        "options": [
+          "Na Barra de Status (rodapé)",
+          "Na Barra de Título",
+          "Na Barra de Fórmulas",
+          "Na Guia Arquivo"
+        ],
+        "correctIndex": 0,
+        "explanation": "A Barra de Status, no rodapé inferior direito do Excel, calcula automaticamente estatísticas básicas das células numéricas selecionadas."
+      },
+      {
+        "id": 108,
+        "question": "Qual é a principal função da Barra de Fórmulas no Excel?",
+        "options": [
+          "Exibir o nome do computador do usuário",
+          "Exibir e permitir editar o conteúdo real ou a fórmula da célula ativa",
+          "Conectar o Excel à internet",
+          "Alternar a cor de fundo do Windows"
+        ],
+        "correctIndex": 1,
+        "explanation": "A Barra de Fórmulas mostra a fórmula exata ou o texto inserido na célula, permitindo edição completa."
+      },
+      {
+        "id": 109,
+        "question": "Qual atalho de teclado recolhe ou expande a Faixa de Opções para dar mais visibilidade à planilha?",
+        "options": [
+          "Ctrl + P",
+          "Alt + Tab",
+          "Ctrl + F1",
+          "Ctrl + Shift + L"
+        ],
+        "correctIndex": 2,
+        "explanation": "Ctrl + F1 oculta ou exibe a Faixa de Opções com agilidade."
+      },
+      {
+        "id": 110,
+        "question": "O que acontece ao pressionar a tecla Esc enquanto você está digitando dados em uma célula?",
+        "options": [
+          "A planilha inteira é excluída",
+          "O computador reinicia",
+          "O valor é salvo automaticamente",
+          "A edição atual é cancelada e a célula retorna ao seu valor original anterior"
+        ],
+        "correctIndex": 3,
+        "explanation": "A tecla Esc cancela a digitação ou edição atual sem alterar o conteúdo que já estava salvo na célula."
       }
     ]
   },
   {
-    id: 2,
-    lessonNumber: 2,
-    title: 'Entrada, Tipos de Dados e Formatação Numérica',
-    module: 'Módulo 1: Fundamentos e Navegação',
-    duration: '26 min',
-    summary: 'Aprenda a trabalhar com texto, números, datas, moedas, casas decimais, alinhamentos e estilos profissionais.',
-    videoUrl: 'https://www.youtube.com/embed/Pj15RzBvEFE',
-    videoTitle: 'Aula 02: Formatação Profissional e Tipos de Dados no Excel',
-    videoHighlights: [
-      'Tipos de dados: Texto (esquerda) vs. Números (direita)',
-      'Formatação de Moeda (R$), Porcentagem (%) e Data',
-      'Ajuste de largura de colunas e quebra de texto',
-      'Pincel de Formatação e Estilos de Célula'
+    "id": 2,
+    "lessonNumber": 2,
+    "title": "Aula 02: Formatação Básica de Células",
+    "module": "Módulo 1: Fundamentos e Interface",
+    "duration": "24 min",
+    "summary": "Aprenda a aplicar formatações essenciais de texto, alinhamento, bordas, cores de preenchimento, formatos numéricos (Moeda, Contábil, Porcentagem) e o uso do Pincel de Formatação.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/C5ouQPaCQjM",
+    "videoTitle": "Aula 03 - Formatação Básica - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "Fontes, tamanhos, cores e preenchimento de células",
+      "Alinhamento horizontal, vertical e quebra automática de texto",
+      "Formatos numéricos: Geral, Número, Moeda, Contábil e Porcentagem",
+      "Pincel de Formatação para copiar estilos com agilidade"
     ],
-    theoryContent: {
-      introduction: 'A correta formatação dos dados no Excel é fundamental não apenas para a estética visual, mas para garantir que o software interprete os valores como números calculáveis e não como texto simples. Por padrão, o Excel alinha textos à esquerda e números e datas à direita. Se um número estiver alinhado à esquerda sem formatação explícita, ele provavelmente foi gravado como texto e não participará de somas.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "A formatação correta transforma planilhas amadoras e poluídas em documentos executivos fáceis de ler e compreender. No Excel, formatar uma célula altera apenas a sua aparência visual perante o usuário, mantendo o valor matemático subjacente inalterado para os cálculos.",
+      "keyConcepts": [
         {
-          title: 'Alinhamento Padrão por Tipo',
-          description: 'Textos são automaticamente alinhados à esquerda. Números, moedas, horas e datas são alinhados à direita. Valores lógicos (VERDADEIRO/FALSO) e erros (#VALOR!) são centralizados.',
-          formulaOrExample: 'Texto: "Alunos" (esquerda) | Valor: 1250,50 (direita)'
+          "title": "Tipografia e Bordas",
+          "description": "Ajuste de fontes (Segoe UI, Aptos, Arial, Calibri), pesos (Negrito Ctrl+N, Itálico Ctrl+I) e aplicação de bordas personalizadas (bordas externas espessas, bordas duplas para totalizadores) na guia Página Inicial."
         },
         {
-          title: 'Formatação de Moeda vs. Contábil',
-          description: 'O formato Moeda coloca o símbolo R$ colado ao número. O formato Contábil alinha o R$ no canto esquerdo da célula e os números no canto direito, exibindo o zero como um traço (-).',
-          formulaOrExample: 'Contábil: R$         1.500,00'
+          "title": "Alinhamento e Quebra de Texto",
+          "description": "Organização do conteúdo dentro da célula verticalmente (Superior, Meio, Inferior) e horizontalmente (Esquerda para textos, Direita para números). O comando \"Quebrar Texto Automaticamente\" permite acomodar textos longos em várias linhas dentro da mesma célula sem alargar a coluna."
         },
         {
-          title: 'Pincel de Formatação',
-          description: 'Ferramenta localizada na guia Página Inicial que copia as propriedades visuais (cor, fonte, borda, formato numérico) de uma célula de origem e aplica em uma célula de destino sem alterar seu valor numérico.'
+          "title": "Formatos Numéricos: Moeda vs. Contábil",
+          "description": "O formato Moeda alinha o símbolo monetário (R$) encostado no número, enquanto o formato Contábil fixa o símbolo (R$) alinhado à esquerda da célula e alinha as casas decimais perfeitamente em coluna, exibindo um traço (-) para o valor zero."
+        },
+        {
+          "title": "Pincel de Formatação",
+          "description": "Ferramenta que copia todas as características de estilo (cor, fonte, borda, formato de número) de uma célula de origem para uma ou várias células de destino. Um clique simples copia uma vez; um duplo clique fixa o pincel para copiar em múltiplas células consecutivas."
         }
       ],
-      stepByStep: [
-        'Selecione o intervalo de números a ser formatado (ex: B2:B10).',
-        'Na guia Página Inicial, no grupo Número, clique no menu suspenso e escolha "Moeda" ou "Contábil".',
-        'Use os botões de aumentar ou diminuir casas decimais para definir duas casas após a vírgula.',
-        'Selecione uma célula com a formatação desejada e dê duplo clique no "Pincel de Formatação" para aplicar em vários locais.',
-        'Dê um duplo clique na divisória entre duas colunas para ajustar a largura automaticamente ao maior texto.'
+      "stepByStep": [
+        "Selecione os cabeçalhos da tabela e clique em Negrito (Ctrl + N) e aplique uma cor de preenchimento azul escuro com texto branco.",
+        "Selecione as células com valores financeiros e clique no botão de Formato de Número de Contabilização (R$).",
+        "Selecione uma célula que contenha uma porcentagem (ex: 0,15) e clique no botão Estilo de Porcentagem (%) para exibir 15%.",
+        "Selecione a célula com a formatação desejada, clique duas vezes no ícone do Pincel de Formatação e clique sobre as demais colunas.",
+        "Pressione Esc para desativar o Pincel de Formatação."
       ],
-      keyboardShortcuts: [
-        { keys: 'Ctrl + Shift + $', action: 'Aplicar formatação de Moeda (R$) instantaneamente' },
-        { keys: 'Ctrl + Shift + %', action: 'Aplicar formato de Porcentagem sem casas decimais' },
-        { keys: 'Ctrl + Shift + #', action: 'Aplicar formato de Data (dia-mês-ano)' },
-        { keys: 'Ctrl + 1', action: 'Abrir a janela completa "Formatar Células"' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Ctrl + 1",
+          "action": "Abre a caixa de diálogo completa \"Formatar Células\""
+        },
+        {
+          "keys": "Ctrl + N",
+          "action": "Aplica ou remove o estilo Negrito"
+        },
+        {
+          "keys": "Ctrl + I",
+          "action": "Aplica ou remove o estilo Itálico"
+        },
+        {
+          "keys": "Ctrl + Shift + $",
+          "action": "Aplica imediatamente o formato Moeda (R$)"
+        },
+        {
+          "keys": "Ctrl + Shift + %",
+          "action": "Aplica imediatamente o formato Porcentagem (%)"
+        }
       ],
-      proTip: 'Se uma célula exibir vários símbolos "#####", não se preocupe: isso significa apenas que a coluna está estreita demais para exibir o número ou data. Basta dar um duplo clique na borda da coluna para ajustá-la.',
-      commonErrors: 'Digitar pontos no lugar de vírgulas para casas decimais no padrão brasileiro, fazendo o Excel tratar o número como texto não somável.'
+      "proTip": "Evite o uso excessivo de \"Mesclar e Centralizar\" em tabelas com dados contínuos, pois células mescladas podem prejudicar a ordenação, a filtragem e a seleção de colunas. Em vez disso, prefira o alinhamento \"Centralizar seleção\" na caixa Formatar Células (Ctrl + 1).",
+      "commonErrors": "Digitar manualmente \"R$\" ou \"%\" junto ao número dentro da célula. Isso faz com que o Excel reconheça a célula como texto, impossibilitando que ela seja usada em cálculos matemáticos."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 201,
-        question: 'Como o Excel alinha por padrão valores de texto e valores numéricos nas células?',
-        options: [
-          'Texto à esquerda e números à direita',
-          'Texto à direita e números à esquerda',
-          'Ambos sempre centralizados',
-          'Texto no topo e números na base'
+        "id": 201,
+        "question": "Qual atalho universal no Excel abre a janela completa de \"Formatar Células\"?",
+        "options": [
+          "Ctrl + F",
+          "Ctrl + 1",
+          "Alt + F4",
+          "Ctrl + Enter"
         ],
-        correctIndex: 0,
-        explanation: 'Por padrão, o Excel alinha textos à esquerda e números/datas à direita da célula.'
+        "correctIndex": 1,
+        "explanation": "Ctrl + 1 é o atalho mais importante para abrir o menu detalhado de Formatar Células."
       },
       {
-        id: 202,
-        question: 'O que significa quando uma célula do Excel exibe o conteúdo "######"?',
-        options: [
-          'A fórmula possui um vírus grave',
-          'A largura da coluna é insuficiente para exibir o número ou data formatada',
-          'O valor digitado é negativo e proibido',
-          'A planilha foi bloqueada por senha'
+        "id": 202,
+        "question": "Qual é a principal diferença visual entre o formato \"Moeda\" e o formato \"Contábil\"?",
+        "options": [
+          "O formato Moeda não aceita centavos",
+          "O formato Contábil só funciona com dólares",
+          "Não existe nenhuma diferença entre eles",
+          "O formato Contábil alinha o símbolo R$ à esquerda e alinha perfeitamente as vírgulas decimais na coluna"
         ],
-        correctIndex: 1,
-        explanation: 'O símbolo "######" ocorre quando a coluna está muito estreita para mostrar o valor numérico ou data por completo.'
+        "correctIndex": 3,
+        "explanation": "No formato Contábil o símbolo R$ fica fixo à esquerda da célula e os decimais perfeitamente alinhados."
       },
       {
-        id: 203,
-        question: 'Qual atalho abre diretamente a janela avançada "Formatar Células"?',
-        options: ['Ctrl + 1', 'Alt + F4', 'Ctrl + F', 'F12'],
-        correctIndex: 0,
-        explanation: 'Ctrl + 1 é o atalho universal no Excel para abrir a caixa de diálogo de Formatar Células.'
-      },
-      {
-        id: 204,
-        question: 'Para que serve o botão "Pincel de Formatação" no Excel?',
-        options: [
-          'Para pintar desenhos à mão livre na planilha',
-          'Para copiar o formato visual de uma célula e aplicar em outra sem mudar seu conteúdo',
-          'Para apagar o histórico de fórmulas',
-          'Para trocar o idioma do Excel'
+        "id": 203,
+        "question": "Se você digitar o número 0,25 em uma célula e aplicar o formato Porcentagem (%), como o número será exibido?",
+        "options": [
+          "25%",
+          "0,25%",
+          "2,5%",
+          "250%"
         ],
-        correctIndex: 1,
-        explanation: 'O Pincel de Formatação copia estilo, fontes, bordas e formatos de número de uma célula para outra.'
+        "correctIndex": 0,
+        "explanation": "O Excel multiplica o valor decimal por 100 e adiciona o símbolo de porcentagem: 0,25 vira 25%."
       },
       {
-        id: 205,
-        question: 'Qual é o separador decimal oficial utilizado pelo Excel configurado no idioma Português (Brasil)?',
-        options: ['Ponto (.)', 'Vírgula (,)', 'Ponto e vírgula (;)', 'Dois pontos (:)'],
-        correctIndex: 1,
-        explanation: 'No padrão brasileiro (ABNT), a vírgula separa decimais e o ponto separa milhares.'
-      },
-      {
-        id: 206,
-        question: 'Qual é a principal diferença visual entre o formato Moeda e o formato Contábil?',
-        options: [
-          'Moeda calcula juros e Contábil calcula multas',
-          'Contábil alinha o símbolo de moeda à esquerda e os números à direita, exibindo zero como um traço (-)',
-          'O formato Contábil só aceita números inteiros',
-          'O formato Moeda não permite centavos'
+        "id": 204,
+        "question": "Para aplicar a mesma formatação de uma célula em várias outras de forma contínua, o que devemos fazer no ícone do Pincel de Formatação?",
+        "options": [
+          "Dar um único clique",
+          "Pressionar a tecla Shift junto com o botão direito",
+          "Dar um duplo clique rápido",
+          "Arrastar o ícone até a lixeira"
         ],
-        correctIndex: 1,
-        explanation: 'O formato Contábil alinha os símbolos de moeda na margem esquerda e valores zero são representados por hífen (-).'
+        "correctIndex": 2,
+        "explanation": "Dar um duplo clique no Pincel de Formatação mantém a ferramenta ativa para múltiplas seleções até que você tecle Esc."
       },
       {
-        id: 207,
-        question: 'Qual atalho de teclado aplica rapidamente a formatação de Porcentagem (%) à célula selecionada?',
-        options: ['Ctrl + Shift + %', 'Ctrl + P', 'Alt + %', 'Ctrl + Shift + P'],
-        correctIndex: 0,
-        explanation: 'Ctrl + Shift + % aplica o estilo de porcentagem imediatamente.'
-      },
-      {
-        id: 208,
-        question: 'O recurso "Quebrar Texto Automaticamente" serve para:',
-        options: [
-          'Excluir palavras com mais de dez letras',
-          'Fazer com que textos longos ocupem múltiplas linhas visíveis dentro da mesma célula',
-          'Dividir uma planilha em dois arquivos separados',
-          'Criar uma quebra de página para impressão'
+        "id": 205,
+        "question": "Por que não se deve digitar manualmente \"R$ 50,00\" com letras e espaços dentro da célula?",
+        "options": [
+          "Porque a célula fica invisível",
+          "Porque o Excel passa a tratar o conteúdo como Texto, impedindo cálculos de soma e média",
+          "Porque o Excel fecha sozinho",
+          "Porque a letra R é proibida em planilhas"
         ],
-        correctIndex: 1,
-        explanation: 'Quebrar Texto Automaticamente ajusta o texto em várias linhas verticais dentro da altura da linha da célula.'
+        "correctIndex": 1,
+        "explanation": "Digitar símbolos textuais converte o número em texto puro, quebrando fórmulas matemáticas."
       },
       {
-        id: 209,
-        question: 'Ao digitar "10%" em uma célula, qual é o valor decimal matemático real armazenado pelo Excel?',
-        options: ['10', '0,1', '100', '0,01'],
-        correctIndex: 1,
-        explanation: '10% equivale matematicamente a 10/100, ou seja, 0,1.'
-      },
-      {
-        id: 210,
-        question: 'Como ajustar automaticamente a largura de uma coluna para caber exatamente o maior conteúdo nela inserido?',
-        options: [
-          'Pressionar Delete',
-          'Dar um duplo clique na linha divisória entre o cabeçalho da coluna e a próxima',
-          'Desligar o monitor',
-          'Reiniciar o computador'
+        "id": 206,
+        "question": "Qual recurso permite que um texto longo seja exibido em várias linhas dentro da mesma célula sem aumentar a largura da coluna?",
+        "options": [
+          "Quebrar Texto Automaticamente",
+          "Mesclar e Centralizar",
+          "Limpar Formatos",
+          "Inverter Linhas"
         ],
-        correctIndex: 1,
-        explanation: 'Dar um duplo clique na divisória entre as letras das colunas ativa o AutoAjuste de largura instantâneo.'
+        "correctIndex": 0,
+        "explanation": "Quebrar Texto Automaticamente ajusta a altura da linha mantendo o texto visível em múltiplas linhas."
+      },
+      {
+        "id": 207,
+        "question": "Por padrão, como o Excel alinha textos e números não formatados nas células?",
+        "options": [
+          "Textos à direita e números à esquerda",
+          "Ambos centralizados",
+          "Ambos alinhados à direita",
+          "Textos à esquerda e números à direita"
+        ],
+        "correctIndex": 3,
+        "explanation": "Por padrão natural, o Excel alinha textos à esquerda e valores numéricos à direita."
+      },
+      {
+        "id": 208,
+        "question": "Qual atalho de teclado aplica formatação de Negrito no Excel em português?",
+        "options": [
+          "Ctrl + B",
+          "Ctrl + G",
+          "Ctrl + N",
+          "Ctrl + T"
+        ],
+        "correctIndex": 2,
+        "explanation": "No Excel em português, Ctrl + N ativa e desativa o Negrito (Ctrl + B é o atalho para salvar a pasta de trabalho)."
+      },
+      {
+        "id": 209,
+        "question": "O que o recurso \"Aumentar Casas Decimais\" faz com o número 12,5?",
+        "options": [
+          "Passa a exibir 12,50",
+          "Multiplica o número por 10",
+          "Converte para 125",
+          "Arredonda para 13"
+        ],
+        "correctIndex": 0,
+        "explanation": "Aumentar casas decimais adiciona zeros após a vírgula para maior precisão visual (ex: 12,5 vira 12,50)."
+      },
+      {
+        "id": 210,
+        "question": "Qual é o efeito do comando \"Limpar Formatos\" (ícone da borracha na guia Página Inicial)?",
+        "options": [
+          "Exclui os dados e a fórmula da célula",
+          "Remove cores, bordas e formatações visuais, preservando o valor puro do conteúdo",
+          "Exclui a coluna inteira",
+          "Fecha a pasta de trabalho sem salvar"
+        ],
+        "correctIndex": 1,
+        "explanation": "Limpar Formatos remove toda a estética e formatações aplicadas, deixando apenas o dado bruto."
       }
     ]
   },
   {
-    id: 3,
-    lessonNumber: 3,
-    title: 'Operadores Matemáticos e Fórmulas Básicas (SOMA, MÉDIA, MÍN, MÁX)',
-    module: 'Módulo 1: Fundamentos e Navegação',
-    duration: '28 min',
-    summary: 'Inicie a construção de cálculos reais. Compreenda operadores (+, -, *, /), precedência matemática e as funções mais usadas do mundo.',
-    videoUrl: 'https://www.youtube.com/embed/LqE-jU9y9XQ',
-    videoTitle: 'Aula 03: Fórmulas Básicas, Operadores e Funções Essenciais',
-    videoHighlights: [
-      'O sinal de igualdade obrigatório (=) para iniciar fórmulas',
-      'Operadores aritméticos (+, -, *, /, ^)',
-      'Funções SOMA, MÉDIA, MÁXIMO, MÍNIMO',
-      'Ordem de precedência matemática (PEMDAS)'
+    "id": 3,
+    "lessonNumber": 3,
+    "title": "Aula 03: Funções Aritméticas e Ordem de Precedência",
+    "module": "Módulo 2: Cálculos e Funções Essenciais",
+    "duration": "26 min",
+    "summary": "Domine os operadores aritméticos fundamentais (+, -, *, /, ^), a regra de precedência matemática PEMDAS, referências relativas e as funções SOMA e MULT.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/9X1pfhyBo0c",
+    "videoTitle": "Aula 04 - Funções Aritmétricas - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "Operadores matemáticos: Adição, Subtração, Multiplicação, Divisão e Potenciação",
+      "Ordem de Precedência Matemática (Parênteses e Operadores)",
+      "Função SOMA com intervalos contínuos e intercalados",
+      "Uso da Alça de Preenchimento para replicar cálculos"
     ],
-    theoryContent: {
-      introduction: 'Toda fórmula ou função no Excel DEVE obrigatoriamente começar com o sinal de igual (=). Sem ele, o Excel entenderá o que você digitou como texto simples. Além dos operadores matemáticos tradicionais, o Excel disponibiliza centenas de funções prontas que facilitam cálculos em grandes intervalos de dados, como a função SOMA e MÉDIA.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "Toda fórmula no Excel deve obrigatoriamente iniciar pelo sinal de igual (=). O Excel é um motor de cálculo de alta precisão que segue rigorosamente as regras da matemática tradicional. Compreender a ordem de cálculo evita erros graves em relatórios contábeis e financeiros.",
+      "keyConcepts": [
         {
-          title: 'Operadores Aritméticos',
-          description: 'Adição (+), Subtração (-), Multiplicação (*), Divisão (/) e Exponenciação (^). O Excel segue a ordem de precedência: parênteses primeiro, depois potências, multiplicação/divisão e por fim adição/subtração.',
-          formulaOrExample: '= (10 + 5) * 2  -> Resultado: 30'
+          "title": "Operadores Matemáticos Básicos",
+          "description": "Adição (+), Subtração (-), Multiplicação (*), Divisão (/) e Exponenciação (^). Toda fórmula inicia com =.",
+          "formulaOrExample": "=A1 + B1 | =A1 * 1,10 | =C4 / 12 | =2^3 (resultado 8)"
         },
         {
-          title: 'Dois Pontos (:) vs. Ponto e Vírgula (;)',
-          description: 'Em argumentos de funções, os dois pontos (:) significam "ATÉ" (intervalo contínuo). O ponto e vírgula (;) significa "E" (células ou intervalos isolados).',
-          formulaOrExample: '=SOMA(A1:A5) soma de A1 até A5 | =SOMA(A1;A5) soma apenas A1 e A5'
+          "title": "Ordem de Precedência (PEMDAS)",
+          "description": "O Excel resolve primeiro o que está entre Parênteses, em seguida Exponenciação, depois Multiplicação e Divisão (na ordem em que surgirem) e por último Adição e Subtração.",
+          "formulaOrExample": "=10 + 5 * 2 resulta em 20 | =(10 + 5) * 2 resulta em 30"
         },
         {
-          title: 'Funções Estatísticas Básicas',
-          description: 'MÉDIA calcula a média aritmética. MÁXIMO retorna o maior número do intervalo. MÍNIMO retorna o menor número do intervalo. CONT.NÚM conta quantas células possuem números.',
-          formulaOrExample: '=MÉDIA(B2:B20) | =MÁXIMO(C2:C50) | =MÍNIMO(C2:C50)'
+          "title": "Função SOMA",
+          "description": "Permite somar centenas ou milhares de células de forma simples e rápida sem precisar somar uma a uma com o operador +.",
+          "formulaOrExample": "=SOMA(A1:A100) soma da célula A1 até A100 | =SOMA(A1; B5; C10) soma células isoladas"
+        },
+        {
+          "title": "Alça de Preenchimento",
+          "description": "O pequeno quadrado verde localizado no canto inferior direito da célula selecionada. Ao dar um duplo clique ou arrastar, o Excel replica a fórmula para as linhas abaixo ajustando as referências relativas automaticamente."
         }
       ],
-      stepByStep: [
-        'Clique na célula onde deseja ver o resultado (ex: D10).',
-        'Digite o sinal de igual: =',
-        'Digite o nome da função (ex: =SOMA() e abra parênteses.',
-        'Com o mouse, clique e arraste sobre as células que deseja somar (ex: D2:D9).',
-        'Feche o parênteses ) e pressione Enter para calcular.',
-        'Experimente o recurso "AutoSoma" na guia Página Inicial ou use o atalho Alt + =.'
+      "stepByStep": [
+        "Clique na célula C2 e digite =A2*B2 para calcular o total de uma venda (Quantidade x Preço).",
+        "Pressione Enter para concluir o cálculo.",
+        "Dê um duplo clique na Alça de Preenchimento no canto inferior direito de C2 para calcular toda a lista.",
+        "Abaixo da coluna C, clique na ferramenta \"AutoSoma\" (Alt + =) na guia Página Inicial para gerar =SOMA(C2:C10).",
+        "Pressione Enter para confirmar o total geral."
       ],
-      keyboardShortcuts: [
-        { keys: 'Alt + =', action: 'Inserir a função AutoSoma automaticamente no intervalo selecionado' },
-        { keys: 'F2', action: 'Editar a fórmula da célula ativa diretamente na grade' },
-        { keys: 'Esc', action: 'Cancelar a edição de uma fórmula sem salvar alterações' },
-        { keys: 'Ctrl + `', action: 'Alternar entre exibir os resultados e exibir as fórmulas da planilha' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Alt + =",
+          "action": "Insere a função AutoSoma automaticamente no intervalo selecionado"
+        },
+        {
+          "keys": "Ctrl + D",
+          "action": "Copia a fórmula ou valor da célula superior para a célula atual"
+        },
+        {
+          "keys": "Ctrl + R",
+          "action": "Copia a fórmula ou valor da célula à esquerda para a célula atual"
+        },
+        {
+          "keys": "F2",
+          "action": "Entra no modo de edição da célula ativa"
+        }
       ],
-      proTip: 'Nunca faça uma soma digitando =SOMA(A1+A2+A3). Isso é redundante! Use apenas =SOMA(A1:A3) ou =A1+A2+A3. As funções do Excel foram criadas para trabalhar com intervalos usando dois pontos.',
-      commonErrors: 'Esquecer de fechar parênteses em cálculos complexos ou dividir por zero, o que gera o erro clássico #DIV/0!.'
+      "proTip": "Para somar colunas ou linhas inteiras instantaneamente, selecione toda a tabela incluindo a linha em branco de totais e pressione Alt + =. O Excel criará todas as somas de uma única vez!",
+      "commonErrors": "Esquecer de colocar parênteses ao calcular médias ponderadas ou margens de lucro, por exemplo digitar =A1+B1/2 em vez de =(A1+B1)/2."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 301,
-        question: 'Com qual caractere toda fórmula ou função no Excel deve obrigatoriamente iniciar?',
-        options: ['#', '=', '+', '@'],
-        correctIndex: 1,
-        explanation: 'Toda fórmula no Excel deve começar com o sinal de igual (=).'
-      },
-      {
-        id: 302,
-        question: 'Qual é o resultado da fórmula: =10 + 5 * 2?',
-        options: ['30', '20', '25', '100'],
-        correctIndex: 1,
-        explanation: 'Pela ordem de precedência matemática, a multiplicação é feita antes: 5 * 2 = 10, depois 10 + 10 = 20.'
-      },
-      {
-        id: 303,
-        question: 'O que significa o operador de dois pontos (:) dentro de uma função como =SOMA(A1:A10)?',
-        options: [
-          'Dividir A1 por A10',
-          'Indica um intervalo contínuo, significando "de A1 ATÉ A10"',
-          'Significa somar apenas a célula A1 e a célula A10',
-          'Indica que o cálculo é em dobro'
+        "id": 301,
+        "question": "Com qual caractere obrigatório deve se iniciar qualquer cálculo ou fórmula no Excel?",
+        "options": [
+          "Sinal de mais (+)",
+          "Sinal de arroba (@)",
+          "Ponto e vírgula (;)",
+          "Sinal de igual (=)"
         ],
-        correctIndex: 1,
-        explanation: 'Os dois pontos (:) representam um intervalo contínuo (de... até).'
+        "correctIndex": 3,
+        "explanation": "Todas as fórmulas no Excel devem começar obrigatoriamente pelo sinal de igual (=)."
       },
       {
-        id: 304,
-        question: 'Qual função retorna o menor valor numérico contido em um intervalo de células?',
-        options: ['=MENORVALOR()', '=MÍNIMO()', '=BAIXO()', '=PEQUENO()'],
-        correctIndex: 1,
-        explanation: 'A função =MÍNIMO() retorna o menor valor dentro de um intervalo de números.'
-      },
-      {
-        id: 305,
-        question: 'Qual é a diferença entre =SOMA(B1:B5) e =SOMA(B1;B5)?',
-        options: [
-          'Nenhuma diferença, são fórmulas idênticas',
-          '=SOMA(B1:B5) soma todas as 5 células de B1 até B5, enquanto =SOMA(B1;B5) soma apenas B1 e B5',
-          'O ponto e vírgula multiplica em vez de somar',
-          'Os dois pontos causam erro no Excel'
+        "id": 302,
+        "question": "Qual é o resultado da fórmula =10 + 2 * 5 no Excel?",
+        "options": [
+          "60",
+          "20",
+          "100",
+          "25"
         ],
-        correctIndex: 1,
-        explanation: 'Os dois pontos somam o intervalo contínuo; o ponto e vírgula soma apenas os dois argumentos especificados.'
+        "correctIndex": 1,
+        "explanation": "Pela regra de precedência, a multiplicação é feita antes da soma: 2 * 5 = 10, e 10 + 10 = 20."
       },
       {
-        id: 306,
-        question: 'Qual atalho insere automaticamente a função AutoSoma na célula selecionada?',
-        options: ['Ctrl + S', 'Alt + =', 'Ctrl + Shift + S', 'Alt + Enter'],
-        correctIndex: 1,
-        explanation: 'Alt + = é o atalho clássico para aplicar o AutoSoma rapidamente.'
-      },
-      {
-        id: 307,
-        question: 'Qual função calcula a média aritmética simples dos números no intervalo C2:C10?',
-        options: ['=MED()', '=MÉDIA(C2:C10)', '=AVERAGE_BR()', '=CALCULARMEDIA()'],
-        correctIndex: 1,
-        explanation: 'No Excel em português, a função correta é =MÉDIA() (com acento).'
-      },
-      {
-        id: 308,
-        question: 'O que o erro "#DIV/0!" indica em uma planilha do Excel?',
-        options: [
-          'A fórmula tentou dividir um número por zero ou por uma célula vazia',
-          'O nome da função foi escrito errado',
-          'A planilha não tem espaço em disco',
-          'O arquivo não foi salvo'
+        "id": 303,
+        "question": "Qual operador é utilizado para realizar uma exponenciação (potência) no Excel?",
+        "options": [
+          "*",
+          "**",
+          "^ (circunflexo)",
+          "%"
         ],
-        correctIndex: 0,
-        explanation: '#DIV/0! ocorre quando ocorre uma divisão matemática impossível por zero.'
+        "correctIndex": 2,
+        "explanation": "O acento circunflexo (^) é o operador de potenciação no Excel (ex: =2^3 resulta em 8)."
       },
       {
-        id: 309,
-        question: 'Qual operador aritmético representa a multiplicação no Excel?',
-        options: ['x', '.', '*', '%'],
-        correctIndex: 2,
-        explanation: 'O asterisco (*) é o operador padrão de multiplicação no Excel.'
+        "id": 304,
+        "question": "Na fórmula =SOMA(A1:A5), o que indica o símbolo de dois pontos (:)?",
+        "options": [
+          "Que todas as células no intervalo contínuo de A1 até A5 serão somadas",
+          "Que apenas as células A1 e A5 serão somadas",
+          "Que a célula A1 será dividida por A5",
+          "Que há um erro de sintaxe"
+        ],
+        "correctIndex": 0,
+        "explanation": "Os dois pontos (:) indicam um intervalo contínuo (de A1 \"até\" A5)."
       },
       {
-        id: 310,
-        question: 'Qual função conta quantas células em um intervalo contêm valores numéricos válidos?',
-        options: ['=CONTAR()', '=CONT.NÚM()', '=SOMAR.NÚM()', '=TOTAL()'],
-        correctIndex: 1,
-        explanation: '=CONT.NÚM() conta exclusivamente as células que contêm valores numéricos.'
+        "id": 305,
+        "question": "Se quisermos somar apenas as células A1 e A5 de forma isolada, como a fórmula deve ser escrita?",
+        "options": [
+          "=SOMA(A1:A5)",
+          "=SOMA(A1 - A5)",
+          "=SOMA(A1; A5)",
+          "=SOMA(A1 & A5)"
+        ],
+        "correctIndex": 2,
+        "explanation": "O ponto e vírgula (;) serve como separador de argumentos isolados no Excel."
+      },
+      {
+        "id": 306,
+        "question": "Qual atalho de teclado insere a função AutoSoma de forma instantânea?",
+        "options": [
+          "Ctrl + S",
+          "Ctrl + Shift + S",
+          "F5",
+          "Alt + ="
+        ],
+        "correctIndex": 3,
+        "explanation": "O atalho Alt + = insere a função AutoSoma automaticamente na célula selecionada."
+      },
+      {
+        "id": 307,
+        "question": "Qual fórmula calcula corretamente a média de duas notas nas células A1 e B1 respeitando a ordem de cálculo?",
+        "options": [
+          "=A1 + B1 / 2",
+          "=(A1 + B1) / 2",
+          "=A1 / 2 + B1",
+          "=A1 * B1 / 2"
+        ],
+        "correctIndex": 1,
+        "explanation": "Os parênteses garantem que a soma de A1 + B1 ocorra antes da divisão por 2."
+      },
+      {
+        "id": 308,
+        "question": "Qual é o papel da Alça de Preenchimento (pequeno quadrado verde no canto da célula selecionada)?",
+        "options": [
+          "Arrastar e propagar fórmulas ou sequências lógicas para células adjacentes",
+          "Excluir a linha atual",
+          "Mudar o idioma do Excel",
+          "Fechar o arquivo"
+        ],
+        "correctIndex": 0,
+        "explanation": "A alça de preenchimento replica fórmulas e padrões para as células vizinhas com rapidez."
+      },
+      {
+        "id": 309,
+        "question": "Qual função nativa do Excel pode ser usada para multiplicar um intervalo de números?",
+        "options": [
+          "=VEZES",
+          "=CALC_MULT",
+          "=DUPLICAR",
+          "=PRODUTO ou =MULT"
+        ],
+        "correctIndex": 3,
+        "explanation": "A função =MULT (ou =PRODUTO) multiplica todos os números fornecidos em seus argumentos."
+      },
+      {
+        "id": 310,
+        "question": "Ao arrastar a fórmula =A1*2 da linha 1 para a linha 2, para qual fórmula ela é atualizada automaticamente pelo Excel?",
+        "options": [
+          "=A1*2",
+          "=B1*2",
+          "=A2*2",
+          "=A2*3"
+        ],
+        "correctIndex": 2,
+        "explanation": "Por ser uma referência relativa, a linha 1 se ajusta automaticamente para a linha 2 (=A2*2)."
       }
     ]
   },
   {
-    id: 4,
-    lessonNumber: 4,
-    title: 'Referências de Células: Relativas, Absolutas ($) e Alça de Preenchimento',
-    module: 'Módulo 1: Fundamentos e Navegação',
-    duration: '30 min',
-    summary: 'O conceito mais importante para automação de fórmulas: entenda o símbolo de cifrão ($), travamento de linhas e colunas e a tecla F4.',
-    videoUrl: 'https://www.youtube.com/embed/9G0z_ZkGZJk',
-    videoTitle: 'Aula 04: O Segredo do Cifrão ($) e Alça de Preenchimento no Excel',
-    videoHighlights: [
-      'Alça de Preenchimento (quadradinho verde no canto da célula)',
-      'Referências Relativas (deslocamento automático de linhas e colunas)',
-      'Referências Absolutas ($A$1) para fixar valores constantes',
-      'Referências Mistas ($A1 vs. A$1) e uso da tecla F4'
+    "id": 4,
+    "lessonNumber": 4,
+    "title": "Aula 04: Funções Condicionais (SE, E, OU, SEERRO)",
+    "module": "Módulo 2: Cálculos e Funções Essenciais",
+    "duration": "28 min",
+    "summary": "Aprenda a aplicar lógica condicional no Excel para tomada de decisões automatizadas com a função SE simples, SE aninhada, operadores relacionais, funções lógicas E/OU e tratamento com SEERRO.",
+    "videoUrl": "https://www.youtube-nocookie.com/embed/QiOdw-Fgjm0",
+    "videoTitle": "Aula 05 - Funções Condicionais - Excel do Básico ao Avançado",
+    "videoHighlights": [
+      "Sintaxe fundamental da função SE: teste_lógico, valor_se_verdadeiro, valor_se_falso",
+      "Operadores de comparação: >, <, >=, <=, =, <>",
+      "Funções lógicas combinadas: E() e OU()",
+      "Função SEERRO para substituir mensagens de erro por textos elegantes"
     ],
-    theoryContent: {
-      introduction: 'Ao arrastar uma fórmula usando a Alça de Preenchimento, o Excel atualiza automaticamente as linhas e colunas das referências. Isso é chamado de Referência Relativa. Porém, quando precisamos multiplicar uma coluna inteira por uma única taxa fixa (ex: comissão ou cotação do dólar localizada na célula D1), devemos "travar" ou fixar essa célula utilizando o cifrão ($). Isso é uma Referência Absoluta.',
-      keyConcepts: [
+    "theoryContent": {
+      "introduction": "A função SE é um dos pilares mais fundamentais do Excel. Ela permite que a planilha tome decisões dinâmicas com base em critérios lógicos estabelecidos pelo usuário, como definir se um aluno do CETEP foi \"Aprovado\" ou \"Reprovado\", ou se um cliente tem direito a desconto comercial.",
+      "keyConcepts": [
         {
-          title: 'Referência Relativa (ex: A1)',
-          description: 'Não possui nenhum cifrão. Ao arrastar para baixo, a linha aumenta (A2, A3, A4). Ao arrastar para o lado, a coluna muda (B1, C1, D1).',
-          formulaOrExample: '=A1 * B1  (ao descer vira =A2 * B2)'
+          "title": "Sintaxe da Função SE",
+          "description": "=SE(teste_lógico; valor_se_verdadeiro; valor_se_falso). Se a condição lógica for atendida, o Excel retorna o primeiro resultado; caso contrário, retorna o segundo.",
+          "formulaOrExample": "=SE(B2>=7; \"Aprovado\"; \"Reprovado\")"
         },
         {
-          title: 'Referência Absoluta (ex: $A$1)',
-          description: 'Possui cifrão antes da coluna e antes da linha. Permanece exatamente na mesma célula A1 não importa para onde a fórmula seja arrastada ou copiada.',
-          formulaOrExample: '=B2 * $D$1  (ao descer vira =B3 * $D$1)'
+          "title": "Operadores Relacionais",
+          "description": "Maior (>), Menor (<), Maior ou Igual (>=), Menor ou Igual (<=), Igual (=) e Diferente (<>)."
         },
         {
-          title: 'Referências Mistas (ex: $A1 ou A$1)',
-          description: '$A1 trava apenas a coluna A, mas deixa a linha livre. A$1 trava apenas a linha 1, mas deixa a coluna livre. Muito utilizado em matrizes de multiplicação e relatórios cruzados.',
-          formulaOrExample: '=$A2 * B$1'
+          "title": "Funções Lógicas E() e OU()",
+          "description": "A função E exige que TODAS as condições sejam verdadeiras simultaneamente. A função OU exige que pelo menos UMA das condições seja verdadeira.",
+          "formulaOrExample": "=SE(E(Nota>=7; Faltas<=10); \"Aprovado\"; \"Reprovado\")"
+        },
+        {
+          "title": "Tratamento de Erros com SEERRO",
+          "description": "Evita a exibição de códigos inestéticos como #DIV/0! ou #N/D caso um cálculo produza um erro.",
+          "formulaOrExample": "=SEERRO(A1/B1; \"Valor Inválido\")"
         }
       ],
-      stepByStep: [
-        'Crie uma tabela com produtos, valores e uma célula isolada contendo o percentual de imposto (ex: E1 = 15%).',
-        'Na coluna de imposto a pagar, digite a fórmula multiplicando o valor do produto pela célula de imposto: =C2 * E1.',
-        'Clique no meio da palavra E1 na fórmula e pressione a tecla F4. O Excel transformará em $E$1.',
-        'Pressione Enter.',
-        'Passe o mouse sobre o canto inferior direito da célula até o cursor virar uma cruz preta sólida (+).',
-        'Dê um clique duplo na Alça de Preenchimento para propagar a fórmula para todas as linhas da tabela.'
+      "stepByStep": [
+        "Clique na célula de Situação do aluno (ex: D2).",
+        "Digite =SE(C2>=7; \"Aprovado\"; \"Reprovado\"). Lembre-se de colocar textos entre aspas duplas.",
+        "Pressione Enter e observe o resultado calculado.",
+        "Dê um duplo clique na Alça de Preenchimento para calcular a situação de todos os alunos.",
+        "Para testar a robustez, altere a nota na célula C2 para 5 e veja a situação mudar automaticamente para \"Reprovado\"."
       ],
-      keyboardShortcuts: [
-        { keys: 'F4', action: 'Alternar entre referências (A1 -> $A$1 -> A$1 -> $A1 -> A1)' },
-        { keys: 'Ctrl + D', action: 'Copiar fórmula da célula de cima para a célula selecionada' },
-        { keys: 'Ctrl + R', action: 'Copiar fórmula da célula da esquerda para a direita' },
-        { keys: 'Clique duplo na Alça', action: 'Preencher automaticamente até o fim dos dados adjacentes' }
+      "keyboardShortcuts": [
+        {
+          "keys": "Shift + F3",
+          "action": "Abre a janela \"Inserir Função\" para guiar a montagem da função SE"
+        },
+        {
+          "keys": "F9",
+          "action": "Avalia e calcula apenas a parte selecionada da fórmula na barra de fórmulas"
+        },
+        {
+          "keys": "Ctrl + Z",
+          "action": "Desfaz a última ação em caso de digitação incorreta"
+        }
       ],
-      proTip: 'Pressione F4 repetidamente ao digitar uma fórmula para ciclar rapidamente entre os 4 modos: Absoluto total ($A$1), Misto travando linha (A$1), Misto travando coluna ($A1) e Relativo sem travas (A1).',
-      commonErrors: 'Esquecer de travar a célula da taxa ou porcentagem ($), fazendo com que a fórmula multiplique por células vazias e retorne zero ou valores errados nas linhas seguintes.'
+      "proTip": "Sempre que retornar textos dentro de fórmulas no Excel (como \"Aprovado\", \"Sim\", \"Pendente\"), você deve obrigatoriamente colocá-los entre aspas duplas (\" \"). Números e nomes de funções não usam aspas.",
+      "commonErrors": "Esquecer as aspas duplas em textos ou trocar o ponto e vírgula (;) por vírgula em versões do Excel configuradas em português do Brasil."
     },
-    quiz: [
+    "quiz": [
       {
-        id: 401,
-        question: 'Qual símbolo é utilizado no Excel para travar (fixar) uma linha ou coluna em uma fórmula?',
-        options: ['%', '$', '#', '&'],
-        correctIndex: 1,
-        explanation: 'O caractere cifrão ($) é utilizado para fixar referências no Excel.'
-      },
-      {
-        id: 402,
-        question: 'Qual tecla de atalho é utilizada para alternar entre referências relativas, absolutas e mistas?',
-        options: ['F2', 'F4', 'F9', 'F12'],
-        correctIndex: 1,
-        explanation: 'A tecla F4 insere e alterna os cifrões de travamento na referência selecionada.'
-      },
-      {
-        id: 403,
-        question: 'Se a fórmula "=A1*B1" for copiada da célula C1 para a célula C2, como ela ficará?',
-        options: ['=A1*B1', '=A2*B2', '=$A$1*$B$1', '=A2*B1'],
-        correctIndex: 1,
-        explanation: 'Por ser uma referência relativa, descer uma linha faz todas as linhas aumentarem em 1 (=A2*B2).'
-      },
-      {
-        id: 404,
-        question: 'Se a fórmula "=$A$1*B1" for copiada da linha 1 para a linha 5, qual parte da fórmula NÃO se alterará?',
-        options: ['B1', '$A$1', 'Nenhuma, ambas mudam', 'O sinal de multiplicação'],
-        correctIndex: 1,
-        explanation: '$A$1 é uma referência absoluta (coluna e linha travadas), portanto permanece imutável.'
-      },
-      {
-        id: 405,
-        question: 'Na referência mista "$C5", o que está travado e o que está livre?',
-        options: [
-          'A coluna C está travada e a linha 5 está livre para variar',
-          'A linha 5 está travada e a coluna C está livre',
-          'Ambas estão travadas',
-          'Nenhuma está travada'
+        "id": 401,
+        "question": "Quantos argumentos a função SE possui em sua sintaxe padrão?",
+        "options": [
+          "3 argumentos",
+          "1 argumento",
+          "2 argumentos",
+          "5 argumentos"
         ],
-        correctIndex: 0,
-        explanation: 'O cifrão antes do C fixa a coluna C, enquanto o 5 sem cifrão varia livremente ao arrastar.'
+        "correctIndex": 0,
+        "explanation": "A função SE possui 3 argumentos: =SE(teste_lógico; valor_se_verdadeiro; valor_se_falso)."
       },
       {
-        id: 406,
-        question: 'Onde está localizada a "Alça de Preenchimento" no Excel?',
-        options: [
-          'No canto superior esquerdo da tela',
-          'No canto inferior direito da célula ou intervalo selecionado',
-          'Dentro da Barra de Fórmulas',
-          'No rodapé do Windows'
+        "id": 402,
+        "question": "Qual operador representa a comparação \"Diferente de\" no Excel?",
+        "options": [
+          "!=",
+          "><",
+          "<>",
+          "=/="
         ],
-        correctIndex: 1,
-        explanation: 'A Alça de Preenchimento é o pequeno quadrado no canto inferior direito da célula ativa.'
+        "correctIndex": 2,
+        "explanation": "No Excel, o operador de diferença é formado pelos sinais menor e maior juntos: <>."
       },
       {
-        id: 407,
-        question: 'O que acontece ao dar um duplo clique rápido na Alça de Preenchimento de uma célula calculada?',
-        options: [
-          'A célula é apagada',
-          'A fórmula é preenchida automaticamente para baixo até o fim dos dados da coluna vizinha',
-          'A planilha é salva em PDF',
-          'O Excel exibe uma mensagem de erro'
+        "id": 403,
+        "question": "Qual é o resultado da fórmula =SE(10 > 5; \"Maior\"; \"Menor\")?",
+        "options": [
+          "\"Menor\"",
+          "\"Maior\"",
+          "VERDADEIRO",
+          "10"
         ],
-        correctIndex: 1,
-        explanation: 'O duplo clique na alça preenche a fórmula até o fim do bloco de dados contíguo.'
+        "correctIndex": 1,
+        "explanation": "Como 10 é maior que 5, o teste lógico é VERDADEIRO, retornando o texto \"Maior\"."
       },
       {
-        id: 408,
-        question: 'Qual atalho de teclado copia o conteúdo da célula de cima para a célula abaixo selecionada?',
-        options: ['Ctrl + D', 'Ctrl + C', 'Ctrl + V', 'Ctrl + X'],
-        correctIndex: 0,
-        explanation: 'Ctrl + D (Down) copia a célula imediatamente superior para a selecionada.'
-      },
-      {
-        id: 409,
-        question: 'Por que o uso de referências absolutas ($) é essencial em tabelas de comissão de vendas?',
-        options: [
-          'Para deixar o texto em negrito',
-          'Para garantir que todas as linhas continuem multiplicando pela mesma célula fixa da taxa de comissão',
-          'Para que a planilha funcione sem internet',
-          'Para impedir que outras pessoas leiam a tabela'
+        "id": 404,
+        "question": "Por que palavras e textos devem ser escritos entre aspas duplas (\" \") dentro de uma fórmula SE?",
+        "options": [
+          "Porque senão o texto fica em negrito",
+          "Porque o Excel só fala inglês",
+          "Para proteger a planilha com senha",
+          "Para que o Excel entenda que se trata de uma sequência de texto e não o nome de uma função ou célula"
         ],
-        correctIndex: 1,
-        explanation: 'Fixar a célula da taxa ($) impede que a fórmula se desloque para células em branco ao ser arrastada.'
+        "correctIndex": 3,
+        "explanation": "Sem aspas, o Excel tenta interpretar a palavra como o nome de uma fórmula ou intervalo, gerando erro #NOME?."
       },
       {
-        id: 410,
-        question: 'Quantas vezes a tecla F4 precisa ser pressionada a partir de "A1" para obter a referência mista "A$1"?',
-        options: ['1 vez', '2 vezes', '3 vezes', '4 vezes'],
-        correctIndex: 1,
-        explanation: '1ª vez: $A$1 (absoluta). 2ª vez: A$1 (linha travada). 3ª vez: $A1 (coluna travada). 4ª vez: A1 (relativa).'
+        "id": 405,
+        "question": "Quando a função lógica E(A1>5; B1>10) retorna VERDADEIRO?",
+        "options": [
+          "Apenas quando AMBAS as condições forem atendidas simultaneamente",
+          "Quando apenas A1 for maior que 5",
+          "Quando apenas B1 for maior que 10",
+          "Quando nenhuma das duas for atendida"
+        ],
+        "correctIndex": 0,
+        "explanation": "A função E só retorna VERDADEIRO se todas as suas condições forem verdadeiras ao mesmo tempo."
+      },
+      {
+        "id": 406,
+        "question": "Quando a função lógica OU(A1>5; B1>10) retorna VERDADEIRO?",
+        "options": [
+          "Apenas quando ambas forem verdadeiras",
+          "Quando pelo menos UMA das condições for verdadeira",
+          "Nunca retorna verdadeiro",
+          "Apenas aos domingos"
+        ],
+        "correctIndex": 1,
+        "explanation": "A função OU retorna VERDADEIRO se qualquer uma das condições for satisfeita."
+      },
+      {
+        "id": 407,
+        "question": "Para que serve a função =SEERRO(valor; valor_se_erro)?",
+        "options": [
+          "Para provocar erros na planilha propositalmente",
+          "Para corrigir erros ortográficos em textos",
+          "Para capturar e substituir mensagens de erro do Excel por uma mensagem ou valor personalizado",
+          "Para calcular juros compostos"
+        ],
+        "correctIndex": 2,
+        "explanation": "SEERRO intercepta qualquer erro gerado pela fórmula e exibe uma alternativa elegante definida pelo usuário."
+      },
+      {
+        "id": 408,
+        "question": "Qual fórmula avalia se uma nota na célula A1 é maior ou igual a 7 para aprovação?",
+        "options": [
+          "=SE(A1 = 7; \"Aprovado\"; \"Reprovado\")",
+          "=SE(A1 > 7; \"Aprovado\"; \"Reprovado\")",
+          "=SE(A1 => 7; \"Aprovado\"; \"Reprovado\")",
+          "=SE(A1 >= 7; \"Aprovado\"; \"Reprovado\")"
+        ],
+        "correctIndex": 3,
+        "explanation": "O operador correto para maior ou igual é >= (com o sinal de igual depois do sinal de maior)."
+      },
+      {
+        "id": 409,
+        "question": "Qual erro ocorre no Excel se você tentar dividir um número por zero em uma fórmula sem tratamento?",
+        "options": [
+          "#VALOR!",
+          "#DIV/0!",
+          "#N/D",
+          "#NULO!"
+        ],
+        "correctIndex": 1,
+        "explanation": "A divisão por zero gera no Excel o código clássico de erro #DIV/0!."
+      },
+      {
+        "id": 410,
+        "question": "O que é uma função \"SE Aninhada\"?",
+        "options": [
+          "Uma função SE dentro de outra função SE para avaliar mais de dois possíveis resultados",
+          "Uma função que só roda uma vez por ano",
+          "Uma fórmula com defeito de fábrica",
+          "Uma macro em linguagem C"
+        ],
+        "correctIndex": 0,
+        "explanation": "SE Aninhado consiste em colocar uma nova condição SE dentro do argumento valor_se_falso da anterior."
       }
     ]
   }

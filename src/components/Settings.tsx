@@ -307,7 +307,7 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
                         <p className="font-bold text-slate-900 text-sm">Notificações em Tempo Real no Navegador</p>
                         <p className="text-xs text-slate-500 font-medium mt-1">
                           {typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted'
-                            ? '✅ Permissão concedida! Você receberá avisos no seu dispositivo.'
+                            ? 'Permissão concedida! Você receberá avisos no seu dispositivo.'
                             : 'Ative para autorizar o serviço de avisos escolares em segundo plano.'}
                         </p>
                       </div>

@@ -1,6 +1,6 @@
 {
-  "name": "Portal Acadêmico CETEP - By Enzo Medeiros",
-  "description": "Sistema completo de gestão acadêmica com boletim, secretaria e sala de aula real-time.",
+  "name": "CETEP",
+  "description": "Portal acadêmico CETEP para gestão escolar, boletim, sala de aula e capacitação.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
