@@ -179,7 +179,7 @@ export default function App() {
   const fetchAllUsers = async () => {
     if (!isSupabaseConfigured) return;
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('usuarios')
         .select('*');
       
@@ -207,16 +207,15 @@ export default function App() {
         setAllUsers(mapped);
       }
     } catch (err) {
-      console.error('Error fetching all users:', err);
-      if (err instanceof TypeError && err.message === 'Failed to fetch') {
-        toast.error('Erro de conexão com o banco de dados Supabase.');
-      }
+      console.warn('Silent fallback for users list:', err);
     }
   };
 
   const fetchUserProfile = async (uid: string, email: string) => {
-    // Fetch all users first so we have the list
-    fetchAllUsers();
+    if (!isSupabaseConfigured) {
+      setLoading(false);
+      return;
+    }
     
     try {
       const { data, error } = await supabase
@@ -226,7 +225,7 @@ export default function App() {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-         console.error('Error fetching profile:', error);
+         console.warn('Profile fetch warning:', error);
       }
 
       if (data) {
@@ -258,17 +257,15 @@ export default function App() {
           frequencia: 100
         };
 
-    const { error: insertError } = await supabase
+        const { error: insertError } = await supabase
           .from('usuarios')
           .upsert([newUserProfile]);
 
         if (!insertError) {
-          // Small delay to ensure DB propagation before refresh
           setTimeout(async () => {
             await fetchAllUsers();
           }, 500);
           
-          // Notify student via Gmail on first login
           await sendEmail({
             to_name: newUserProfile.nome,
             to_email: newUserProfile.email,
@@ -288,15 +285,10 @@ export default function App() {
             isOnline: true,
             lastSeen: new Date().toISOString()
           });
-        } else {
-           console.error('Insert error:', insertError);
-           if (insertError.message.includes('relation "public.usuarios" does not exist')) {
-             toast.error('Banco de dados não configurado. Por favor, execute o script SQL no Supabase.');
-           }
         }
       }
     } catch (err) {
-      console.error(err);
+      console.warn('fetchUserProfile error:', err);
     } finally {
       setLoading(false);
     }

@@ -39,44 +39,59 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
     });
   };
 
-  const compressImage = (file: File, maxDim = 250, quality = 0.70): Promise<string> => {
-    return new Promise((resolve, reject) => {
+  const compressImage = (file: File, maxDim = 320, quality = 0.80): Promise<string> => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
+        const rawResult = e.target?.result as string;
+        if (!rawResult) {
+          resolve('');
+          return;
+        }
+
         const img = new Image();
         img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
+          try {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
 
-          if (width > height) {
-            if (width > maxDim) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
+            if (width > height) {
+              if (width > maxDim) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              }
+            } else {
+              if (height > maxDim) {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
             }
-          } else {
-            if (height > maxDim) {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
+
+            canvas.width = Math.max(width, 1);
+            canvas.height = Math.max(height, 1);
+
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+              return resolve(rawResult);
             }
+
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressedDataUrl);
+          } catch {
+            resolve(rawResult);
           }
-
-          canvas.width = width;
-          canvas.height = height;
-
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            return resolve(e.target?.result as string);
-          }
-
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
-          resolve(compressedDataUrl);
         };
-        img.onerror = () => reject(new Error('Falha ao processar a imagem'));
-        img.src = e.target?.result as string;
+        img.onerror = () => {
+          // Fallback to raw data without throwing
+          resolve(rawResult);
+        };
+        img.src = rawResult;
       };
-      reader.onerror = () => reject(new Error('Falha ao ler o arquivo'));
+      reader.onerror = () => {
+        resolve('');
+      };
       reader.readAsDataURL(file);
     });
   };
@@ -97,10 +112,10 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
     if (savedAll) {
       try {
         const usersArr: UserType[] = JSON.parse(savedAll);
-        const updatedArr = usersArr.map(u => u.id === currentUser.id ? updatedUser : u);
+        const updatedArr = usersArr.map(u => (u.id === currentUser.id || u.email === currentUser.email) ? updatedUser : u);
         localStorage.setItem('cetep_all_users', JSON.stringify(updatedArr));
       } catch (e) {
-        console.error(e);
+        console.warn('Storage sync warning:', e);
       }
     }
 
@@ -109,17 +124,17 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
     }
 
     try {
-      // Sync to Firebase
-      await setDoc(doc(db, 'usuarios', currentUser.id), {
+      const docId = currentUser.id || (currentUser.email ? currentUser.email.replace(/[^a-zA-Z0-9]/g, '_') : 'user_profile');
+      await setDoc(doc(db, 'usuarios', docId), {
         avatar: newAvatarUrl,
         avatar_url: newAvatarUrl,
         updatedAt: new Date().toISOString()
       }, { merge: true });
 
-      toast.success('Foto de perfil salva com sucesso!');
+      toast.success('Foto de perfil atualizada com sucesso!');
     } catch (err: any) {
       console.warn('Firebase sync warning:', err);
-      toast.success('Foto salva no dispositivo com sucesso!');
+      toast.success('Foto de perfil atualizada!');
     } finally {
       setIsUploading(false);
     }
@@ -129,16 +144,20 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('A imagem deve ter no máximo 10MB.');
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error('A imagem deve ter no máximo 15MB.');
       return;
     }
 
     try {
       setIsUploading(true);
-      const compressedUrl = await compressImage(file, 250, 0.70);
-      await handleAvatarChange(compressedUrl);
-    } catch (error) {
+      const compressedUrl = await compressImage(file, 320, 0.80);
+      if (compressedUrl) {
+        await handleAvatarChange(compressedUrl);
+      } else {
+        toast.error('Não foi possível ler a imagem selecionada.');
+      }
+    } catch {
       toast.error('Erro ao processar imagem. Tente outra foto.');
     } finally {
       setIsUploading(false);

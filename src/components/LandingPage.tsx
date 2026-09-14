@@ -1,135 +1,160 @@
+import React from 'react';
 import { motion } from 'motion/react';
-import { ArrowRight, Play, BookOpen, ShieldCheck, Globe, Trophy } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Logo from './Logo';
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+      
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-24 pb-32 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/5 via-slate-50/50 to-transparent">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
+      <section className="relative overflow-hidden pt-28 pb-20 border-b border-slate-200/80 bg-white">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+            
+            {/* Left Content */}
             <motion.div 
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="lg:w-3/5"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4 }}
+              className="lg:w-7/12 space-y-6 text-left"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-500 text-sm font-semibold mb-8 border border-indigo-100/50">
-                <Trophy className="w-4 h-4" />
-                <span>Educação Profissional de Elite</span>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border border-slate-200">
+                <span>Secretaria da Educação da Bahia • CETEP</span>
               </div>
-              <h1 className="text-6xl lg:text-8xl font-black leading-[0.9] text-slate-800 mb-8 tracking-tighter font-display">
-                Sua porta de entrada para o <span className="text-indigo-500">sucesso</span> profissional.
+              
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-tight">
+                Centro Territorial de Educação Profissional
               </h1>
-              <p className="text-xl text-slate-600 mb-10 max-w-xl leading-relaxed font-medium">
-                Portal acadêmico da <span className="font-bold text-slate-800">CETEP Bacia do Rio Corrente</span>. Acesse suas notas, tarefas e acompanhe sua jornada.
+              
+              <p className="text-lg text-slate-600 font-normal leading-relaxed max-w-2xl">
+                Portal acadêmico oficial da unidade <span className="font-bold text-slate-900">Bacia do Rio Corrente</span>. Acompanhe suas notas, frequência, comunicado dos docentes e oportunidades de estágio.
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Link to="/auth?mode=register" className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 transition-all flex items-center gap-3 shadow-lg shadow-blue-500/20 hover:shadow-xl hover:-translate-y-0.5 cursor-pointer">
-                  Criar Conta de Aluno <ArrowRight className="w-5 h-5 opacity-80" />
+
+              {/* Clean Executive Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3 pt-2">
+                <Link 
+                  to="/auth" 
+                  className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all shadow-xs hover:shadow-md flex items-center gap-2 cursor-pointer"
+                >
+                  <span>Entrar no Portal</span>
+                  <span>&rarr;</span>
                 </Link>
-                <Link to="/auth" className="px-8 py-4 bg-white border-2 border-slate-200 rounded-2xl font-bold text-slate-700 hover:bg-slate-50 transition-all flex items-center gap-3 cursor-pointer shadow-sm">
-                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
-                    <Play className="w-3.5 h-3.5 text-blue-600 fill-current" />
-                  </div>
-                  Entrar no Portal
+
+                <Link 
+                  to="/auth?mode=register" 
+                  className="px-6 py-3.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 rounded-xl text-sm font-bold transition-all cursor-pointer"
+                >
+                  <span>Criar Conta de Aluno</span>
                 </Link>
+              </div>
+
+              {/* Status Bar */}
+              <div className="pt-4 flex items-center gap-6 text-xs text-slate-500 font-medium border-t border-slate-100">
+                <div>
+                  <span className="font-bold text-slate-800">Ano Letivo:</span> 2026
+                </div>
+                <div>
+                  <span className="font-bold text-slate-800">Modalidade:</span> Integrado & Subsequente
+                </div>
+                <div>
+                  <span className="font-bold text-slate-800">Sistema:</span> Ativo
+                </div>
               </div>
             </motion.div>
 
+            {/* Right Photo Card (High-Resolution Academic Setting) */}
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="lg:w-2/5 relative"
+              transition={{ delay: 0.15, duration: 0.4 }}
+              className="lg:w-5/12 w-full"
             >
-              <div className="relative rounded-[60px] overflow-hidden shadow-2xl border-[12px] border-white ring-1 ring-black/5 bg-gray-50 flex items-center justify-center p-12">
-                <Logo className="w-64 h-64 hover:scale-110 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/5 via-transparent to-transparent pointer-events-none" />
-                
-                <div className="absolute top-8 right-8">
-                   <div className="bg-white p-4 rounded-3xl shadow-xl flex flex-col items-center">
-                      <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-2 shadow-sm border-2 border-indigo-50 p-1">
-                         <Logo className="w-full h-full" />
-                      </div>
-                      <span className="text-xl font-black text-indigo-950 tracking-tighter">CETEP</span>
-                   </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Feature Grid */}
-      <section className="py-32 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="text-center max-w-2xl mx-auto mb-20">
-            <h2 className="text-4xl font-black text-slate-800 mb-6 font-display tracking-tight">Educação Profissional</h2>
-            <p className="text-slate-500 text-lg font-medium">Oferecemos cursos técnicos especializados para preparar você para os desafios do mercado de trabalho.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { 
-                icon: BookOpen, 
-                title: "Cursos Técnicos", 
-                desc: "Informática, Administração, Nutrição e outros.",
-                items: ["Laboratórios Modernos", "Projetos Reais", "Certificação"]
-              },
-              { 
-                icon: ShieldCheck, 
-                title: "Ambiente Seguro", 
-                desc: "Controle de acesso e acompanhamento constante.",
-                items: ["Segurança 24h", "Portal Monitorado", "Suporte"]
-              },
-              { 
-                icon: Globe, 
-                title: "Oportunidades", 
-                desc: "Convênios com as maiores empresas da região.",
-                items: ["Estágios", "Networking", "Carreira"]
-              },
-            ].map((feature, i) => (
-              <motion.div 
-                key={i}
-                whileHover={{ y: -10 }}
-                className="bg-slate-50/50 p-10 rounded-[32px] border border-slate-100 hover:shadow-lg transition-all"
+              <Link 
+                to="/auth" 
+                title="Clique para entrar no portal acadêmico"
+                className="block group relative rounded-2xl overflow-hidden border border-slate-200 shadow-lg bg-slate-100 transition-all hover:border-blue-400"
               >
-                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-8 shadow-sm border border-slate-100">
-                  <feature.icon className="w-7 h-7 text-indigo-500" />
+                <img 
+                  src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=1000&auto=format&fit=crop&q=80" 
+                  alt="Estudantes em ambiente técnico de aprendizagem"
+                  className="w-full h-80 sm:h-96 object-cover group-hover:scale-102 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent flex flex-col justify-end p-6 text-left">
+                  <div className="inline-block px-2.5 py-1 bg-blue-600/90 text-white text-[10px] font-bold uppercase tracking-wider rounded w-fit mb-2">
+                    Campus Bacia do Rio Corrente
+                  </div>
+                  <h3 className="text-white text-lg font-bold">Educação Técnica & Profissional</h3>
+                  <p className="text-slate-300 text-xs mt-0.5">
+                    Formação prática em tecnologia, gestão e desenvolvimento regional.
+                  </p>
+                  <span className="mt-3 text-xs font-bold text-blue-300 group-hover:text-white transition-colors">
+                    Acessar ambiente virtual &rarr;
+                  </span>
                 </div>
-                <h3 className="text-2xl font-black text-slate-800 mb-4 tracking-tight">{feature.title}</h3>
-                <p className="text-slate-500 mb-8 text-sm font-medium">{feature.desc}</p>
-                <ul className="space-y-3">
-                  {feature.items.map((item, idx) => (
-                    <li key={idx} className="flex items-center gap-3 text-sm font-black uppercase tracking-widest text-slate-400">
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                      <span className="text-[10px]">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
+              </Link>
+            </motion.div>
+
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 border-t border-gray-100">
-         <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-4">
-               <Logo className="w-10 h-10 grayscale opacity-50" />
-               <div className="text-left">
-                  <p className="text-xs font-black text-slate-900 tracking-tighter leading-none">CETEP</p>
-                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest leading-none mt-1">Bacia do Rio Corrente</p>
-               </div>
+      {/* Institutional Highlights Grid */}
+      <section className="py-16 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8">
+          
+          <div className="mb-10 text-left">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">Recursos do Portal Acadêmico</h2>
+            <p className="text-sm text-slate-500 font-medium">Ambiente centralizado de serviços para discentes e docentes</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div className="bg-white p-7 rounded-xl border border-slate-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2.5 py-1 rounded">
+                Ambiente Virtual
+              </span>
+              <h3 className="text-base font-bold text-slate-900 mt-4 mb-2">Sala de Aula & Materiais</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Acesso aos canais de comunicação com docentes, cronogramas de atividades escolares e download de materiais didáticos oficiais.
+              </p>
             </div>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-               © 2026 CETEP • PORTAL ACADÊMICO
-            </p>
-         </div>
+
+            <div className="bg-white p-7 rounded-xl border border-slate-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded">
+                Histórico Escolar
+              </span>
+              <h3 className="text-base font-bold text-slate-900 mt-4 mb-2">Boletim & Notas Digitais</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Consulta individualizada de médias por disciplina bimestral, índice de frequência e emissão do boletim acadêmico em formato PDF.
+              </p>
+            </div>
+
+            <div className="bg-white p-7 rounded-xl border border-slate-200">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded">
+                Carreira & Mercado
+              </span>
+              <h3 className="text-base font-bold text-slate-900 mt-4 mb-2">Painel de Estágios</h3>
+              <p className="text-xs text-slate-500 leading-relaxed">
+                Quadro de oportunidades profissionais para alunos do ensino técnico, vagas de jovem aprendiz e orientações de documentação.
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Institutional Footer */}
+      <footer className="py-8 bg-white border-t border-slate-200 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-6 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <span className="font-bold text-slate-900">CETEP</span> • Centro Territorial de Educação Profissional da Bacia do Rio Corrente
+          </div>
+          <div className="text-[11px] text-slate-400">
+            Governo do Estado da Bahia • Secretaria da Educação
+          </div>
+        </div>
       </footer>
+
     </div>
   );
 }
