@@ -16,6 +16,7 @@ import Assignments from './components/Assignments';
 import Journal from './components/Journal';
 import Classroom from './components/Classroom';
 import ExtraCourses from './components/ExtraCourses';
+import ExcelCoursePlayer from './components/ExcelCoursePlayer';
 import Internships from './components/Internships';
 import Teachers from './components/Teachers';
 import About from './components/About';
@@ -399,6 +400,10 @@ export default function App() {
               <Route path="/extra-courses" element={
                 isAuthenticated ? <ExtraCourses /> : <Navigate to="/auth" />
               } />
+              <Route path="/curso-excel" element={
+                isAuthenticated ? <ExcelCoursePlayer onBack={() => window.history.back()} studentName={currentUser?.name} /> : <Navigate to="/auth" />
+              } />
+              <Route path="/excel" element={<Navigate to="/curso-excel" replace />} />
               <Route path="/internships" element={
                 isAuthenticated ? <Internships /> : <Navigate to="/auth" />
               } />

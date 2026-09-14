@@ -1,24 +1,94 @@
 import { GoogleGenAI } from '@google/genai';
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
+const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' ? process.env.GEMINI_API_KEY : '');
+
+export function getOpenAiApiKey(): string {
+  if (typeof window !== 'undefined') {
+    const local = localStorage.getItem('cetep_openai_api_key');
+    if (local && local.trim()) return local.trim();
+  }
+  return import.meta.env.VITE_OPENAI_API_KEY || (typeof process !== 'undefined' ? (process.env.OPENAI_API_KEY || '') : '');
+}
+
+export function saveOpenAiApiKey(key: string): void {
+  if (typeof window !== 'undefined') {
+    if (key && key.trim()) {
+      localStorage.setItem('cetep_openai_api_key', key.trim());
+    } else {
+      localStorage.removeItem('cetep_openai_api_key');
+    }
+  }
+}
+
+export function getPreferredAiProvider(): 'chatgpt' | 'gemini' | 'auto' {
+  if (typeof window !== 'undefined') {
+    const pref = localStorage.getItem('cetep_ai_provider');
+    if (pref === 'chatgpt' || pref === 'gemini' || pref === 'auto') return pref;
+  }
+  return getOpenAiApiKey() ? 'chatgpt' : 'auto';
+}
+
+export function savePreferredAiProvider(provider: 'chatgpt' | 'gemini' | 'auto'): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('cetep_ai_provider', provider);
+  }
+}
 
 export async function askAiTeacher(prompt: string, userCourse = 'Geral', userGrade = '1º Ano'): Promise<string> {
   const cleanPrompt = prompt.trim();
   if (!cleanPrompt) return 'Por favor, digite sua dúvida para o Professor IA.';
 
-  const systemInstruction = `Você é o "Professor IA CETEP", assistente pedagógico e tutor de IA do portal.
+  const systemInstruction = `Você é o "Professor IA CETEP", assistente pedagógico e tutor de IA do portal acadêmico do CETEP (Centro Territorial de Educação Profissional).
 DIRETRIZ OBRIGATÓRIA E RIGOROSA:
-- Responda APENAS e EXCLUSIVAMENTE ao que a pessoa perguntou.
-- NÃO adicione saudações longas, NÃO inclua listas não solicitadas de "como posso ajudar mais", "dicas de estudo" ou "opções extras".
-- Seja direto, claro, objetivo e preciso.
-- Se for uma pergunta simples, dê a resposta direta em uma ou poucas frases.
-- Se for um problema ou exercício, resolva diretamente o problema perguntado.`;
+- Responda com clareza, precisão pedagógica e de forma direta ao que foi solicitado.
+- Seja objetivo, educado e didático.
+- Se for uma dúvida de informática, Excel, enfermagem, administração, matemática ou qualquer disciplina escolar/técnica, dê exemplos práticos passo a passo.
+- Quando pertinente, forneça a fórmula, comando ou síntese conceitual.`;
 
+  const provider = getPreferredAiProvider();
+  const openAiKey = getOpenAiApiKey();
+
+  // 1. If ChatGPT is preferred or configured
+  if ((provider === 'chatgpt' || provider === 'auto') && openAiKey && openAiKey.startsWith('sk-')) {
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${openAiKey}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemInstruction },
+            { role: 'user', content: cleanPrompt }
+          ],
+          temperature: 0.6,
+          max_tokens: 1200
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (content) {
+          return content.trim();
+        }
+      } else {
+        const errData = await response.json().catch(() => ({}));
+        console.warn('OpenAI API error response:', errData);
+      }
+    } catch (err) {
+      console.warn('ChatGPT API call fallback to secondary engine:', err);
+    }
+  }
+
+  // 2. Try Gemini API
   try {
-    if (apiKey && apiKey !== 'your-gemini-api-key') {
-      const ai = new GoogleGenAI({ apiKey });
+    if (geminiApiKey && geminiApiKey !== 'your-gemini-api-key') {
+      const ai = new GoogleGenAI({ apiKey: geminiApiKey });
       const response = await ai.models.generateContent({
-        model: 'gemini-3.6-flash',
+        model: 'gemini-2.5-flash',
         contents: cleanPrompt,
         config: {
           systemInstruction,
@@ -33,7 +103,7 @@ DIRETRIZ OBRIGATÓRIA E RIGOROSA:
     console.warn('Gemini API call fallback to smart tutor:', err);
   }
 
-  // Efficient educational response generator when API key is pending or in preview mode
+  // 3. Fallback to built-in smart pedagogical tutor engine
   return generateSmartTutorResponse(cleanPrompt, userCourse);
 }
 
