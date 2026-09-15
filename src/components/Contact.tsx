@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import { Mail, Phone, MapPin, Send, MessageSquare, Bot, Sparkles, User as UserIcon, BookOpen, SendHorizontal, RefreshCw, CheckCircle2, HelpCircle, Key, Settings, X, Eye, EyeOff } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Mail, Phone, MapPin, Send, MessageSquare, Bot, Sparkles, User as UserIcon, BookOpen, SendHorizontal, RefreshCw, CheckCircle2, HelpCircle } from 'lucide-react';
 import { User } from '../types';
-import { askAiTeacher, getOpenAiApiKey, saveOpenAiApiKey, getPreferredAiProvider, savePreferredAiProvider } from '../services/aiTeacherService';
+import { askAiTeacher } from '../services/aiTeacherService';
 import { sendContactFormEmail } from '../services/emailService';
 import { toast } from 'sonner';
 
@@ -22,25 +22,6 @@ export default function Contact({ currentUser }: ContactProps) {
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState<'ai' | 'form'>(tabParam === 'form' ? 'form' : 'ai');
-
-  // OpenAI API Key Settings Modal
-  const [showKeyModal, setShowKeyModal] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState('');
-  const [showKeySecret, setShowKeySecret] = useState(false);
-  const [preferredProvider, setPreferredProvider] = useState<'auto' | 'chatgpt' | 'gemini'>('auto');
-
-  useEffect(() => {
-    setApiKeyInput(getOpenAiApiKey());
-    setPreferredProvider(getPreferredAiProvider());
-  }, []);
-
-  const handleSaveApiKey = (e: React.FormEvent) => {
-    e.preventDefault();
-    saveOpenAiApiKey(apiKeyInput.trim());
-    savePreferredAiProvider(preferredProvider);
-    toast.success('Configurações da chave ChatGPT salvas com sucesso!');
-    setShowKeyModal(false);
-  };
 
   useEffect(() => {
     if (tabParam === 'form' || tabParam === 'ai') {
@@ -213,14 +194,6 @@ export default function Contact({ currentUser }: ContactProps) {
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setShowKeyModal(true)}
-                    className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors flex items-center gap-1 text-xs font-semibold cursor-pointer"
-                    title="Configurar Chave da API do ChatGPT (OpenAI)"
-                  >
-                    <Key className="w-4 h-4 text-blue-600" />
-                    <span className="hidden sm:inline">Chave ChatGPT</span>
-                  </button>
                   <button
                     onClick={() => setMessages([messages[0]])}
                     className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
@@ -446,116 +419,6 @@ export default function Contact({ currentUser }: ContactProps) {
 
           </motion.div>
         )}
-
-        {/* Modal de Configuração da Chave da API ChatGPT / Gemini */}
-        <AnimatePresence>
-          {showKeyModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6"
-              >
-                <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center">
-                      <Key className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-slate-900 text-base">Chave de API ChatGPT (OpenAI)</h3>
-                      <p className="text-xs text-slate-400 font-medium">Configure sua própria chave para o Chat IA</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setShowKeyModal(false)}
-                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <form onSubmit={handleSaveApiKey} className="space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700">Chave da API da OpenAI (ChatGPT)</label>
-                    <div className="relative">
-                      <input
-                        type={showKeySecret ? 'text' : 'password'}
-                        value={apiKeyInput}
-                        onChange={(e) => setApiKeyInput(e.target.value)}
-                        placeholder="sk-proj-..."
-                        className="w-full pl-4 pr-11 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowKeySecret(!showKeySecret)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
-                      >
-                        {showKeySecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-slate-400">
-                      Sua chave (ex: <code>sk-...</code>) fica salva com segurança apenas no seu navegador (LocalStorage) e é usada para processar perguntas com o modelo <strong>GPT-4o-mini</strong>.
-                    </p>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700">Provedor de Inteligência Artificial Preferido</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[
-                        { id: 'auto', label: 'Automático' },
-                        { id: 'chatgpt', label: 'ChatGPT' },
-                        { id: 'gemini', label: 'Gemini' }
-                      ].map((item) => (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => setPreferredProvider(item.id as any)}
-                          className={`p-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                            preferredProvider === item.id
-                              ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
-                              : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-                    {apiKeyInput && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setApiKeyInput('');
-                          saveOpenAiApiKey('');
-                          toast.info('Chave removida do armazenamento local.');
-                        }}
-                        className="px-4 py-2.5 text-rose-600 hover:bg-rose-50 rounded-xl text-xs font-bold transition-all cursor-pointer mr-auto"
-                      >
-                        Remover Chave
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => setShowKeyModal(false)}
-                      className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all cursor-pointer"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
-                    >
-                      Salvar Configurações
-                    </button>
-                  </div>
-                </form>
-              </motion.div>
-            </div>
-          )}
-        </AnimatePresence>
 
       </div>
     </div>

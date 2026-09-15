@@ -108,3 +108,152 @@ export const downloadBoletimPDF = (user: User) => {
     return false;
   }
 };
+
+export const downloadCertificatePDF = (
+  studentName: string,
+  courseTitle: string = 'Excel do Zero ao Avançado',
+  hours: number = 50,
+  issuedDate?: string
+) => {
+  try {
+    const doc = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    });
+
+    const pageWidth = doc.internal.pageSize.getWidth(); // 297mm
+    const pageHeight = doc.internal.pageSize.getHeight(); // 210mm
+    const date = issuedDate || new Date().toLocaleDateString('pt-BR');
+    const authCode = `CETEP-${Math.random().toString(36).substring(2, 8).toUpperCase()}-2026`;
+
+    // Background aesthetic borders
+    // Outer border (Navy)
+    doc.setDrawColor(15, 42, 92);
+    doc.setLineWidth(2.5);
+    doc.rect(10, 10, pageWidth - 20, pageHeight - 20);
+
+    // Inner thin border (Gold)
+    doc.setDrawColor(202, 138, 4);
+    doc.setLineWidth(0.8);
+    doc.rect(14, 14, pageWidth - 28, pageHeight - 28);
+
+    // Corner decorative accents
+    doc.setDrawColor(15, 42, 92);
+    doc.setLineWidth(1.5);
+    const cornerSize = 12;
+    // Top-left
+    doc.line(14, 14 + cornerSize, 14 + cornerSize, 14);
+    // Top-right
+    doc.line(pageWidth - 14 - cornerSize, 14, pageWidth - 14, 14 + cornerSize);
+    // Bottom-left
+    doc.line(14, pageHeight - 14 - cornerSize, 14 + cornerSize, pageHeight - 14);
+    // Bottom-right
+    doc.line(pageWidth - 14 - cornerSize, pageHeight - 14, pageWidth - 14, pageHeight - 14 - cornerSize);
+
+    // Institution Header
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(15, 42, 92);
+    doc.text('CENTRO ESTADUAL DE EDUCAÇÃO PROFISSIONAL', pageWidth / 2, 28, { align: 'center' });
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100, 116, 139);
+    doc.text('PORTAL ACADÊMICO OFICIAL • CAPACITAÇÃO E EXTENSÃO TÉCNICA', pageWidth / 2, 34, { align: 'center' });
+
+    // Certificate Title
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(26);
+    doc.setTextColor(202, 138, 4); // Gold/amber
+    doc.text('CERTIFICADO DE CONCLUSÃO', pageWidth / 2, 48, { align: 'center' });
+
+    // Divider line
+    doc.setDrawColor(202, 138, 4);
+    doc.setLineWidth(0.6);
+    doc.line(pageWidth / 2 - 40, 52, pageWidth / 2 + 40, 52);
+
+    // Body text
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(13);
+    doc.setTextColor(51, 65, 85);
+    doc.text('Certificamos para os devidos fins legais e acadêmicos que o(a) estudante', pageWidth / 2, 65, { align: 'center' });
+
+    // Student Name
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(22);
+    doc.setTextColor(15, 42, 92);
+    doc.text(studentName.toUpperCase(), pageWidth / 2, 80, { align: 'center' });
+
+    // Line under name
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(0.5);
+    doc.line(pageWidth / 2 - 80, 84, pageWidth / 2 + 80, 84);
+
+    // Course completion description
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
+    doc.setTextColor(51, 65, 85);
+    const line1 = `concluiu com pleno êxito o curso de capacitação técnica em`;
+    doc.text(line1, pageWidth / 2, 96, { align: 'center' });
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(15, 42, 92);
+    doc.text(`"${courseTitle}"`, pageWidth / 2, 107, { align: 'center' });
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(71, 85, 105);
+    const line2 = `com carga horária oficial de ${hours} horas/aula, cumprindo integralmente todas as videoaulas práticas,`;
+    const line3 = `o plano de estudos teóricos e obtendo média superior a 7,0 nos questionários de avaliação contínua.`;
+    doc.text(line1 ? line2 : '', pageWidth / 2, 117, { align: 'center' });
+    doc.text(line3, pageWidth / 2, 124, { align: 'center' });
+
+    // City & Date
+    doc.setFontSize(11);
+    doc.setTextColor(100, 116, 139);
+    doc.text(`Emitido em ${date} • Registro no Sistema Acadêmico CETEP`, pageWidth / 2, 142, { align: 'center' });
+
+    // Signatures
+    const sigY = 168;
+    // Left signature - Coordenação
+    doc.setDrawColor(148, 163, 184);
+    doc.setLineWidth(0.5);
+    doc.line(45, sigY, 115, sigY);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(30, 41, 59);
+    doc.text('Coordenação Pedagógica', 80, sigY + 5, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text('CETEP Ensino Profissional', 80, sigY + 9, { align: 'center' });
+
+    // Right signature - Direção
+    doc.line(pageWidth - 115, sigY, pageWidth - 45, sigY);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(30, 41, 59);
+    doc.text('Diretoria Acadêmica', pageWidth - 80, sigY + 5, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 116, 139);
+    doc.text('Certificação Digital Eletrônica', pageWidth - 80, sigY + 9, { align: 'center' });
+
+    // Authenticity badge at the bottom
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`Autenticidade: ${authCode} • Válido em todo o território nacional para horas complementares.`, pageWidth / 2, pageHeight - 17, { align: 'center' });
+
+    // Save PDF
+    const safeName = studentName.trim().replace(/\s+/g, '_') || 'Estudante';
+    doc.save(`Certificado_CETEP_${safeName}_${courseTitle.replace(/\s+/g, '_')}.pdf`);
+    toast.success('Certificado Digital Oficial emitido com sucesso!');
+    return true;
+  } catch (err) {
+    console.error('Erro ao gerar certificado:', err);
+    toast.error('Não foi possível gerar o certificado.');
+    return false;
+  }
+};

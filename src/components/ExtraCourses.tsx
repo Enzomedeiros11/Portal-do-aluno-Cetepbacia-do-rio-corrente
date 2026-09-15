@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { BookMarked, ExternalLink, GraduationCap, Star, Clock, Globe, Award, CheckCircle2, Play } from 'lucide-react';
+import { BookMarked, ExternalLink, GraduationCap, Star, Clock, Globe, Award, CheckCircle2, Play, Download } from 'lucide-react';
 import ExcelCoursePlayer from './ExcelCoursePlayer';
 import { getCompletedLessonIds, TOTAL_EXCEL_LESSONS } from '../data/excelCourseData';
+import { downloadCertificatePDF } from '../lib/pdfUtils';
 
 export default function ExtraCourses() {
   const [activeCourse, setActiveCourse] = useState<string | null>(null);
@@ -133,25 +134,38 @@ export default function ExtraCourses() {
                       </div>
                     </div>
 
-                    <button
-                      onClick={() => {
-                        if (isExcel) {
-                          setActiveCourse('excel');
-                        }
-                      }}
-                      className={`mt-8 w-full py-3.5 rounded-2xl font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
-                        isExcel
-                          ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
-                          : 'bg-indigo-900 text-white hover:bg-slate-900'
-                      }`}
-                    >
-                      <Play className="w-4 h-4 fill-current" />
-                      {isExcel
-                        ? excelCompletedCount > 0
-                          ? 'Continuar Curso de Excel'
-                          : 'Iniciar Curso de Excel'
-                        : 'Iniciar Curso'}
-                    </button>
+                    <div className="mt-8 flex flex-col sm:flex-row gap-2.5">
+                      <button
+                        onClick={() => {
+                          if (isExcel) {
+                            setActiveCourse('excel');
+                          }
+                        }}
+                        className={`flex-1 py-3.5 rounded-2xl font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                          isExcel
+                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
+                            : 'bg-indigo-900 text-white hover:bg-slate-900'
+                        }`}
+                      >
+                        <Play className="w-4 h-4 fill-current" />
+                        {isExcel
+                          ? excelCompletedCount > 0
+                            ? 'Continuar Curso'
+                            : 'Iniciar Curso de Excel'
+                          : 'Iniciar Curso'}
+                      </button>
+
+                      {isExcel && (
+                        <button
+                          onClick={() => downloadCertificatePDF(studentName, 'Excel do Zero ao Avançado', 50)}
+                          className="py-3.5 px-4 rounded-2xl font-bold text-sm bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                          title="Baixar Certificado Oficial de Conclusão em PDF"
+                        >
+                          <Download className="w-4 h-4" />
+                          <span>Certificado</span>
+                        </button>
+                      )}
+                    </div>
                     <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50 rounded-bl-[100%] opacity-0 group-hover:opacity-100 transition-opacity" />
                   </motion.div>
                 );

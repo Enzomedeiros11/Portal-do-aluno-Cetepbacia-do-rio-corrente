@@ -81,7 +81,7 @@ export default function LandingPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent flex flex-col justify-end p-6 text-left">
                   <div className="inline-block px-2.5 py-1 bg-blue-600/90 text-white text-[10px] font-bold uppercase tracking-wider rounded w-fit mb-2">
-                    Campus Bacia do Rio Corrente
+                    CETEP Bacia do Rio Corrente
                   </div>
                   <h3 className="text-white text-lg font-bold">Educação Técnica & Profissional</h3>
                   <p className="text-slate-300 text-xs mt-0.5">

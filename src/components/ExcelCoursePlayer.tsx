@@ -36,9 +36,11 @@ import {
   ArrowRight,
   Lock,
   Unlock,
-  ShieldCheck
+  ShieldCheck,
+  Download
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { downloadCertificatePDF } from '../lib/pdfUtils';
 
 interface ExcelCoursePlayerProps {
   onBack: () => void;
@@ -88,6 +90,10 @@ export default function ExcelCoursePlayer({ onBack, studentName = 'Aluno(a)' }: 
 
   const totalCompleted = completedLessonIds.length;
   const progressPercentage = Math.round((totalCompleted / TOTAL_EXCEL_LESSONS) * 100);
+
+  const handleDownloadCertificate = () => {
+    downloadCertificatePDF(studentName, 'Excel do Zero ao Avançado', 50);
+  };
 
   // Mark theory as completed
   const handleCompleteTheory = () => {
@@ -245,6 +251,15 @@ export default function ExcelCoursePlayer({ onBack, studentName = 'Aluno(a)' }: 
               <Award className="w-3.5 h-3.5" />
               <span>{progressPercentage}%</span>
             </div>
+
+            <button
+              onClick={handleDownloadCertificate}
+              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+              title="Baixar Certificado Oficial de Conclusão em PDF"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Emitir Certificado</span>
+            </button>
           </div>
         </div>
       </header>

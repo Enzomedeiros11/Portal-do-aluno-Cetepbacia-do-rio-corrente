@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, BookOpen, GraduationCap, FileText, Bot } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from './Logo';
@@ -337,6 +337,36 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Mobile Fixed Bottom Navigation Bar for quick access */}
+      {isAuthenticated && (
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-3 py-2 flex items-center justify-around shadow-lg">
+          {[
+            { name: 'Início', path: '/dashboard', icon: Home },
+            { name: 'Aulas', path: '/classroom', icon: BookOpen },
+            { name: 'Cursos', path: '/extra-courses', icon: GraduationCap },
+            { name: 'Boletim', path: '/boletim', icon: FileText },
+            { name: 'Chat IA', path: '/contact?tab=ai', icon: Bot },
+          ].map((item) => {
+            const isActive = location.pathname === item.path || (item.path.includes('?') && (location.pathname + location.search) === item.path);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition-all active:scale-95 ${
+                  isActive
+                    ? 'text-blue-600 font-extrabold'
+                    : 'text-slate-400 hover:text-slate-700 font-medium'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${isActive ? 'text-blue-600 stroke-[2.5]' : 'text-slate-400'}`} />
+                <span className="text-[10px] mt-1 leading-none">{item.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </nav>
   );
 }
