@@ -64,6 +64,7 @@ export const ALL_CLASS_GROUPS: ClassGroup[] = [
   { id: '1_analises', name: '1º Análises', grade: '1º Ano', course: 'Análises Clínicas', keywords: ['análises', 'analises', 'clínicas', 'clinicas'], color: 'bg-teal-600', description: 'Grupo exclusivo da turma do 1º Ano de Análises Clínicas.' },
   { id: '1_enfermagem', name: '1º Enfermagem', grade: '1º Ano', course: 'Técnico em Enfermagem', keywords: ['enfermagem', 'saúde', 'saude'], color: 'bg-rose-600', description: 'Grupo exclusivo da turma do 1º Ano de Enfermagem.' },
   { id: '1_adm', name: '1º Administração', grade: '1º Ano', course: 'Técnico em Administração', keywords: ['adm', 'administração', 'administracao'], color: 'bg-amber-600', description: 'Grupo exclusivo da turma do 1º Ano de Administração.' },
+  { id: '1_edif', name: '1º Edificações', grade: '1º Ano', course: 'Técnico em Edificações', keywords: ['edif', 'edificações', 'edificacoes'], color: 'bg-blue-600', description: 'Grupo exclusivo da turma do 1º Ano de Edificações.' },
   { id: '1_agro', name: '1º Agropecuária', grade: '1º Ano', course: 'Técnico em Agropecuária', keywords: ['agro', 'agropecuária', 'agropecuaria'], color: 'bg-emerald-600', description: 'Grupo exclusivo da turma do 1º Ano de Agropecuária.' },
 
   // 2º Ano
@@ -71,6 +72,7 @@ export const ALL_CLASS_GROUPS: ClassGroup[] = [
   { id: '2_analises', name: '2º Análises', grade: '2º Ano', course: 'Análises Clínicas', keywords: ['análises', 'analises', 'clínicas', 'clinicas'], color: 'bg-teal-700', description: 'Grupo exclusivo da turma do 2º Ano de Análises Clínicas.' },
   { id: '2_enfermagem', name: '2º Enfermagem', grade: '2º Ano', course: 'Técnico em Enfermagem', keywords: ['enfermagem', 'saúde', 'saude'], color: 'bg-rose-700', description: 'Grupo exclusivo da turma do 2º Ano de Enfermagem.' },
   { id: '2_adm', name: '2º Administração', grade: '2º Ano', course: 'Técnico em Administração', keywords: ['adm', 'administração', 'administracao'], color: 'bg-amber-700', description: 'Grupo exclusivo da turma do 2º Ano de Administração.' },
+  { id: '2_edif', name: '2º Edificações', grade: '2º Ano', course: 'Técnico em Edificações', keywords: ['edif', 'edificações', 'edificacoes'], color: 'bg-blue-700', description: 'Grupo exclusivo da turma do 2º Ano de Edificações.' },
   { id: '2_agro', name: '2º Agropecuária', grade: '2º Ano', course: 'Técnico em Agropecuária', keywords: ['agro', 'agropecuária', 'agropecuaria'], color: 'bg-emerald-700', description: 'Grupo exclusivo da turma do 2º Ano de Agropecuária.' },
 
   // 3º Ano
@@ -78,6 +80,7 @@ export const ALL_CLASS_GROUPS: ClassGroup[] = [
   { id: '3_analises', name: '3º Análises', grade: '3º Ano', course: 'Análises Clínicas', keywords: ['análises', 'analises', 'clínicas', 'clinicas'], color: 'bg-teal-800', description: 'Grupo exclusivo da turma do 3º Ano de Análises Clínicas.' },
   { id: '3_enfermagem', name: '3º Enfermagem', grade: '3º Ano', course: 'Técnico em Enfermagem', keywords: ['enfermagem', 'saúde', 'saude'], color: 'bg-rose-800', description: 'Grupo exclusivo da turma do 3º Ano de Enfermagem.' },
   { id: '3_adm', name: '3º Administração', grade: '3º Ano', course: 'Técnico em Administração', keywords: ['adm', 'administração', 'administracao'], color: 'bg-amber-800', description: 'Grupo exclusivo da turma do 3º Ano de Administração.' },
+  { id: '3_edif', name: '3º Edificações', grade: '3º Ano', course: 'Técnico em Edificações', keywords: ['edif', 'edificações', 'edificacoes'], color: 'bg-blue-800', description: 'Grupo exclusivo da turma do 3º Ano de Edificações.' },
   { id: '3_agro', name: '3º Agropecuária', grade: '3º Ano', course: 'Técnico em Agropecuária', keywords: ['agro', 'agropecuária', 'agropecuaria'], color: 'bg-emerald-800', description: 'Grupo exclusivo da turma do 3º Ano de Agropecuária.' },
 ];
 
@@ -218,80 +221,39 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
     }
   };
 
-  const readFileAsDataUrl = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      if (file.type.startsWith('image/')) {
-        const img = new Image();
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          img.src = e.target?.result as string;
-        };
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          let { width, height } = img;
-          const maxDim = 800;
-          if (width > maxDim || height > maxDim) {
-            if (width > height) {
-              height = Math.round((height * maxDim) / width);
-              width = maxDim;
-            } else {
-              width = Math.round((width * maxDim) / height);
-              height = maxDim;
-            }
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', 0.8));
-          } else {
-            resolve(img.src);
-          }
-        };
-        img.onerror = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      } else {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      }
-    });
-  };
-
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 30 * 1024 * 1024) {
-      toast.error('O arquivo deve ter no máximo 30MB.');
-      return;
-    }
-
     setIsUploading(true);
-    setUploadProgress(40);
+    setUploadProgress(20);
 
     try {
-      const dataUrl = await readFileAsDataUrl(file);
-      setUploadProgress(80);
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user?.id || 'anon'}/${Math.random()}.${fileExt}`;
+
+      const { data, error: uploadError } = await supabase.storage
+        .from('arquivos_turma')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('arquivos_turma')
+        .getPublicUrl(filePath);
 
       await handleSendMessage(null as any, {
-        url: dataUrl,
+        url: publicUrl,
         name: file.name,
         type: file.type
       });
 
-      setUploadProgress(100);
-      toast.success('Arquivo compartilhado e salvo no Firebase com sucesso!');
+      toast.success('Arquivo enviado!');
     } catch (err: any) {
-      console.error('Erro ao processar arquivo:', err);
       toast.error('Erro ao enviar arquivo.');
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
-      if (e.target) e.target.value = '';
     }
   };
 
@@ -432,7 +394,6 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                     type="button" 
                     onClick={() => fileInputRef.current?.click()}
                     className="p-2.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
-                    title="Anexar arquivo (até 30MB - imagens, PDF, documentos)"
                   >
                     <Paperclip className="w-5 h-5" />
                   </button>

@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Newspaper, Search, Calendar, ArrowRight, ExternalLink } from 'lucide-react';
+import { Newspaper, Bell, TrendingUp, Calendar, Search, Filter, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -19,13 +19,7 @@ export default function Journal() {
       title: 'CETEP - Bacia do Rio Corrente',
       date: '16 Mai 2024',
       category: 'Educação',
-      desc: 'Nossa instituição continua transformando vidas através da educação profissional de excelência na região de Santa Maria da Vitória e cidades vizinhas.'
-    },
-    {
-      title: '1º Simulado da Escola - CETEP',
-      date: '10 Jun 2024',
-      category: 'Acadêmico',
-      desc: 'Confira os registros em vídeo e a participação dos estudantes no grande simulado preparatório de avaliação técnica.'
+      desc: 'Nossa instituição continua transformando vidas através da educação profissional de excelência na região.'
     }
   ];
 
@@ -36,83 +30,68 @@ export default function Journal() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-28 pb-12 px-6 relative overflow-hidden font-sans transition-colors duration-200">
-      {/* Background accents */}
-      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[60px] pointer-events-none" />
+    <div className="min-h-screen bg-slate-50 pt-28 pb-12 px-6 relative overflow-hidden font-sans">
+       {/* Background accents optimized */}
+       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[60px] pointer-events-none" />
 
       <div className="container mx-auto max-w-5xl relative z-10">
-        <header className="mb-14 flex flex-col md:flex-row md:items-end justify-between gap-8">
+        <header className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div>
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center gap-4 mb-4"
             >
-              <div className="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20 text-white">
-                <Newspaper className="w-6 h-6" />
+              <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                <Newspaper className="text-white w-6 h-6" />
               </div>
-              <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight font-display">
-                Jornal & Notícias
-              </h1>
+              <h1 className="text-5xl font-black text-slate-900 tracking-tighter font-display uppercase">Portal de Notícias</h1>
             </motion.div>
-            <p className="text-slate-500 dark:text-slate-400 text-base font-medium">
-              Acompanhe as últimas novidades, projetos e conquistas da nossa comunidade acadêmica.
-            </p>
+            <p className="text-slate-500 text-lg font-medium">Acompanhe as últimas novidades e conquistas da nossa comunidade acadêmica.</p>
           </div>
           
           <div className="relative w-full md:w-80 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5 group-focus-within:text-blue-600 transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 w-5 h-5 group-focus-within:text-indigo-600 transition-colors" />
             <input 
               type="text" 
-              placeholder="Pesquisar notícia..." 
+              placeholder="Pesquisar reportagem..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-6 py-3.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-2xl border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-blue-500 outline-none transition-all text-xs font-semibold shadow-xs placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-full pl-12 pr-6 py-4 bg-white rounded-[30px] border border-slate-200 focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-600 outline-none transition-all text-sm font-bold shadow-sm"
             />
           </div>
         </header>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {filteredNews.map((item, i) => (
-            <motion.article
+            <motion.div 
               key={i}
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white dark:bg-slate-900 p-8 rounded-[32px] border border-slate-200/80 dark:border-slate-800 shadow-xs hover:border-blue-500/40 dark:hover:border-blue-500/40 transition-all group flex flex-col md:flex-row md:items-center justify-between gap-6"
+              onClick={() => handleReadMore(item.title)}
+              className="bg-white p-10 rounded-[48px] border border-slate-200 shadow-2xl shadow-indigo-900/[0.03] flex flex-col md:flex-row gap-10 items-center group cursor-pointer hover:border-indigo-600/30 transition-all active:scale-[0.99] group/card overflow-hidden relative"
             >
-              <div className="space-y-2 max-w-2xl">
-                <div className="flex items-center gap-3">
-                  <span className="px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-black uppercase tracking-wider">
-                    {item.category}
-                  </span>
-                  <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1.5 font-medium">
-                    <Calendar className="w-3.5 h-3.5" /> {item.date}
-                  </span>
-                </div>
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  {item.title}
-                </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-                  {item.desc}
-                </p>
+              <div className="w-full md:w-40 h-40 bg-slate-900 rounded-[32px] flex flex-col items-center justify-center border border-white/10 shrink-0 text-white relative overflow-hidden">
+                 <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-500/20 to-transparent" />
+                 <Calendar className="w-8 h-8 text-indigo-400 mb-3 relative z-10" />
+                 <span className="text-[10px] font-black uppercase tracking-widest text-white/40 relative z-10">{item.date.split(' ')[0]}</span>
+                 <span className="text-2xl font-black tracking-tighter relative z-10">{item.date.split(' ')[1]}</span>
               </div>
-
-              <button
-                onClick={() => handleReadMore(item.title)}
-                className="px-6 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white text-slate-700 dark:text-slate-200 font-bold text-xs rounded-2xl transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer group-hover:shadow-md"
-              >
-                <span>Ver Reportagem</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </motion.article>
+              <div className="flex-1 relative z-10">
+                <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 bg-indigo-50 px-4 py-1.5 rounded-full mb-4 inline-block">
+                   {item.category}
+                </span>
+                <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tighter font-display leading-tight group-hover/card:text-indigo-600 transition-colors">{item.title}</h3>
+                <p className="text-slate-500 leading-relaxed text-base font-medium mb-6">{item.desc}</p>
+                <div className="flex items-center gap-2 text-indigo-600 font-black text-xs uppercase tracking-widest group-hover/card:gap-4 transition-all">
+                   Ler reportagem completa <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+              
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full translate-x-16 -translate-y-16 blur-2xl group-hover/card:scale-150 transition-transform duration-700" />
+            </motion.div>
           ))}
-
-          {filteredNews.length === 0 && (
-            <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-[32px] border border-slate-200 dark:border-slate-800">
-              <p className="text-slate-500 dark:text-slate-400 text-sm">Nenhuma notícia encontrada para "{searchTerm}".</p>
-            </div>
-          )}
         </div>
       </div>
     </div>

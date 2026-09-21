@@ -146,33 +146,13 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
         formData.password === 'admin'
       );
 
-      let savedAvatar: string | undefined = undefined;
-      let savedName = 'Professor Enzo Medeiros';
-
       try {
         const docSnap = await getDoc(doc(db, 'usuarios', 'enzo_admin'));
-        if (docSnap.exists()) {
-          const d = docSnap.data();
-          if (d.senha) {
-            if (d.senha === formData.password) {
-              isValidPassword = true;
-            } else {
-              isValidPassword = false;
-            }
-          }
-          if (d.avatar || d.avatar_url) {
-            savedAvatar = d.avatar || d.avatar_url;
-          }
-          if (d.nome) savedName = d.nome;
-        }
-
-        // Also check if alternate doc exists
-        if (!savedAvatar) {
-          const altSnap = await getDoc(doc(db, 'usuarios', 'enzomedeirosdasilva6_gmail_com'));
-          if (altSnap.exists()) {
-            const ad = altSnap.data();
-            if (ad.avatar || ad.avatar_url) savedAvatar = ad.avatar || ad.avatar_url;
-            if (ad.nome && savedName === 'Professor Enzo Medeiros') savedName = ad.nome;
+        if (docSnap.exists() && docSnap.data().senha) {
+          if (docSnap.data().senha === formData.password) {
+            isValidPassword = true;
+          } else {
+            isValidPassword = false;
           }
         }
       } catch (err) {
@@ -187,19 +167,19 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
 
       const enzoUser: User = {
         id: 'enzo_admin',
-        name: savedName,
+        name: 'Professor Enzo Medeiros',
         email: 'enzomedeirosdasilva6@gmail.com',
         role: 'teacher',
         course: 'Todos os Cursos',
         grade: 'Docente / Coordenador',
-        avatar: savedAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=EnzoMedeiros',
+        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=EnzoMedeiros',
         subjectGrades: {},
         frequencia: 100
       };
 
-      // Sync to Firebase preserving avatar
+      // Sync to Firebase
       try {
-        const payload = {
+        await setDoc(doc(db, 'usuarios', 'enzo_admin'), {
           id: 'enzo_admin',
           nome: enzoUser.name,
           email: enzoUser.email,
@@ -207,12 +187,8 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
           tipo: 'teacher',
           curso: enzoUser.course,
           grade: enzoUser.grade,
-          avatar: enzoUser.avatar,
-          avatar_url: enzoUser.avatar,
           updatedAt: new Date().toISOString()
-        };
-        await setDoc(doc(db, 'usuarios', 'enzo_admin'), payload, { merge: true });
-        await setDoc(doc(db, 'usuarios', 'enzomedeirosdasilva6_gmail_com'), payload, { merge: true });
+        }, { merge: true });
       } catch (err) {
         console.warn('Firebase sync warning for Enzo:', err);
       }
@@ -313,7 +289,6 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
         if (d.senha) {
           storedSenha = d.senha;
         }
-        const dbAvatar = d.avatar || d.avatar_url;
         if (!userToLogin) {
           userToLogin = {
             id: docSnap.id,
@@ -323,12 +298,10 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
             role: (d.tipo === 'teacher' || cleanEmail === 'enzomedeirosdasilva6@gmail.com') ? 'teacher' : 'student',
             grade: d.grade || '1º Ano',
             course: d.curso || 'Técnico em Informática',
-            avatar: dbAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
+            avatar: d.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
             subjectGrades: d.notas || {},
             frequencia: d.frequencia || 100
           };
-        } else if (dbAvatar) {
-          userToLogin.avatar = dbAvatar;
         }
       }
     } catch (err) {
@@ -361,9 +334,9 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col lg:flex-row overflow-hidden font-sans transition-colors">
+    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row overflow-hidden font-sans">
       {/* Left Side: Solid Professional Section */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 dark:bg-slate-950 relative items-center justify-center p-20 border-r border-transparent dark:border-slate-800">
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative items-center justify-center p-20">
         <div className="relative z-10 max-w-lg">
            <motion.div 
              initial={{ opacity: 0, scale: 0.9 }}
@@ -397,18 +370,18 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
            >
               <div className="flex-1 p-6 bg-white/5 rounded-xl border border-white/10">
                  <p className="text-3xl font-bold text-white mb-1 tracking-tight">1.2k+</p>
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Alunos Registrados</p>
+                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Alunos Registrados</p>
               </div>
               <div className="flex-1 p-6 bg-white/5 rounded-xl border border-white/10">
                  <p className="text-3xl font-bold text-white mb-1 tracking-tight">98%</p>
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Aprovação</p>
+                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Aprovação</p>
               </div>
            </motion.div>
         </div>
       </div>
 
       {/* Right Side: Auth Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-20 bg-white dark:bg-slate-900 transition-colors">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-20 bg-white">
         <motion.div 
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -418,12 +391,12 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
             <div className="lg:hidden inline-flex w-12 h-12 bg-blue-600 rounded-lg items-center justify-center mb-6">
               <Logo className="w-8 h-8 text-white fill-white" />
             </div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
               {mode === 'login' && 'Identificação de Aluno'}
               {mode === 'register' && 'Criar Nova Conta'}
               {mode === 'forgot' && 'Recuperar Senha'}
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-1.5 font-medium text-sm">
+            <p className="text-slate-500 mt-1.5 font-medium text-sm">
               {mode === 'login' && 'Insira seus dados de acesso para entrar no portal acadêmico.'}
               {mode === 'register' && 'Preencha seus dados de estudante para se cadastrar no CETEP.'}
               {mode === 'forgot' && 'Redefina sua senha através do código de verificação por e-mail.'}
@@ -432,14 +405,14 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
 
           {/* Top Switcher Tabs: Entrar vs Criar Conta */}
           {mode !== 'forgot' && (
-            <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-2xl mb-6 border border-slate-200 dark:border-slate-700 shadow-inner">
+            <div className="flex bg-slate-100 p-1.5 rounded-2xl mb-6 border border-slate-200 shadow-inner">
               <button
                 type="button"
                 onClick={() => switchMode('login')}
                 className={`flex-1 py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
                   mode === 'login'
-                    ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm border border-slate-200 dark:border-slate-700 font-extrabold'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    ? 'bg-white text-blue-600 shadow-sm border border-slate-200 font-extrabold'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 <LogIn className="w-4 h-4" />
@@ -451,7 +424,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                 className={`flex-1 py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
                   mode === 'register'
                     ? 'bg-blue-600 text-white shadow-md font-extrabold'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                    : 'text-slate-500 hover:text-slate-800'
                 }`}
               >
                 <UserPlus className="w-4 h-4" />
@@ -463,7 +436,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
           {mode === 'forgot' ? (
             <div className="space-y-4">
               {error && (
-                <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/60 rounded-lg flex items-center gap-3 text-rose-600 dark:text-rose-300 text-sm font-semibold">
+                <div className="p-4 bg-rose-50 border border-rose-100 rounded-lg flex items-center gap-3 text-rose-600 text-sm font-semibold">
                   <AlertCircle className="w-5 h-5 shrink-0" />
                   <p>{error}</p>
                 </div>
@@ -472,7 +445,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
               {resetStep === 'request' ? (
                 <>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                       E-mail Cadastrado
                     </label>
                     <div className="relative">
@@ -480,7 +453,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                       <input
                         type="email"
                         placeholder="seu.email@exemplo.com"
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all font-medium text-sm text-slate-800 dark:text-slate-100"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       />
@@ -497,11 +470,11 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                 </>
               ) : (
                 <>
-                  <div className="p-3 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-xs rounded-lg font-medium border border-blue-100 dark:border-blue-900/50">
+                  <div className="p-3 bg-blue-50 text-blue-700 text-xs rounded-lg font-medium">
                     Código de 6 dígitos enviado para <strong>{formData.email}</strong>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                       Código de Verificação
                     </label>
                     <div className="relative">
@@ -510,14 +483,14 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                         type="text"
                         maxLength={6}
                         placeholder="Código de 6 dígitos"
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 outline-none font-mono text-center tracking-widest text-lg text-slate-800 dark:text-slate-100"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none font-mono text-center tracking-widest text-lg"
                         value={inputCode}
                         onChange={(e) => setInputCode(e.target.value)}
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                       Nova Senha
                     </label>
                     <div className="relative">
@@ -525,7 +498,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                       <input
                         type="password"
                         placeholder="Digite sua nova senha"
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 outline-none text-sm font-medium text-slate-800 dark:text-slate-100"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none text-sm font-medium"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                       />
@@ -546,7 +519,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                 <button
                   type="button"
                   onClick={() => switchMode('login')}
-                  className="text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                  className="text-xs font-bold text-slate-500 hover:text-blue-600 cursor-pointer"
                 >
                   ← Voltar para o Login
                 </button>
@@ -558,7 +531,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/60 rounded-lg flex items-center gap-3 text-rose-600 dark:text-rose-300 text-sm font-semibold"
+                  className="p-4 bg-rose-50 border border-rose-100 rounded-lg flex items-center gap-3 text-rose-600 text-sm font-semibold"
                 >
                   <AlertCircle className="w-5 h-5 shrink-0" />
                   <p>{error}</p>
@@ -570,7 +543,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                 <div key="register-fields-container" className="space-y-4">
                   {/* Campo 1: Nome Completo */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                       Nome Completo do Aluno
                     </label>
                     <div className="relative">
@@ -579,7 +552,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                         type="text"
                         required={mode === 'register'}
                         placeholder="Ex: João da Silva"
-                        className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all font-medium text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                        className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm text-slate-800"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       />
@@ -589,18 +562,18 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                   {/* Campo 2 e 3: Série e Curso */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         Série / Ano
                       </label>
                       <div className="relative">
                         <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                         <select
-                          className="w-full pl-10 pr-8 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all appearance-none font-semibold text-xs text-slate-800 dark:text-slate-100 cursor-pointer"
+                          className="w-full pl-10 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none font-semibold text-xs text-slate-800 cursor-pointer"
                           value={formData.grade}
                           onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
                         >
                           {GRADES.filter(g => g !== 'Docente').map(g => (
-                            <option key={g} value={g} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">{g}</option>
+                            <option key={g} value={g}>{g}</option>
                           ))}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -608,18 +581,18 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                         Curso Técnico
                       </label>
                       <div className="relative">
                         <BookOpen className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                         <select
-                          className="w-full pl-10 pr-8 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all appearance-none font-semibold text-xs text-slate-800 dark:text-slate-100 cursor-pointer"
+                          className="w-full pl-10 pr-8 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none font-semibold text-xs text-slate-800 cursor-pointer"
                           value={formData.course}
                           onChange={(e) => setFormData({ ...formData, course: e.target.value })}
                         >
                           {COURSES.map(c => (
-                            <option key={c} value={c} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">{c}</option>
+                            <option key={c} value={c}>{c}</option>
                           ))}
                         </select>
                         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -631,7 +604,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
 
               {/* Campo E-mail */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   {mode === 'register' ? 'E-mail Principal (Gmail/Outro)' : 'E-mail ou Matrícula'}
                 </label>
                 <div className="relative">
@@ -640,7 +613,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                     type="email"
                     required
                     placeholder="seu.email@exemplo.com"
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all font-medium text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm text-slate-800"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   />
@@ -649,7 +622,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
 
               {/* Campo Senha */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   {mode === 'register' ? 'Criar Senha de Acesso' : 'Sua Senha'}
                 </label>
                 <div className="relative">
@@ -658,14 +631,14 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                     type={showPassword ? 'text' : 'password'}
                     required
                     placeholder={mode === 'register' ? 'Mínimo de 4 caracteres' : 'Sua senha'}
-                    className="w-full pl-12 pr-12 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 dark:focus:border-blue-400 outline-none transition-all font-medium text-sm text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    className="w-full pl-12 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all font-medium text-sm text-slate-800"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -677,7 +650,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                   <button
                     type="button"
                     onClick={() => { setMode('forgot'); setError(null); }}
-                    className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
+                    className="text-xs font-semibold text-blue-600 hover:underline cursor-pointer"
                   >
                     Esqueceu a senha?
                   </button>
@@ -688,7 +661,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                 type="submit"
                 disabled={loading}
                 className={`w-full py-4 rounded-xl font-bold text-white transition-all flex items-center justify-center gap-2 group shadow-md active:scale-95 disabled:opacity-50 cursor-pointer ${
-                  mode === 'register' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 dark:bg-blue-600 hover:bg-slate-800 dark:hover:bg-blue-700'
+                  mode === 'register' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-900 hover:bg-slate-800'
                 }`}
               >
                 {loading ? (
@@ -703,17 +676,17 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
             </form>
           )}
 
-          <div className="mt-8 text-center border-t border-slate-100 dark:border-slate-800 pt-6">
+          <div className="mt-8 text-center border-t border-slate-100 pt-6">
             {mode !== 'forgot' && (
               <button
                 type="button"
                 onClick={() => switchMode(mode === 'login' ? 'register' : 'login')}
-                className="text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer inline-flex items-center gap-1.5"
+                className="text-sm font-bold text-slate-600 hover:text-blue-600 transition-colors cursor-pointer inline-flex items-center gap-1.5"
               >
                  {mode === 'login' ? (
-                   <>Ainda não tem conta? <span className="text-blue-600 dark:text-blue-400 underline">Criar conta agora</span></>
+                   <>Ainda não tem conta? <span className="text-blue-600 underline">Criar conta agora</span></>
                  ) : (
-                   <>Já tem uma conta cadastrada? <span className="text-blue-600 dark:text-blue-400 underline">Fazer Login</span></>
+                   <>Já tem uma conta cadastrada? <span className="text-blue-600 underline">Fazer Login</span></>
                  )}
               </button>
             )}
