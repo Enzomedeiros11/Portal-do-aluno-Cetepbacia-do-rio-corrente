@@ -221,39 +221,80 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
     }
   };
 
+  const readFileAsDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      if (file.type.startsWith('image/')) {
+        const img = new Image();
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          img.src = e.target?.result as string;
+        };
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let { width, height } = img;
+          const maxDim = 800;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.8));
+          } else {
+            resolve(img.src);
+          }
+        };
+        img.onerror = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      } else {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      }
+    });
+  };
+
   const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error('O arquivo deve ter no máximo 8MB.');
+      return;
+    }
+
     setIsUploading(true);
-    setUploadProgress(20);
+    setUploadProgress(40);
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${user?.id || 'anon'}/${Math.random()}.${fileExt}`;
-
-      const { data, error: uploadError } = await supabase.storage
-        .from('arquivos_turma')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('arquivos_turma')
-        .getPublicUrl(filePath);
+      const dataUrl = await readFileAsDataUrl(file);
+      setUploadProgress(80);
 
       await handleSendMessage(null as any, {
-        url: publicUrl,
+        url: dataUrl,
         name: file.name,
         type: file.type
       });
 
-      toast.success('Arquivo enviado!');
+      setUploadProgress(100);
+      toast.success('Arquivo compartilhado e salvo no Firebase com sucesso!');
     } catch (err: any) {
+      console.error('Erro ao processar arquivo:', err);
       toast.error('Erro ao enviar arquivo.');
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
+      if (e.target) e.target.value = '';
     }
   };
 
@@ -276,33 +317,33 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
 
   if (selectedClass) {
     return (
-      <div className="min-h-screen bg-slate-50 pt-20 flex flex-col">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-20 flex flex-col transition-colors duration-200">
         {/* Header Sala */}
-        <div className="bg-white border-b border-slate-200 px-6 py-4 shadow-sm z-40 fixed top-16 left-0 right-0">
+        <div className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 shadow-xs z-40 fixed top-16 left-0 right-0 transition-colors">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button onClick={() => setSelectedClass(null)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
-                <ArrowLeft className="w-5 h-5 text-slate-600" />
+              <button onClick={() => setSelectedClass(null)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer">
+                <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-300" />
               </button>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="font-bold text-slate-900 leading-tight text-lg">Grupo {selectedClass.name}</h2>
-                  <span className="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-[10px] font-extrabold rounded-full uppercase">
+                  <h2 className="font-bold text-slate-900 dark:text-white leading-tight text-lg">Grupo {selectedClass.name}</h2>
+                  <span className="px-2.5 py-0.5 bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 text-[10px] font-extrabold rounded-full uppercase">
                     {selectedClass.grade}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 font-medium">{selectedClass.course} • CETEP</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{selectedClass.course} • CETEP</p>
               </div>
             </div>
             <div className="flex items-center gap-2">
                {isEnzoOrTeacher && (
-                 <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold rounded-xl">
-                   <Crown className="w-3.5 h-3.5 text-amber-600" /> Acesso Total Permitido
+                 <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-xs font-bold rounded-xl">
+                   <Crown className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" /> Acesso Total Permitido
                  </span>
                )}
                <button 
                  onClick={() => navigate('/assignments')}
-                 className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold shadow-sm hover:bg-blue-700 transition-colors"
+                 className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold shadow-xs hover:bg-blue-700 transition-colors cursor-pointer"
                >
                   <ClipboardList className="w-4 h-4" /> Atividades
                </button>
@@ -312,23 +353,23 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
 
         <div className="max-w-7xl mx-auto w-full flex-1 flex flex-col lg:flex-row gap-6 mt-20 p-6 mb-20">
           {/* Feed principal do Grupo */}
-          <div className="flex-1 flex flex-col bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px]">
-            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+          <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden min-h-[500px] transition-colors">
+            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                <div className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-blue-600" />
-                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Chat Oficial da Turma {selectedClass.name}</h3>
+                  <MessageSquare className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Chat Oficial da Turma {selectedClass.name}</h3>
                </div>
                <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ao Vivo</span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Ao Vivo</span>
                </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-6 space-y-4 max-h-[600px] scroll-smooth">
               {messages.filter(m => m.canal === selectedClass.id || m.canal === selectedClass.name || m.canal === 'Geral').length === 0 && (
                 <div className="h-full flex flex-col items-center justify-center text-slate-400 py-12 text-center">
-                   <MessageSquare className="w-12 h-12 mb-3 text-slate-300" />
-                   <p className="text-sm font-bold text-slate-700">O chat da turma {selectedClass.name} está pronto!</p>
+                   <MessageSquare className="w-12 h-12 mb-3 text-slate-300 dark:text-slate-600" />
+                   <p className="text-sm font-bold text-slate-700 dark:text-slate-300">O chat da turma {selectedClass.name} está pronto!</p>
                    <p className="text-xs text-slate-400 mt-1">Envie a primeira mensagem para se conectar com seus colegas.</p>
                 </div>
               )}
@@ -336,17 +377,17 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                 .filter(m => m.canal === selectedClass.id || m.canal === selectedClass.name || m.canal === 'Geral')
                 .map((msg) => (
                 <div key={msg.id} className={`flex gap-3 ${msg.email === user?.email ? 'flex-row-reverse' : 'flex-row'}`}>
-                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-white font-bold text-xs ${msg.canal === 'Geral' ? 'bg-amber-500' : 'bg-slate-700'}`}>
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 text-white font-bold text-xs ${msg.canal === 'Geral' ? 'bg-amber-500' : 'bg-slate-700 dark:bg-slate-600'}`}>
                     {(msg.usuario || '?').charAt(0).toUpperCase()}
                   </div>
                   <div className={`max-w-[80%] ${msg.email === user?.email ? 'text-right' : 'text-left'}`}>
                     <div className="flex items-center gap-2 mb-1 px-1 justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-slate-900 uppercase tracking-tight">
+                        <span className="text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-tight">
                           {msg.canal === 'Geral' ? 'COMUNICADO GERAL' : msg.usuario}
                         </span>
                         {msg.email?.toLowerCase() === 'enzomedeirosdasilva6@gmail.com' && (
-                          <span className="px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[9px] font-black rounded">PROFE ENZO</span>
+                          <span className="px-1.5 py-0.2 bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[9px] font-black rounded">PROFE ENZO</span>
                         )}
                         <span className="text-[9px] text-slate-400">{new Date(msg.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
@@ -362,15 +403,15 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                     </div>
                     <div className={`px-4 py-3 rounded-2xl text-sm ${
                       msg.canal === 'Geral'
-                        ? 'bg-amber-50 text-slate-900 border-2 border-amber-200'
+                        ? 'bg-amber-50 dark:bg-amber-950/40 text-slate-900 dark:text-amber-200 border-2 border-amber-200 dark:border-amber-800'
                         : msg.email === user?.email 
                           ? 'bg-blue-600 text-white rounded-tr-none shadow-xs' 
-                          : 'bg-slate-100 text-slate-800 rounded-tl-none border border-slate-200/80'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none border border-slate-200/80 dark:border-slate-700'
                     }`}>
                       {msg.texto}
                       {msg.arquivo_url && (
                         <div 
-                          className="mt-3 p-3 bg-black/5 rounded-xl flex items-center justify-between gap-3 cursor-pointer hover:bg-black/10 transition-colors"
+                          className="mt-3 p-3 bg-black/5 dark:bg-white/10 rounded-xl flex items-center justify-between gap-3 cursor-pointer hover:bg-black/10 dark:hover:bg-white/15 transition-colors"
                           onClick={() => window.open(msg.arquivo_url, '_blank')}
                         >
                            <div className="flex items-center gap-2 truncate">
@@ -387,33 +428,33 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
               <div ref={chatEndRef} />
             </div>
 
-            <form onSubmit={handleSendMessage} className="p-4 bg-slate-50 border-t border-slate-200">
-               <div className="flex items-center gap-2 bg-white rounded-xl border border-slate-200 p-1.5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+            <form onSubmit={handleSendMessage} className="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 transition-colors">
+               <div className="flex items-center gap-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 p-1.5 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
                   <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
                   <button 
                     type="button" 
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-2.5 text-slate-400 hover:text-blue-600 transition-colors"
+                    className="p-2.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
                   >
                     <Paperclip className="w-5 h-5" />
                   </button>
                   <input 
                     type="text" 
                     placeholder={`Enviar mensagem no grupo ${selectedClass.name}...`} 
-                    className="flex-1 px-3 py-2 outline-none text-sm font-medium"
+                    className="flex-1 px-3 py-2 outline-none text-sm font-medium bg-transparent text-slate-900 dark:text-white placeholder-slate-400"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                   />
                   <button 
                     type="submit" 
                     disabled={!message.trim() && !isUploading}
-                    className="bg-blue-600 text-white p-2.5 rounded-xl hover:bg-blue-700 transition-colors shadow-xs disabled:opacity-50"
+                    className="bg-blue-600 text-white p-2.5 rounded-xl hover:bg-blue-700 transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
                   >
                     <Send className="w-5 h-5" />
                   </button>
                </div>
                {isUploading && (
-                 <div className="mt-2 h-1 bg-slate-200 rounded-full overflow-hidden">
+                 <div className="mt-2 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div className="h-full bg-blue-600 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
                  </div>
                )}
@@ -422,35 +463,35 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
 
           {/* Lateral */}
           <div className="w-full lg:w-80 space-y-6">
-             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
-                <h4 className="text-[10px] font-extrabold uppercase text-slate-400 tracking-widest mb-4 flex items-center gap-2">
-                   <Users className="w-3.5 h-3.5 text-blue-600" /> Integrantes da Turma {selectedClass.name}
+             <div className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs transition-colors">
+                <h4 className="text-[10px] font-extrabold uppercase text-slate-400 dark:text-slate-400 tracking-widest mb-4 flex items-center gap-2">
+                   <Users className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" /> Integrantes da Turma {selectedClass.name}
                 </h4>
                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                    {officialStaff.map(s => (
                      <div key={s.id} className="flex items-center gap-3">
                         <div className="relative">
-                           <img src={s.avatar} className="w-8 h-8 rounded-full bg-slate-100" />
-                           <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 border-2 border-white rounded-full bg-emerald-500" />
+                           <img src={s.avatar} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800" />
+                           <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 border-2 border-white dark:border-slate-900 rounded-full bg-emerald-500" />
                         </div>
                         <div>
-                           <p className="text-xs font-bold text-slate-900 leading-none">{s.name}</p>
-                           <p className="text-[9px] font-black text-amber-600 uppercase mt-1">Docente / Admin</p>
+                           <p className="text-xs font-bold text-slate-900 dark:text-white leading-none">{s.name}</p>
+                           <p className="text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase mt-1">Docente / Admin</p>
                         </div>
                      </div>
                    ))}
-                   <div className="pt-2 border-t border-slate-100">
+                   <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
                       {classStudents.length === 0 ? (
                         <p className="text-xs text-slate-400 font-medium py-2 text-center">Nenhum colega desta turma logado recentemente.</p>
                       ) : (
                         classStudents.map(s => (
                           <div key={s.id} className="flex items-center gap-3 mt-3">
                              <div className="relative">
-                                <img src={s.avatar} className="w-8 h-8 rounded-full bg-slate-100" />
-                                <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 border-2 border-white rounded-full ${s.isOnline ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                                <img src={s.avatar} className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800" />
+                                <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 border-2 border-white dark:border-slate-900 rounded-full ${s.isOnline ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                              </div>
                              <div>
-                               <p className="text-xs font-semibold text-slate-800">{s.name}</p>
+                               <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">{s.name}</p>
                                <p className="text-[9px] text-slate-400 font-medium">{s.grade}</p>
                              </div>
                           </div>
@@ -466,7 +507,7 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-6 transition-colors duration-200">
       <div className="max-w-7xl mx-auto">
         <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
@@ -475,8 +516,8 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                 <Users className="text-white w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Grupos das Turmas</h1>
-                <p className="text-slate-500 font-medium text-sm mt-0.5">Salas de chat e espaço oficial exclusivo por ano e curso do CETEP.</p>
+                <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Grupos das Turmas</h1>
+                <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-0.5">Salas de chat e espaço oficial exclusivo por ano e curso do CETEP.</p>
               </div>
             </div>
           </div>
@@ -489,31 +530,31 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                 placeholder="Buscar grupo (ex: 1 Info, 2 Analises)..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-xs font-semibold shadow-xs"
+                className="w-full pl-11 pr-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500/20 outline-none transition-all text-xs font-semibold shadow-xs placeholder-slate-400"
               />
             </div>
           </div>
         </header>
 
         {/* Permissão Badge Alert */}
-        <div className="mb-8 p-4 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-4 bg-white border-slate-200 shadow-xs">
+        <div className="mb-8 p-4 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-4 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xs transition-colors">
           <div className="flex items-center gap-3">
             {isEnzoOrTeacher ? (
-              <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0">
                 <Crown className="w-5 h-5" />
               </div>
             ) : (
-              <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400 flex items-center justify-center shrink-0">
                 <GraduationCap className="w-5 h-5" />
               </div>
             )}
             <div>
-              <p className="text-xs font-extrabold text-slate-900">
+              <p className="text-xs font-extrabold text-slate-900 dark:text-white">
                 {isEnzoOrTeacher 
                   ? 'Acesso Especial Concedido (Professor / Admin Enzo Medeiros)' 
                   : `Aluno registrado no ${user?.grade || 'Ano Atual'} • ${user?.course || 'Curso Técnico'}`}
               </p>
-              <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                 {isEnzoOrTeacher 
                   ? 'Você tem permissão total para visualizar, entrar e enviar mensagens em qualquer grupo de turma.' 
                   : 'Para garantir o foco pedagógico, cada aluno possui acesso privado somente ao grupo da sua turma.'}
@@ -522,13 +563,15 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
           </div>
 
           {/* Filter by Grade */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-xl shrink-0">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl shrink-0">
             {(['Todos', '1º Ano', '2º Ano', '3º Ano'] as const).map((g) => (
               <button
                 key={g}
                 onClick={() => setGradeFilter(g)}
-                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                  gradeFilter === g ? 'bg-white text-blue-600 shadow-xs' : 'text-slate-500 hover:text-slate-900'
+                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  gradeFilter === g 
+                    ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs' 
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {g}
@@ -549,21 +592,21 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
             }
 
             const headerColors = [
-              { bg: 'bg-indigo-600', text: 'text-indigo-600', border: 'border-indigo-200', badgeBg: 'bg-indigo-50', title: '1º Ano' },
-              { bg: 'bg-teal-600', text: 'text-teal-600', border: 'border-teal-200', badgeBg: 'bg-teal-50', title: '2º Ano' },
-              { bg: 'bg-amber-600', text: 'text-amber-600', border: 'border-amber-200', badgeBg: 'bg-amber-50', title: '3º Ano' },
+              { bg: 'bg-indigo-600', text: 'text-indigo-600 dark:text-indigo-400', border: 'border-indigo-200 dark:border-indigo-800/60', badgeBg: 'bg-indigo-50 dark:bg-indigo-950/40', title: '1º Ano' },
+              { bg: 'bg-teal-600', text: 'text-teal-600 dark:text-teal-400', border: 'border-teal-200 dark:border-teal-800/60', badgeBg: 'bg-teal-50 dark:bg-teal-950/40', title: '2º Ano' },
+              { bg: 'bg-amber-600', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-200 dark:border-amber-800/60', badgeBg: 'bg-amber-50 dark:bg-amber-950/40', title: '3º Ano' },
             ][colIdx];
 
             return (
               <div key={yearGrade} className="flex flex-col space-y-4">
                 {/* Header da Coluna/Fileira */}
-                <div className={`p-4 rounded-2xl bg-white border ${headerColors.border} shadow-xs flex items-center justify-between`}>
+                <div className={`p-4 rounded-2xl bg-white dark:bg-slate-900 border ${headerColors.border} shadow-xs flex items-center justify-between transition-colors`}>
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 ${headerColors.bg} text-white font-black text-sm rounded-xl flex items-center justify-center shadow-xs`}>
                       {colIdx + 1}º
                     </div>
                     <div>
-                      <h2 className="text-base font-black text-slate-900 leading-tight">Turmas do {yearGrade}</h2>
+                      <h2 className="text-base font-black text-slate-900 dark:text-white leading-tight">Turmas do {yearGrade}</h2>
                       <p className="text-[11px] text-slate-400 font-bold">{yearGroups.length} Cursos Ativos</p>
                     </div>
                   </div>
@@ -575,7 +618,7 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                 {/* Lista de Grupos da Fileira */}
                 <div className="space-y-4">
                   {yearGroups.length === 0 ? (
-                    <div className="p-8 bg-white rounded-2xl border border-dashed border-slate-200 text-center text-slate-400 text-xs font-medium">
+                    <div className="p-8 bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 text-center text-slate-400 text-xs font-medium">
                       Nenhum grupo encontrado nesta fileira.
                     </div>
                   ) : (
@@ -588,10 +631,10 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                           animate={{ opacity: 1, y: 0 }}
                           whileHover={{ y: -3 }}
                           onClick={() => handleSelectGroup(grp)}
-                          className={`bg-white rounded-2xl border shadow-xs overflow-hidden cursor-pointer group transition-all relative ${
+                          className={`bg-white dark:bg-slate-900 rounded-2xl border shadow-xs overflow-hidden cursor-pointer group transition-all relative ${
                             hasAccess 
-                              ? 'border-slate-200 hover:border-blue-400 hover:shadow-md' 
-                              : 'border-slate-200/60 opacity-80 bg-slate-50/50'
+                              ? 'border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md' 
+                              : 'border-slate-200/60 dark:border-slate-800/60 opacity-80 bg-slate-50/50 dark:bg-slate-900/50'
                           }`}
                         >
                           <div className={`h-20 ${grp.color} p-4 relative flex flex-col justify-end`}>
@@ -611,20 +654,20 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                           </div>
 
                           <div className="p-4">
-                             <p className="text-xs text-slate-500 font-medium leading-relaxed mb-3">{grp.description}</p>
+                             <p className="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed mb-3">{grp.description}</p>
                              
-                             <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                             <div className="pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                                 {hasAccess ? (
-                                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-md">
+                                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-0.5 rounded-md">
                                     <Unlock className="w-3 h-3" /> Acesso Liberado
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-md">
+                                  <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
                                     <Lock className="w-3 h-3" /> Restrito ao {grp.grade}
                                   </span>
                                 )}
                                 
-                                <span className="text-[10px] font-bold text-blue-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
                                    Entrar no Chat <ChevronRight className="w-3.5 h-3.5" />
                                 </span>
                              </div>

@@ -146,13 +146,33 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
         formData.password === 'admin'
       );
 
+      let savedAvatar: string | undefined = undefined;
+      let savedName = 'Professor Enzo Medeiros';
+
       try {
         const docSnap = await getDoc(doc(db, 'usuarios', 'enzo_admin'));
-        if (docSnap.exists() && docSnap.data().senha) {
-          if (docSnap.data().senha === formData.password) {
-            isValidPassword = true;
-          } else {
-            isValidPassword = false;
+        if (docSnap.exists()) {
+          const d = docSnap.data();
+          if (d.senha) {
+            if (d.senha === formData.password) {
+              isValidPassword = true;
+            } else {
+              isValidPassword = false;
+            }
+          }
+          if (d.avatar || d.avatar_url) {
+            savedAvatar = d.avatar || d.avatar_url;
+          }
+          if (d.nome) savedName = d.nome;
+        }
+
+        // Also check if alternate doc exists
+        if (!savedAvatar) {
+          const altSnap = await getDoc(doc(db, 'usuarios', 'enzomedeirosdasilva6_gmail_com'));
+          if (altSnap.exists()) {
+            const ad = altSnap.data();
+            if (ad.avatar || ad.avatar_url) savedAvatar = ad.avatar || ad.avatar_url;
+            if (ad.nome && savedName === 'Professor Enzo Medeiros') savedName = ad.nome;
           }
         }
       } catch (err) {
@@ -167,19 +187,19 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
 
       const enzoUser: User = {
         id: 'enzo_admin',
-        name: 'Professor Enzo Medeiros',
+        name: savedName,
         email: 'enzomedeirosdasilva6@gmail.com',
         role: 'teacher',
         course: 'Todos os Cursos',
         grade: 'Docente / Coordenador',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=EnzoMedeiros',
+        avatar: savedAvatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=EnzoMedeiros',
         subjectGrades: {},
         frequencia: 100
       };
 
-      // Sync to Firebase
+      // Sync to Firebase preserving avatar
       try {
-        await setDoc(doc(db, 'usuarios', 'enzo_admin'), {
+        const payload = {
           id: 'enzo_admin',
           nome: enzoUser.name,
           email: enzoUser.email,
@@ -187,8 +207,12 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
           tipo: 'teacher',
           curso: enzoUser.course,
           grade: enzoUser.grade,
+          avatar: enzoUser.avatar,
+          avatar_url: enzoUser.avatar,
           updatedAt: new Date().toISOString()
-        }, { merge: true });
+        };
+        await setDoc(doc(db, 'usuarios', 'enzo_admin'), payload, { merge: true });
+        await setDoc(doc(db, 'usuarios', 'enzomedeirosdasilva6_gmail_com'), payload, { merge: true });
       } catch (err) {
         console.warn('Firebase sync warning for Enzo:', err);
       }
@@ -289,6 +313,7 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
         if (d.senha) {
           storedSenha = d.senha;
         }
+        const dbAvatar = d.avatar || d.avatar_url;
         if (!userToLogin) {
           userToLogin = {
             id: docSnap.id,
@@ -298,10 +323,12 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
             role: (d.tipo === 'teacher' || cleanEmail === 'enzomedeirosdasilva6@gmail.com') ? 'teacher' : 'student',
             grade: d.grade || '1º Ano',
             course: d.curso || 'Técnico em Informática',
-            avatar: d.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
+            avatar: dbAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
             subjectGrades: d.notas || {},
             frequencia: d.frequencia || 100
           };
+        } else if (dbAvatar) {
+          userToLogin.avatar = dbAvatar;
         }
       }
     } catch (err) {
@@ -331,48 +358,6 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
 
     onLogin(userToLogin);
     setLoading(false);
-  };
-
-  const handleQuickDemo = (role: 'student' | 'teacher') => {
-    if (role === 'student') {
-      const demoStudent: User = {
-        id: 'demo_student_enzo',
-        name: 'Enzo Medeiros',
-        email: 'enzomedeirosdasilva6@gmail.com',
-        role: 'student',
-        grade: '1º Ano',
-        course: 'Técnico em Informática',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=EnzoMedeiros',
-        subjectGrades: {
-          'Português': { n1: '9.0', n2: '9.5', n3: '9.2' },
-          'Matemática': { n1: '8.8', n2: '9.4', n3: '9.0' },
-          'Banco de Dados': { n1: '9.5', n2: '9.8', n3: '9.6' },
-          'Robótica': { n1: '9.2', n2: '9.0', n3: '9.4' },
-          'Programação Web': { n1: '10.0', n2: '9.8', n3: '9.9' }
-        },
-        frequencia: 98,
-        isOnline: true,
-        lastSeen: new Date().toISOString()
-      };
-      toast.success('Entrando como Aluno Demonstração (Enzo Medeiros)...');
-      onLogin(demoStudent);
-    } else {
-      const demoTeacher: User = {
-        id: 'demo_teacher_ricardo',
-        name: 'Prof. Ricardo Silva',
-        email: 'prof.ricardo@cetep.edu.br',
-        role: 'teacher',
-        grade: 'Docente / Coordenador',
-        course: 'Técnico em Informática',
-        avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=ProfRicardo',
-        subjectGrades: {},
-        frequencia: 100,
-        isOnline: true,
-        lastSeen: new Date().toISOString()
-      };
-      toast.success('Entrando como Professor / Coordenador...');
-      onLogin(demoTeacher);
-    }
   };
 
   return (
@@ -715,36 +700,6 @@ export default function Auth({ onLogin, onRegister, users }: AuthProps) {
                   </>
                 )}
               </button>
-
-              {mode === 'login' && (
-                <div className="pt-2">
-                  <div className="relative flex items-center justify-center my-3">
-                    <div className="border-t border-slate-200 w-full" />
-                    <span className="bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
-                      Acesso Rápido de Teste
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => handleQuickDemo('student')}
-                      className="py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 text-slate-700 hover:text-blue-700 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Aluno Demo</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleQuickDemo('teacher')}
-                      className="py-2.5 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-indigo-50 hover:border-indigo-300 text-slate-700 hover:text-indigo-700 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <BookOpen className="w-3.5 h-3.5 text-indigo-600" />
-                      <span>Professor Demo</span>
-                    </button>
-                  </div>
-                </div>
-              )}
             </form>
           )}
 

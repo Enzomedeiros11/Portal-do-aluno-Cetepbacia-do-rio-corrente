@@ -198,15 +198,15 @@ export default function ExcelCoursePlayer({ onBack, studentName = 'Aluno(a)' }: 
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-20">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans pb-20 transition-colors duration-200">
       
       {/* Top Header Bar */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-8 py-3.5 shadow-xs">
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-8 py-3.5 shadow-xs transition-colors">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               onClick={onBack}
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+              className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
               title="Voltar aos Cursos"
             >
               <ChevronLeft className="w-5 h-5" />
@@ -216,8 +216,8 @@ export default function ExcelCoursePlayer({ onBack, studentName = 'Aluno(a)' }: 
                 <FileSpreadsheet className="w-5 h-5" />
               </div>
               <div>
-                <h1 className="text-sm font-bold text-slate-900 leading-tight">Excel do Zero ao Avançado</h1>
-                <p className="text-xs text-slate-500 font-medium">20 Aulas com Vídeo, Teoria e Questionários de 10 Questões</p>
+                <h1 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">Excel do Zero ao Avançado</h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">20 Aulas com Vídeo, Teoria e Questionários de 10 Questões</p>
               </div>
             </div>
           </div>
@@ -228,7 +228,7 @@ export default function ExcelCoursePlayer({ onBack, studentName = 'Aluno(a)' }: 
               href={PRIME_CURSOS_PLAYLIST_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
+              className="px-3 py-1.5 bg-red-50 dark:bg-red-950/50 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors"
               title="Abrir playlist oficial no YouTube do Prime Cursos do Brasil"
             >
               <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
@@ -237,17 +237,17 @@ export default function ExcelCoursePlayer({ onBack, studentName = 'Aluno(a)' }: 
             </a>
 
             <div className="hidden md:block text-right">
-              <div className="text-xs font-bold text-slate-700">
+              <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
                 {totalCompleted} de {TOTAL_EXCEL_LESSONS} aulas liberadas & concluídas
               </div>
-              <div className="w-36 h-2 bg-slate-100 rounded-full mt-1 overflow-hidden border border-slate-200">
+              <div className="w-36 h-2 bg-slate-100 dark:bg-slate-800 rounded-full mt-1 overflow-hidden border border-slate-200 dark:border-slate-700">
                 <div
                   className="h-full bg-emerald-500 transition-all duration-500"
                   style={{ width: `${progressPercentage}%` }}
                 />
               </div>
             </div>
-            <div className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl text-xs font-bold flex items-center gap-1.5">
+            <div className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-bold flex items-center gap-1.5">
               <Award className="w-3.5 h-3.5" />
               <span>{progressPercentage}%</span>
             </div>
@@ -270,11 +270,11 @@ export default function ExcelCoursePlayer({ onBack, studentName = 'Aluno(a)' }: 
           
           {/* LEFT SIDEBAR: Course Syllabus (16 Lessons) */}
           <aside className="lg:col-span-4 space-y-4">
-            <div className="bg-white border border-slate-200 rounded-3xl p-5 shadow-xs sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xs sticky top-24 max-h-[calc(100vh-120px)] overflow-y-auto transition-colors">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
                 <div>
-                  <h2 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-emerald-600" /> Grade Curricular
+                  <h2 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Grade Curricular
                   </h2>
                   <p className="text-[11px] text-slate-400 font-medium">Liberação sequencial por aula</p>
                 </div>

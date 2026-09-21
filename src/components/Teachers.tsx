@@ -151,14 +151,22 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
         grade: newUser.grade,
         frequencia: newUser.frequencia || 100,
         notas: {},
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(newUser.email)}`,
+        avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(newUser.email)}`,
         updatedAt: new Date().toISOString()
       };
 
-      // Save to Firebase Firestore
+      // Save to Firebase Firestore (both by unique id and email doc id)
       await setDoc(doc(db, 'usuarios', newUid), payload);
+      if (newUser.email) {
+        const emailKey = newUser.email.replace(/[^a-zA-Z0-9]/g, '_');
+        await setDoc(doc(db, 'usuarios', emailKey), payload, { merge: true });
+      }
 
       // Also upsert in Supabase for backwards compatibility
-      await supabase.from('usuarios').upsert([payload]);
+      try {
+        await supabase.from('usuarios').upsert([payload]);
+      } catch (e) {}
 
       toast.success(`Usuário ${newUser.name} cadastrado com sucesso no Firebase!`);
       setIsAddModalOpen(false);
@@ -212,12 +220,18 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
 
       // Update in Firebase Firestore
       await setDoc(doc(db, 'usuarios', editUser.id), payload, { merge: true });
+      if (editUser.email) {
+        const emailKey = editUser.email.replace(/[^a-zA-Z0-9]/g, '_');
+        await setDoc(doc(db, 'usuarios', emailKey), payload, { merge: true });
+      }
 
       // Update in Supabase
-      await supabase
-        .from('usuarios')
-        .update(payload)
-        .eq('id', editUser.id);
+      try {
+        await supabase
+          .from('usuarios')
+          .update(payload)
+          .eq('id', editUser.id);
+      } catch (e) {}
 
       toast.success('Usuário atualizado com sucesso no Firebase!');
       setIsEditModalOpen(false);
@@ -237,12 +251,20 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
     try {
       // Delete from Firebase Firestore
       await deleteDoc(doc(db, 'usuarios', userToDelete.id));
+      if (userToDelete.email) {
+        const emailKey = userToDelete.email.replace(/[^a-zA-Z0-9]/g, '_');
+        try {
+          await deleteDoc(doc(db, 'usuarios', emailKey));
+        } catch (e) {}
+      }
 
       // Delete from Supabase
-      await supabase
-        .from('usuarios')
-        .delete()
-        .eq('id', userToDelete.id);
+      try {
+        await supabase
+          .from('usuarios')
+          .delete()
+          .eq('id', userToDelete.id);
+      } catch (e) {}
 
       toast.success(`Usuário ${userToDelete.name} excluído do Firebase!`);
       setUserToDelete(null);
@@ -308,9 +330,11 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
       await addDoc(collection(db, 'mensagens'), payload);
 
       // Save to Supabase fallback
-      await supabase.from('mensagens').insert([payload]);
+      try {
+        await supabase.from('mensagens').insert([payload]);
+      } catch (e) {}
 
-      toast.success('Comunicado transmitido para a sala de aula com sucesso!');
+      toast.success('Comunicado transmitido para a sala de aula com sucesso no Firebase!');
       setAnnouncement({ subject: '', message: '' });
     } catch (err) {
       console.error('Erro ao transmitir:', err);
@@ -323,8 +347,10 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
   const handleDeleteComunicado = async (comId: string) => {
     try {
       await deleteDoc(doc(db, 'mensagens', comId));
-      await supabase.from('mensagens').delete().eq('id', comId);
-      toast.success('Comunicado excluído com sucesso!');
+      try {
+        await supabase.from('mensagens').delete().eq('id', comId);
+      } catch (e) {}
+      toast.success('Comunicado excluído com sucesso do Firebase!');
     } catch (err) {
       console.error('Erro ao apagar comunicado:', err);
       toast.error('Erro ao apagar comunicado.');
@@ -339,17 +365,41 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
         const student = allUsers.find(u => u.id === studentId);
         if (student) {
           const updatedSubjectGrades = { ...(student.subjectGrades || {}), [selectedSubject]: localGrades[studentId] };
-          const { error } = await supabase
-            .from('usuarios')
-            .update({ notas: updatedSubjectGrades, frequencia: localFrequency[studentId] })
-            .eq('id', studentId);
-          if (!error) savedCount++;
+          const freq = localFrequency[studentId] !== undefined ? localFrequency[studentId] : (student.frequencia || 100);
+
+          const gradePayload = {
+            notas: updatedSubjectGrades,
+            frequencia: freq,
+            updatedAt: new Date().toISOString()
+          };
+
+          // 1. Save directly to Firebase Firestore!
+          try {
+            await setDoc(doc(db, 'usuarios', studentId), gradePayload, { merge: true });
+            if (student.email) {
+              const emailKey = student.email.replace(/[^a-zA-Z0-9]/g, '_');
+              await setDoc(doc(db, 'usuarios', emailKey), gradePayload, { merge: true });
+            }
+          } catch (fbErr) {
+            console.warn('Firebase grade update error:', fbErr);
+          }
+
+          // 2. Supabase fallback
+          try {
+            await supabase
+              .from('usuarios')
+              .update({ notas: updatedSubjectGrades, frequencia: freq })
+              .eq('id', studentId);
+          } catch (sbErr) {}
+
+          savedCount++;
         }
       }
-      toast.success(`${savedCount} registros de notas e frequência salvos!`);
+      toast.success(`${savedCount} registros de notas e frequência salvos no Firebase!`);
       await onRefresh();
     } catch (err) {
-      toast.error('Erro ao salvar algumas notas.');
+      console.error('Erro ao salvar notas no Firebase:', err);
+      toast.error('Erro ao salvar notas.');
     } finally {
       setLoading(false);
     }

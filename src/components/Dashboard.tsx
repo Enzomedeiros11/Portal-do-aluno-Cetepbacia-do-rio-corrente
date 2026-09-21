@@ -115,7 +115,7 @@ export default function Dashboard({ user }: DashboardProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-24 pb-16 px-4 sm:px-6 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-16 px-4 sm:px-6 font-sans transition-colors duration-200">
       <motion.div 
         variants={containerVariants}
         initial="hidden"
@@ -126,25 +126,25 @@ export default function Dashboard({ user }: DashboardProps) {
         {/* Header Banner */}
         <motion.div 
           variants={itemVariants}
-          className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6"
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6 transition-colors"
         >
           <div className="flex items-center gap-4 sm:gap-5">
-            <div className="w-14 h-14 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden shrink-0">
+            <div className="w-14 h-14 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 overflow-hidden shrink-0">
               <img src={displayAvatar} alt="Perfil" className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-md text-[10px] font-bold uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-md text-[10px] font-bold uppercase tracking-wider">
                   Matrícula Ativa
                 </span>
-                <span className="text-xs font-bold text-slate-500">
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                   {user.grade || '1º Ano'} • {user.course || 'Curso Técnico'}
                 </span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 Olá, {displayName}
               </h1>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                 Painel do estudante. Selecione uma das áreas abaixo para prosseguir.
               </p>
             </div>
@@ -153,7 +153,7 @@ export default function Dashboard({ user }: DashboardProps) {
           <div className="flex items-center gap-3 shrink-0 flex-wrap">
             <button
               onClick={handleDownloadBoletim}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+              className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold transition-colors cursor-pointer"
             >
               Baixar Boletim (PDF)
             </button>
@@ -169,34 +169,34 @@ export default function Dashboard({ user }: DashboardProps) {
         {/* 4 Academic KPI Cards - Pure typography, no decorative icons */}
         <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          <div className="bg-white p-5 rounded-xl border border-slate-200">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Média Geral</p>
-            <h3 className="text-3xl font-black text-slate-900 mt-1">9.2</h3>
-            <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold rounded">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Média Geral</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1">9.2</h3>
+            <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold rounded">
               Acima da média
             </span>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-slate-200">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Frequência Escolar</p>
-            <h3 className="text-3xl font-black text-slate-900 mt-1">{user.frequencia || 100}%</h3>
-            <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold rounded">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Frequência Escolar</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1">{user.frequencia || 100}%</h3>
+            <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold rounded">
               Regularidade plena
             </span>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-slate-200">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Curso de Excel</p>
-            <h3 className="text-3xl font-black text-slate-900 mt-1">{completedLessons} / 20</h3>
-            <span className="inline-block mt-2 px-2 py-0.5 bg-blue-50 text-blue-700 text-[11px] font-bold rounded">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Curso de Excel</p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1">{completedLessons} / 20</h3>
+            <span className="inline-block mt-2 px-2 py-0.5 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 text-[11px] font-bold rounded">
               {Math.round((completedLessons / 20) * 100)}% concluído
             </span>
           </div>
 
-          <div className="bg-white p-5 rounded-xl border border-slate-200">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Situação Acadêmica</p>
-            <h3 className="text-2xl font-black text-emerald-600 mt-1">Regular</h3>
-            <span className="inline-block mt-2 px-2 py-0.5 bg-slate-100 text-slate-600 text-[11px] font-bold rounded">
+          <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Situação Acadêmica</p>
+            <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">Regular</h3>
+            <span className="inline-block mt-2 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-bold rounded">
               Ano Letivo 2026
             </span>
           </div>
@@ -206,8 +206,8 @@ export default function Dashboard({ user }: DashboardProps) {
         {/* Academic Modules Grid - Clean, no icons */}
         <div>
           <div className="mb-4">
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">Módulos Acadêmicos</h2>
-            <p className="text-xs text-slate-500 font-medium">Acesso direto aos recursos e ambientes do portal</p>
+            <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Módulos Acadêmicos</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Acesso direto aos recursos e ambientes do portal</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -219,27 +219,27 @@ export default function Dashboard({ user }: DashboardProps) {
               >
                 <Link
                   to={mod.link}
-                  className="flex flex-col justify-between h-full p-6 bg-white border border-slate-200 rounded-xl hover:border-blue-400 transition-colors text-left"
+                  className="flex flex-col justify-between h-full p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-blue-400 dark:hover:border-blue-500 transition-colors text-left"
                 >
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      <span className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
                         {mod.category}
                       </span>
-                      <span className="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-bold rounded">
+                      <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-bold rounded">
                         {mod.badge}
                       </span>
                     </div>
                     
-                    <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors mb-1.5">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mb-1.5">
                       {mod.title}
                     </h3>
-                    <p className="text-xs text-slate-500 leading-relaxed font-normal">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-normal">
                       {mod.description}
                     </p>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-600">
+                  <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-blue-600 dark:text-blue-400">
                     <span>{mod.btnText}</span>
                     <span>&rarr;</span>
                   </div>
@@ -253,43 +253,43 @@ export default function Dashboard({ user }: DashboardProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
           
           {/* Notices */}
-          <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-6 space-y-4">
+          <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-4 transition-colors">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-900">Mural de Avisos da Coordenação</h3>
-              <Link to="/classroom" className="text-xs font-bold text-blue-600 hover:underline">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Mural de Avisos da Coordenação</h3>
+              <Link to="/classroom" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">
                 Ver todos na Sala
               </Link>
             </div>
 
             <div className="space-y-3">
               {recentNotices.map((notice, nIdx) => (
-                <div key={nIdx} className="p-4 bg-slate-50 rounded-lg border border-slate-100 space-y-1">
+                <div key={nIdx} className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-100 dark:border-slate-800 space-y-1">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-bold uppercase text-blue-700">
+                    <span className="text-[10px] font-bold uppercase text-blue-700 dark:text-blue-400">
                       {notice.author}
                     </span>
-                    <span className="text-[10px] text-slate-400">{notice.time}</span>
+                    <span className="text-[10px] text-slate-400 dark:text-slate-400">{notice.time}</span>
                   </div>
-                  <h4 className="text-xs font-bold text-slate-900 pt-0.5">{notice.title}</h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">{notice.desc}</p>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white pt-0.5">{notice.title}</h4>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{notice.desc}</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Deadlines */}
-          <div className="bg-white border border-slate-200 rounded-xl p-6 space-y-4">
-            <h3 className="text-sm font-bold text-slate-900">Prazos e Calendário</h3>
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 space-y-4 transition-colors">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Prazos e Calendário</h3>
 
             <div className="space-y-3">
               {upcomingDeadlines.map((item, dIdx) => (
-                <div key={dIdx} className="p-3.5 rounded-lg border border-slate-100 bg-slate-50 flex items-start justify-between gap-3">
+                <div key={dIdx} className="p-3.5 rounded-lg border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 flex items-start justify-between gap-3">
                   <div>
-                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-slate-200 text-slate-700">
+                    <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                       {item.tag}
                     </span>
-                    <h5 className="text-xs font-bold text-slate-900 mt-1.5">{item.title}</h5>
-                    <p className="text-[11px] text-slate-500">{item.date}</p>
+                    <h5 className="text-xs font-bold text-slate-900 dark:text-white mt-1.5">{item.title}</h5>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">{item.date}</p>
                   </div>
                 </div>
               ))}

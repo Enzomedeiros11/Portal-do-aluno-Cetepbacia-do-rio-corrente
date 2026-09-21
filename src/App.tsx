@@ -24,6 +24,7 @@ import Settings from './components/Settings';
 import DatabaseManager from './components/DatabaseManager';
 import Logo from './components/Logo';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ThemeProvider } from './context/ThemeContext';
 import { User } from './types';
 import { Toaster, toast } from 'sonner';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
@@ -80,12 +81,18 @@ export default function App() {
           setCurrentUser((prev) => {
             if (!prev) return prev;
             const updatedMe = fbUsers.find(u => u.id === prev.id || u.email === prev.email);
-            if (updatedMe && updatedMe.avatar !== prev.avatar) {
-              const newMe = { ...prev, avatar: updatedMe.avatar };
-              try {
-                localStorage.setItem('cetep_user', JSON.stringify(newMe));
-              } catch (e) {}
-              return newMe;
+            if (updatedMe) {
+              const avatarChanged = updatedMe.avatar && updatedMe.avatar !== prev.avatar;
+              const nameChanged = updatedMe.name && updatedMe.name !== prev.name;
+              const freqChanged = updatedMe.frequencia !== undefined && updatedMe.frequencia !== prev.frequencia;
+              const notesChanged = updatedMe.subjectGrades && JSON.stringify(updatedMe.subjectGrades) !== JSON.stringify(prev.subjectGrades);
+              if (avatarChanged || nameChanged || freqChanged || notesChanged) {
+                const newMe = { ...prev, ...updatedMe };
+                try {
+                  localStorage.setItem('cetep_user', JSON.stringify(newMe));
+                } catch (e) {}
+                return newMe;
+              }
             }
             return prev;
           });
@@ -360,15 +367,16 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <Router>
-        <Toaster position="top-center" expand={true} richColors />
-        <div className="min-h-screen font-sans bg-white text-slate-900 selection:bg-indigo-600/20">
-          <Navigation 
-            isAuthenticated={isAuthenticated} 
-            logout={logout} 
-            userRole={userRole} 
-            userEmail={currentUser?.email}
-          />
+      <ThemeProvider>
+        <Router>
+          <Toaster position="top-center" expand={true} richColors />
+          <div className="min-h-screen font-sans bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 selection:bg-indigo-600/20 transition-colors duration-200">
+            <Navigation 
+              isAuthenticated={isAuthenticated} 
+              logout={logout} 
+              userRole={userRole} 
+              userEmail={currentUser?.email}
+            />
           
           <main>
             <Routes>
@@ -439,10 +447,13 @@ export default function App() {
               <Route path="/settings" element={
                 isAuthenticated ? <Settings currentUser={currentUser} onLogout={logout} onUpdateUser={(updated) => {
                   if (currentUser) {
-                    const newUsers = allUsers.map(u => u.id === updated.id ? updated : u);
+                    const newUsers = allUsers.map(u => (u.id === updated.id || u.email === updated.email) ? updated : u);
                     updateAllUsers(newUsers);
                     setCurrentUser(updated);
-                    localStorage.setItem('cetep_user', JSON.stringify(updated));
+                    try {
+                      localStorage.setItem('cetep_user', JSON.stringify(updated));
+                      localStorage.setItem('cetep_all_users', JSON.stringify(newUsers));
+                    } catch (e) {}
                   }
                 }} /> : <Navigate to="/auth" />
               } />
@@ -453,6 +464,7 @@ export default function App() {
           </main>
         </div>
       </Router>
-    </ErrorBoundary>
+    </ThemeProvider>
+  </ErrorBoundary>
   );
 }
