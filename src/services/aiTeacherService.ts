@@ -249,20 +249,66 @@ Deve responder aos 5 elementos obrigatórios:
 5. **Detalhamento:** Explicação adicional de um dos elementos acima.`;
   }
 
+  // Joke / Humor
+  if (p.includes('piada') || p.includes('engraçado') || p.includes('rir') || p.includes('humor')) {
+    return `### 😄 Momento Descontração!
+
+Por que o livro de matemática se suicidou?
+> **Porque tinha muitos problemas!** 😂
+
+E para quem estuda informática:
+> Existem **10 tipos de pessoas no mundo**: as que entendem código binário e as que não entendem! 💻
+
+Qualquer dúvida acadêmica ou assunto que queira conversar, estou à disposição!`;
+  }
+
+  // CETEP Info
+  if (p.includes('cetep') || p.includes('escola') || p.includes('santa maria da vitória') || p.includes('bacia do rio corrente')) {
+    return `### 🏫 Sobre o CETEP Bacia do Rio Corrente
+
+O **Centro Territorial de Educação Profissional da Bacia do Rio Corrente (CETEP)** é uma escola estadual de referência em Santa Maria da Vitória - Bahia.
+
+- **Cursos Técnicos Oficiais:** Informática, Administração, Nutrição, Enfermagem, Agropecuária e Meio Ambiente.
+- **Localização:** Av. Gov. Roberto Santos, 54 - Sambaíba, Santa Maria da Vitória - BA.
+- **Destaques:** Laboratórios dedicados, corpo docente qualificado e formação profissional voltada para o mercado de trabalho e vestibular/ENEM.`;
+  }
+
+  // History & Geography
+  if (p.includes('presidente') || p.includes('deodoro') || p.includes('capital') || p.includes('brasil') || p.includes('bahia') || p.includes('independência')) {
+    return `### 🏛️ História e Geografia Geral
+
+- **Primeiro Presidente do Brasil:** Marechal **Deodoro da Fonseca** (1889 - 1891).
+- **Capitais do Brasil:**
+  1. **Salvador (BA):** 1549 a 1763
+  2. **Rio de Janeiro (RJ):** 1763 a 1960
+  3. **Brasília (DF):** Desde 21 de abril de 1960
+- **Independência:** 7 de setembro de 1822 (Brasil) e **2 de Julho de 1823** (Independência da Bahia).`;
+  }
+
+  // Biology & Natural Sciences
+  if (p.includes('fotossíntese') || p.includes('célula') || p.includes('dna') || p.includes('mitocôndria') || p.includes('átomo') || p.includes('química') || p.includes('física')) {
+    return `### 🔬 Ciências da Natureza
+
+- **Fotossíntese:** Organismos fotossintetizantes transformam $CO_2$ e $H_2O$ em glicose ($C_6H_{12}O_6$) e $O_2$ usando a energia solar.
+- **Mitocôndria:** Responsável pela respiração celular e síntese de ATP (energia celular).
+- **DNA:** Ácido desoxirribonucleico, molécula que contém todo o código genético dos seres vivos.`;
+  }
+
   // Rich pedagogical overview
-  return `### 📚 Análise e Explicação Pedagógica
+  return `### 💡 Professor IA: Resposta Completa
 
-Sobre a sua pergunta: **"${prompt}"**
+Sobre a sua dúvida: **"${prompt}"**
 
-#### 1. Visão Geral e Importância
-No contexto acadêmico de **${course}**, este conceito é essencial tanto para o aproveitamento escolar quanto para a prática profissional no mercado de trabalho.
+Aqui está uma explicação direta, detalhada e estruturada:
 
-#### 2. Principais Conceitos a Reter
-- **Definição Objetiva:** Compreender a teoria permite aplicar o raciocínio correto sem depender de decoreba.
-- **Aplicação Real:** No dia a dia profissional, problemas similares são resolvidos dividindo a tarefa em etapas menores.
-- **Método Recomendado:** Comece pelos conceitos fundamentais, faça exercícios práticos e valide o resultado.
+#### 1. Conceito Principal
+${prompt.charAt(0).toUpperCase() + prompt.slice(1)} é um tema de grande relevância no estudo e no dia a dia acadêmico de **${course}**. Compreender seu funcionamento permite analisar a fundo causas, efeitos e aplicações práticas.
+
+#### 2. Principais Tópicos Explicados
+- **Fundamento Teórico:** O conceito se apoia em regras consolidadas da disciplina, servindo como base para resolver problemas reais.
+- **Passo a Passo Prático:** Para solucionar ou aplicar essa ideia, sempre separe os dados conhecidos, identifique o objetivo e aplique o método sistemático de resolução.
+- **Dica de Aplicação:** Conecte o conceito com exemplos cotidianos para fixar o aprendizado sem necessidade de memorização forçada.
 
 ---
-💡 **Precisa de um exemplo prático ou quer resolver um exercício específico?**  
-Envie a questão completa ou o exercício que resolvemos juntos passo a passo!`;
+🎯 **Posso te ajudar com um exemplo passo a passo, exercício de fixação ou resolução de prova sobre esse tema?** É só pedir!`;
 }

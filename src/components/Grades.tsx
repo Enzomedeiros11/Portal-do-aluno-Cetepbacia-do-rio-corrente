@@ -108,39 +108,39 @@ export default function Grades({ user }: GradesProps) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pt-24 pb-12 px-6 transition-colors duration-200">
       <div className="max-w-7xl mx-auto">
         <div className="mb-10">
           <div className="flex items-center gap-3">
              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm text-white">
                 <FileText className="w-6 h-6" />
              </div>
-             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Registro de Notas</h1>
+             <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Registro de Notas</h1>
           </div>
-          <p className="text-slate-500 mt-1">Acompanhamento detalhado do seu rendimento acadêmico.</p>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Acompanhamento detalhado do seu rendimento acadêmico.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div className="lg:col-span-8">
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Boletim de Notas</h3>
-                <button onClick={handleExport} className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+                <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Boletim de Notas</h3>
+                <button onClick={handleExport} className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 transition-colors cursor-pointer">
                   <Download className="w-4 h-4" /> Exportar Relatório
                 </button>
               </div>
               
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-slate-100 dark:divide-slate-800">
                 {subjects.map((sub, i) => (
-                  <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors">
+                  <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
                     <div>
-                      <p className="font-semibold text-slate-900 leading-tight">{sub.name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{sub.teacher}</p>
+                      <p className="font-semibold text-slate-900 dark:text-white leading-tight">{sub.name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{sub.teacher}</p>
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="text-right">
                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Média</p>
-                         <p className={`text-lg font-bold ${sub.grade === '-' ? 'text-slate-300' : Number(sub.grade) >= 7 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                         <p className={`text-lg font-bold ${sub.grade === '-' ? 'text-slate-300 dark:text-slate-600' : Number(sub.grade) >= 7 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
                             {sub.grade}
                          </p>
                       </div>
@@ -152,7 +152,7 @@ export default function Grades({ user }: GradesProps) {
           </div>
 
           <div className="lg:col-span-4 space-y-4">
-             <div className="bg-slate-900 text-white p-8 rounded-xl shadow-lg shadow-slate-900/10">
+             <div className="bg-slate-900 dark:bg-slate-900 border border-slate-800 text-white p-8 rounded-xl shadow-lg shadow-slate-900/10">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">IRA Acumulado</p>
                 <h2 className="text-6xl font-bold tracking-tight mb-6">{ira}</h2>
                 <div className="w-full bg-white/10 h-1.5 rounded-full mb-2">
@@ -161,30 +161,30 @@ export default function Grades({ user }: GradesProps) {
                     style={{ width: `${(Number(ira) / 10) * 100}%` }} 
                   />
                 </div>
-                <p className="text-[10px] font-medium text-slate-500">Índice de Rendimento Acadêmico</p>
+                <p className="text-[10px] font-medium text-slate-400">Índice de Rendimento Acadêmico</p>
              </div>
 
-             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+             <div className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div className="flex items-center justify-between mb-4">
-                   <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Presença Global</p>
+                   <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Presença Global</p>
                    <TrendingUp className="w-4 h-4 text-emerald-500" />
                 </div>
-                <h2 className="text-3xl font-bold text-slate-900">{user?.frequencia || 100}%</h2>
+                <h2 className="text-3xl font-bold text-slate-900 dark:text-white">{user?.frequencia || 100}%</h2>
                 <div className="mt-4 flex gap-1">
                    {[...Array(10)].map((_, i) => (
                       <div 
                         key={i} 
-                        className={`h-1 flex-1 rounded-full ${i < (user?.frequencia || 100) / 10 ? 'bg-emerald-500' : 'bg-slate-100'}`}
+                        className={`h-1 flex-1 rounded-full ${i < (user?.frequencia || 100) / 10 ? 'bg-emerald-500' : 'bg-slate-100 dark:bg-slate-800'}`}
                       />
                    ))}
                 </div>
              </div>
 
-             <div className="bg-blue-50 border border-blue-100 p-6 rounded-xl">
-                <h4 className="text-xs font-bold text-blue-900 uppercase tracking-wider flex items-center gap-2 mb-2">
+             <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/50 p-6 rounded-xl">
+                <h4 className="text-xs font-bold text-blue-900 dark:text-blue-300 uppercase tracking-wider flex items-center gap-2 mb-2">
                    <AlertTriangle className="w-4 h-4" /> Informação
                 </h4>
-                <p className="text-sm text-blue-800 leading-relaxed">
+                <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">
                    As notas finais são computadas ao final de cada bimestre letivo conforme as diretrizes da coordenação.
                 </p>
              </div>

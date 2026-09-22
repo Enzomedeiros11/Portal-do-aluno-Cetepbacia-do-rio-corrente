@@ -31,14 +31,30 @@ export default function Contact({ currentUser }: ContactProps) {
   }, [tabParam]);
 
   // AI Tutor Chat State
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
       id: '1',
       sender: 'ai',
-      text: `Olá ${currentUser ? currentUser.name.split(' ')[0] : 'estudante'}! Sou o **Professor IA CETEP**, seu assistente pedagógico virtual.\n\nComo posso te ajudar nos seus estudos hoje? Você pode me enviar dúvidas de matérias, exercícios do seu curso técnico ou pedir dicas de estudo!`,
+      text: currentUser 
+        ? `Olá, ${currentUser.name.split(' ')[0]}! Como posso te ajudar hoje?`
+        : 'Olá como posso te ajudar hoje?',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
+
+  useEffect(() => {
+    setMessages(prev => {
+      if (prev.length === 1 && prev[0].id === '1') {
+        return [{
+          ...prev[0],
+          text: currentUser 
+            ? `Olá, ${currentUser.name.split(' ')[0]}! Como posso te ajudar hoje?`
+            : 'Olá como posso te ajudar hoje?'
+        }];
+      }
+      return prev;
+    });
+  }, [currentUser]);
   const [inputQuestion, setInputQuestion] = useState('');
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);

@@ -48,29 +48,50 @@ export default function App() {
     // Subscribe to Firebase Firestore 'usuarios' collection for real-time user sync
     const unsubscribeFirebaseUsers = onSnapshot(collection(db, 'usuarios'), (snapshot) => {
       try {
-        const fbUsers: User[] = [];
+        const userMap = new Map<string, User>();
         snapshot.forEach((docSnap) => {
           const d = docSnap.data();
+          const cleanEmail = (d.email || '').trim().toLowerCase();
+          if (!cleanEmail) return;
+
           let role: 'student' | 'teacher' = 'student';
-          if (d.tipo === 'teacher' || d.role === 'teacher' || d.email === 'codernador12@gmail.com' || d.email === 'enzomedeirosdasilva6@gmail.com') {
+          if (
+            d.tipo === 'teacher' || 
+            d.role === 'teacher' || 
+            cleanEmail === 'codernador12@gmail.com' || 
+            cleanEmail === 'enzomedeirosdasilva6@gmail.com'
+          ) {
             role = 'teacher';
           }
 
-          fbUsers.push({
+          const userObj: User = {
             id: docSnap.id,
-            name: d.nome || d.name || d.email?.split('@')[0] || 'Usuário',
-            email: d.email || '',
-            password: d.senha || d.password || '',
+            name: d.nome || d.name || cleanEmail.split('@')[0] || 'Usuário',
+            email: d.email || cleanEmail,
+            // Passwords are strictly confidential and stripped from public client state
             role,
             grade: d.grade || '1º Ano',
             course: d.curso || d.course || 'Técnico em Informática',
-            avatar: d.avatar || d.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${docSnap.id}`,
+            avatar: d.avatar || d.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(cleanEmail)}`,
             isOnline: false,
             lastSeen: d.updatedAt || new Date().toISOString(),
             subjectGrades: d.notas || d.subjectGrades || {},
             frequencia: d.frequencia || 100
-          });
+          };
+
+          if (userMap.has(cleanEmail)) {
+            const existing = userMap.get(cleanEmail)!;
+            const newHasGrades = Object.keys(userObj.subjectGrades || {}).length;
+            const existingHasGrades = Object.keys(existing.subjectGrades || {}).length;
+            if (newHasGrades > existingHasGrades || userObj.role === 'teacher') {
+              userMap.set(cleanEmail, { ...existing, ...userObj });
+            }
+          } else {
+            userMap.set(cleanEmail, userObj);
+          }
         });
+
+        const fbUsers = Array.from(userMap.values());
 
         if (fbUsers.length > 0) {
           setAllUsers(fbUsers);
@@ -80,9 +101,10 @@ export default function App() {
           
           setCurrentUser((prev) => {
             if (!prev) return prev;
-            const updatedMe = fbUsers.find(u => u.id === prev.id || u.email === prev.email);
-            if (updatedMe && updatedMe.avatar !== prev.avatar) {
-              const newMe = { ...prev, avatar: updatedMe.avatar };
+            const myEmail = (prev.email || '').toLowerCase().trim();
+            const updatedMe = fbUsers.find(u => u.id === prev.id || (u.email && u.email.toLowerCase().trim() === myEmail));
+            if (updatedMe) {
+              const newMe = { ...prev, ...updatedMe };
               try {
                 localStorage.setItem('cetep_user', JSON.stringify(newMe));
               } catch (e) {}
