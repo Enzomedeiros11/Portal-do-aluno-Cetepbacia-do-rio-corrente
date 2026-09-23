@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import Markdown from 'react-markdown';
-import { Mail, Phone, MapPin, Send, MessageSquare, Bot, Sparkles, User as UserIcon, BookOpen, SendHorizontal, RefreshCw, CheckCircle2, HelpCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, MessageSquare, Bot, Sparkles, User as UserIcon, BookOpen, SendHorizontal, RefreshCw, CheckCircle2, HelpCircle, KeyRound, ExternalLink, ShieldCheck, X } from 'lucide-react';
 import { User } from '../types';
-import { askAiTeacher } from '../services/aiTeacherService';
+import { askAiTeacher, getGeminiApiKey, saveGeminiApiKey, getOpenAiApiKey, saveOpenAiApiKey } from '../services/aiTeacherService';
 import { sendContactFormEmail } from '../services/emailService';
 import { toast } from 'sonner';
 
@@ -75,6 +75,19 @@ export default function Contact({ currentUser }: ContactProps) {
   const [subject, setSubject] = useState('Dúvida sobre Aulas / Notas');
   const [message, setMessage] = useState('');
   const [isSendingForm, setIsSendingForm] = useState(false);
+
+  // AI Connection Settings (Vercel & Browser)
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [geminiKeyInput, setGeminiKeyInput] = useState(() => getGeminiApiKey());
+  const [openAiKeyInput, setOpenAiKeyInput] = useState(() => getOpenAiApiKey());
+
+  const handleSaveKeys = (e: React.FormEvent) => {
+    e.preventDefault();
+    saveGeminiApiKey(geminiKeyInput.trim());
+    saveOpenAiApiKey(openAiKeyInput.trim());
+    toast.success('Chave de IA configurada com sucesso!');
+    setShowKeyModal(false);
+  };
 
   const handleAskAi = async (customPrompt?: string) => {
     const query = customPrompt || inputQuestion;
@@ -211,6 +224,18 @@ export default function Contact({ currentUser }: ContactProps) {
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => {
+                      setGeminiKeyInput(getGeminiApiKey());
+                      setOpenAiKeyInput(getOpenAiApiKey());
+                      setShowKeyModal(true);
+                    }}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 rounded-xl transition-colors cursor-pointer"
+                    title="Configurações de Conexão da IA (Vercel & Chave API)"
+                  >
+                    <KeyRound className="w-3.5 h-3.5 text-blue-500" />
+                    <span className="hidden sm:inline">Chave IA / Vercel</span>
+                  </button>
                   <button
                     onClick={() => setMessages([messages[0]])}
                     className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
@@ -442,6 +467,121 @@ export default function Contact({ currentUser }: ContactProps) {
 
           </motion.div>
         )}
+
+        {/* Modal: Configuração da IA (Vercel & Chave de API) */}
+        <AnimatePresence>
+          {showKeyModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5"
+              >
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                      <KeyRound className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 dark:text-white text-base">Conexão da IA & Vercel</h4>
+                      <p className="text-[11px] text-slate-400">Como fazer a IA responder 100% no Vercel e localmente</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowKeyModal(false)}
+                    className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Explanation about Vercel */}
+                <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl p-4 text-xs space-y-2 text-slate-700 dark:text-slate-300">
+                  <div className="flex items-center gap-2 font-bold text-blue-800 dark:text-blue-300">
+                    <ShieldCheck className="w-4 h-4 text-blue-600" />
+                    <span>Por que a IA não respondia na Vercel?</span>
+                  </div>
+                  <p className="leading-relaxed">
+                    Na <strong>Vercel</strong>, o servidor Node tradicional não roda sozinho como no seu computador. Para funcionar 100%:
+                  </p>
+                  <ol className="list-decimal pl-4 space-y-1 font-medium text-[11px] text-slate-600 dark:text-slate-300">
+                    <li>
+                      Configuramos a rota de API Serverless em <code className="bg-blue-100/70 dark:bg-blue-900/60 px-1 py-0.5 rounded">api/chat.ts</code>.
+                    </li>
+                    <li>
+                      Você precisa adicionar a variável <code className="bg-blue-100/70 dark:bg-blue-900/60 px-1 py-0.5 rounded font-bold">GEMINI_API_KEY</code> no painel da Vercel (<strong>Settings ➔ Environment Variables</strong>).
+                    </li>
+                    <li>
+                      <strong>Ou se preferir testar agora mesmo:</strong> Cole sua chave abaixo! Ela é salva no seu navegador e responde na hora pelo cliente sem precisar redeploy.
+                    </li>
+                  </ol>
+                </div>
+
+                <form onSubmit={handleSaveKeys} className="space-y-4">
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        Chave Gemini (Google AI Studio)
+                      </label>
+                      <a
+                        href="https://aistudio.google.com/apikey"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium"
+                      >
+                        Obter chave gratuita <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                    <input
+                      type="password"
+                      placeholder="AIzaSy..."
+                      value={geminiKeyInput}
+                      onChange={(e) => setGeminiKeyInput(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                      (Opcional) Chave OpenAI / ChatGPT
+                    </label>
+                    <input
+                      type="password"
+                      placeholder="sk-proj-..."
+                      value={openAiKeyInput}
+                      onChange={(e) => setOpenAiKeyInput(e.target.value)}
+                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        saveGeminiApiKey('');
+                        saveOpenAiApiKey('');
+                        setGeminiKeyInput('');
+                        setOpenAiKeyInput('');
+                        toast.success('Chaves removidas.');
+                        setShowKeyModal(false);
+                      }}
+                      className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      Limpar Chaves
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
+                    >
+                      Salvar e Usar
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
 
       </div>
     </div>

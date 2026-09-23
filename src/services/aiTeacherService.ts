@@ -1,3 +1,23 @@
+import { GoogleGenAI } from '@google/genai';
+
+export function getGeminiApiKey(): string {
+  if (typeof window !== 'undefined') {
+    const local = localStorage.getItem('cetep_gemini_api_key');
+    if (local && local.trim()) return local.trim();
+  }
+  return (import.meta.env.VITE_GEMINI_API_KEY as string) || '';
+}
+
+export function saveGeminiApiKey(key: string): void {
+  if (typeof window !== 'undefined') {
+    if (key && key.trim()) {
+      localStorage.setItem('cetep_gemini_api_key', key.trim());
+    } else {
+      localStorage.removeItem('cetep_gemini_api_key');
+    }
+  }
+}
+
 export function getOpenAiApiKey(): string {
   if (typeof window !== 'undefined') {
     const local = localStorage.getItem('cetep_openai_api_key');
@@ -30,13 +50,71 @@ export function savePreferredAiProvider(provider: 'chatgpt' | 'gemini' | 'auto')
   }
 }
 
+const SYSTEM_INSTRUCTION = `Você é o "Professor IA CETEP", assistente de Inteligência Artificial completo, inteligente e prestativo (no mesmo nível e estilo do ChatGPT original).
+
+DIRETRIZES DE ATUAÇÃO E RESPOSTA:
+1. RESPONDA A TUDO o que o usuário perguntar: tire dúvidas escolares, resolva questões de matemática, física, química, biologia, programação, história, redação, literatura, geografia, filosofia, inglês, tire dúvidas cotidianas, ensine tutoriais, escreva textos, dê explicações lógicas e responda a qualquer curiosidade ou assunto com total domínio e precisão.
+2. Formatação impecável em Markdown:
+   - Use títulos e subtítulos estruturados (## e ###)
+   - Use listas e tópicos claros
+   - Destaque conceitos centrais e palavras-chave em **negrito**
+   - Use blocos de código com sintaxe destacada (\`\`\`javascript, \`\`\`python, \`\`\`sql, \`\`\`excel, etc.) sempre que pertinente
+   - Detalhe cálculos passo a passo
+3. Tom acolhedor, altamente didático, inteligente e encorajador.`;
+
+async function callBrowserGemini(prompt: string, userCourse: string, userGrade: string, apiKey: string): Promise<string | null> {
+  try {
+    const ai = new GoogleGenAI({ apiKey });
+    const candidateModels = [
+      'gemini-3.8-flash',
+      'gemini-3.1-pro-preview',
+      'gemini-3.1-flash-lite',
+      'gemini-flash-latest'
+    ];
+
+    for (const model of candidateModels) {
+      try {
+        const response = await ai.models.generateContent({
+          model,
+          contents: prompt,
+          config: {
+            systemInstruction: `${SYSTEM_INSTRUCTION}\nContexto: Aluno de ${userCourse}, série ${userGrade}.`,
+            temperature: 0.6,
+          },
+        });
+
+        if (response && response.text) {
+          return response.text.trim();
+        }
+      } catch (err: any) {
+        console.warn(`Browser Gemini model ${model} warning:`, err?.message || err);
+      }
+    }
+  } catch (err) {
+    console.warn('Browser GoogleGenAI init error:', err);
+  }
+  return null;
+}
+
 export async function askAiTeacher(prompt: string, userCourse = 'Geral', userGrade = '1º Ano'): Promise<string> {
   const cleanPrompt = prompt.trim();
   if (!cleanPrompt) return 'Por favor, digite sua dúvida para o Professor IA.';
 
-  const openAiKey = getOpenAiApiKey();
+  // 1. Direct browser Gemini call if student configured key in localStorage or VITE_GEMINI_API_KEY
+  const directGeminiKey = getGeminiApiKey();
+  if (directGeminiKey) {
+    try {
+      const browserGeminiReply = await callBrowserGemini(cleanPrompt, userCourse, userGrade, directGeminiKey);
+      if (browserGeminiReply) {
+        return browserGeminiReply;
+      }
+    } catch (e) {
+      console.warn('Direct browser Gemini failed, trying backend route:', e);
+    }
+  }
 
-  // 1. Direct OpenAI call if student configured their own custom key in browser
+  // 2. Direct OpenAI call if student configured their own custom key in browser
+  const openAiKey = getOpenAiApiKey();
   if (openAiKey && openAiKey.startsWith('sk-')) {
     try {
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -50,7 +128,7 @@ export async function askAiTeacher(prompt: string, userCourse = 'Geral', userGra
           messages: [
             {
               role: 'system',
-              content: `Você é o Professor IA CETEP. Responda com clareza, formatação Markdown impecável, tópicos estruturados e didática de alto nível no estilo ChatGPT. Aluno do curso: ${userCourse}, série: ${userGrade}.`
+              content: `${SYSTEM_INSTRUCTION}\nContexto do Aluno: Curso ${userCourse}, Série ${userGrade}.`
             },
             { role: 'user', content: cleanPrompt }
           ],
@@ -71,7 +149,7 @@ export async function askAiTeacher(prompt: string, userCourse = 'Geral', userGra
     }
   }
 
-  // 2. Primary: Full-stack backend /api/chat with Gemini API (process.env.GEMINI_API_KEY)
+  // 3. Call backend /api/chat (works on local Express and Vercel Serverless Function via /api/chat.ts)
   try {
     const apiRes = await fetch('/api/chat', {
       method: 'POST',
@@ -85,19 +163,20 @@ export async function askAiTeacher(prompt: string, userCourse = 'Geral', userGra
       })
     });
 
-    if (apiRes.ok) {
+    const contentType = apiRes.headers.get('content-type') || '';
+    if (apiRes.ok && contentType.includes('application/json')) {
       const data = await apiRes.json();
       if (data.reply && data.reply.trim()) {
         return data.reply.trim();
       }
     } else {
-      console.warn('Server /api/chat returned status:', apiRes.status);
+      console.warn('Server /api/chat returned status or non-json:', apiRes.status, contentType);
     }
   } catch (err) {
-    console.warn('Call to /api/chat failed, activating intelligent tutor engine:', err);
+    console.warn('Call to /api/chat failed:', err);
   }
 
-  // 3. Resilient client-side fallback with ChatGPT-grade formatting
+  // 4. Resilient client-side fallback
   return generateSmartTutorResponse(cleanPrompt, userCourse);
 }
 
