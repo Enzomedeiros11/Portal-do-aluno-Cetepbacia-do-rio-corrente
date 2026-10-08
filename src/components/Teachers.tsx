@@ -660,17 +660,6 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
                  )}
               </button>
 
-              <button 
-                onClick={() => {
-                  const hasPending = pendingRequests.filter(r => r.status === 'aguardando_aprovacao').length > 0;
-                  setAuthModalTab(hasPending ? 'aprovacoes' : 'matriculas');
-                  setIsAuthModalOpen(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer"
-                title="Lista oficial de Matrículas e Aprovações de Pais e Alunos pela Direção"
-              >
-                 <ShieldCheck className="w-4 h-4" /> Matrículas & Direção
-              </button>
 
               <button 
                 onClick={() => setIsAddModalOpen(true)}
@@ -1234,13 +1223,13 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
                   </div>
                   <div>
                     <h3 className="text-lg font-bold flex items-center gap-2">
-                      <span>Matrículas & Direção Escolar</span>
+                      <span>Aprovações & Direção Escolar</span>
                       <span className="text-[10px] uppercase font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 px-2 py-0.5 rounded-full">
                         Exclusivo Direção CETEP
                       </span>
                     </h3>
                     <p className="text-xs text-slate-400 mt-0.5">
-                      Aprovação de pré-cadastros de pais e alunos, matrículas ativas e controle de acesso.
+                      Aprovação de pré-cadastros de pais e alunos e controle de acesso.
                     </p>
                   </div>
                 </div>
@@ -1269,18 +1258,6 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
                   )}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => setAuthModalTab('matriculas')}
-                  className={`px-4 py-2.5 rounded-t-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
-                    authModalTab === 'matriculas'
-                      ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-t-2 border-indigo-600 shadow-xs'
-                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                  }`}
-                >
-                  <ShieldCheck className="w-4 h-4" />
-                  <span>Matrículas Ativas ({authorizedList.length})</span>
-                </button>
 
                 <button
                   type="button"
@@ -1669,77 +1646,22 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
                 )}
               </AnimatePresence>
 
-              {/* Table / List */}
-              <div className="flex-1 overflow-y-auto p-6">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                      <th className="pb-3">Matrícula</th>
-                      <th className="pb-3">Nome do Aluno / Servidor</th>
-                      <th className="pb-3">Gmail Autorizado</th>
-                      <th className="pb-3">Curso & Série</th>
-                      <th className="pb-3">Situação</th>
-                      <th className="pb-3 text-right">Ação</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
-                    {authorizedList
-                      .filter(u => {
-                        const term = authSearchTerm.toLowerCase();
-                        return (
-                          (u.matricula || '').toLowerCase().includes(term) ||
-                          (u.name || '').toLowerCase().includes(term) ||
-                          (u.email || '').toLowerCase().includes(term) ||
-                          (u.course || '').toLowerCase().includes(term)
-                        );
-                      })
-                      .map((item) => (
-                        <tr key={item.id || item.matricula} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
-                          <td className="py-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">
-                            {item.matricula}
-                          </td>
-                          <td className="py-3 font-bold text-slate-800 dark:text-white">
-                            {item.name}
-                          </td>
-                          <td className="py-3 text-slate-600 dark:text-slate-300">
-                            {item.email}
-                          </td>
-                          <td className="py-3 text-slate-500 dark:text-slate-400">
-                            {item.course} • {item.grade}
-                          </td>
-                          <td className="py-3">
-                            {item.isActivated ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
-                                <CheckCircle2 className="w-3 h-3" /> Conta Ativa
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
-                                Primeiro Acesso Pendente
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-3 text-right">
-                            {item.email !== 'enzomedeirosdasilva6@gmail.com' && item.email !== 'adm@gmail.com' && (
-                              <button
-                                onClick={() => handleDeleteAuth(item.id, item.name)}
-                                className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors cursor-pointer"
-                                title="Revogar autorização"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
+              {/* Informativo de Matrículas */}
+              <div className="flex-1 overflow-y-auto p-8 text-center flex flex-col items-center justify-center space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <h4 className="text-sm font-bold text-slate-800 dark:text-white">Matrículas Integradas na Secretaria</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md leading-relaxed">
+                  Todas as matrículas, turmas, notas e dados de alunos e servidores já estão organizados na tabela principal logo abaixo.
+                </p>
               </div>
             </>
           )}
 
               {/* Footer */}
               <div className="p-4 bg-slate-50 dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 shrink-0">
-                <span>Total de pessoas autorizadas pela Direção: <strong>{authorizedList.length}</strong></span>
+                <span>Gestão de Cadastros e Aprovações • Direção CETEP</span>
                 <button
                   onClick={() => setIsAuthModalOpen(false)}
                   className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-xs hover:opacity-90 transition-opacity cursor-pointer"
