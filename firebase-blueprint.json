@@ -2,21 +2,84 @@
   "entities": {
     "User": {
       "title": "User",
-      "description": "Usuários do portal acadêmico (Alunos, Professores e Admin)",
+      "description": "Usuários do portal acadêmico (Alunos, Professores, Responsáveis e Admin)",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "name": { "type": "string" },
         "email": { "type": "string" },
+        "matricula": { "type": "string" },
         "role": { "type": "string" },
         "course": { "type": "string" },
         "grade": { "type": "string" },
         "frequencia": { "type": "number" },
         "subjectGrades": { "type": "object" },
+        "emailResponsavel": { "type": "string" },
+        "nomeResponsavel": { "type": "string" },
+        "telefoneResponsavel": { "type": "string" },
         "avatar": { "type": "string" },
+        "status": { "type": "string" },
         "updatedAt": { "type": "string" }
       },
       "required": ["email", "name", "role"]
+    },
+    "PreRegistrationRequest": {
+      "title": "PreRegistrationRequest",
+      "description": "Solicitações de pré-cadastro de alunos e responsáveis aguardando aprovação do professor",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "matricula": { "type": "string" },
+        "role": { "type": "string" },
+        "course": { "type": "string" },
+        "grade": { "type": "string" },
+        "password": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "evaluatedBy": { "type": "string" },
+        "evaluatedAt": { "type": "string" }
+      },
+      "required": ["name", "email", "matricula", "role", "course", "grade", "status", "createdAt"]
+    },
+    "AuthorizedUser": {
+      "title": "AuthorizedUser",
+      "description": "Alunos e Professores autorizados pela Direção escolar com Matrícula e E-mail",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "matricula": { "type": "string" },
+        "email": { "type": "string" },
+        "nome": { "type": "string" },
+        "tipo": { "type": "string" },
+        "curso": { "type": "string" },
+        "grade": { "type": "string" },
+        "emailResponsavel": { "type": "string" },
+        "nomeResponsavel": { "type": "string" },
+        "status": { "type": "string" },
+        "cadastradoPor": { "type": "string" },
+        "dataCadastro": { "type": "string" }
+      },
+      "required": ["matricula", "email", "nome", "tipo"]
+    },
+    "DailyClass": {
+      "title": "DailyClass",
+      "description": "Publicações dos professores no mural sobre o que vão dar de aula hoje",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "professor": { "type": "string" },
+        "professorEmail": { "type": "string" },
+        "disciplina": { "type": "string" },
+        "curso": { "type": "string" },
+        "turma": { "type": "string" },
+        "tema": { "type": "string" },
+        "conteudo": { "type": "string" },
+        "atividades": { "type": "string" },
+        "data": { "type": "string" }
+      },
+      "required": ["professor", "disciplina", "turma", "tema", "conteudo", "data"]
     },
     "Message": {
       "title": "Message",
@@ -45,7 +108,7 @@
         "name": { "type": "string" },
         "course": { "type": "string" },
         "grade": { "type": "string" },
-        "teacher": { "type": "string font" }
+        "teacher": { "type": "string" }
       }
     }
   },
@@ -53,6 +116,18 @@
     "/usuarios/{userId}": {
       "schema": { "$ref": "#/entities/User" },
       "description": "Coleção de usuários registrados no sistema"
+    },
+    "/solicitacoes_cadastro/{requestId}": {
+      "schema": { "$ref": "#/entities/PreRegistrationRequest" },
+      "description": "Solicitações de pré-cadastro pendentes de aprovação pelo professor"
+    },
+    "/autorizados/{authId}": {
+      "schema": { "$ref": "#/entities/AuthorizedUser" },
+      "description": "Lista de matrículas e e-mails autorizados pela Direção"
+    },
+    "/aulas_hoje/{aulaId}": {
+      "schema": { "$ref": "#/entities/DailyClass" },
+      "description": "Mural de postagens dos professores sobre aulas do dia"
     },
     "/mensagens/{messageId}": {
       "schema": { "$ref": "#/entities/Message" },

@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'motion/react';
-import Markdown from 'react-markdown';
-import { Mail, Phone, MapPin, Send, MessageSquare, Bot, Sparkles, User as UserIcon, BookOpen, SendHorizontal, RefreshCw, CheckCircle2, HelpCircle, KeyRound, ExternalLink, ShieldCheck, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { motion } from 'motion/react';
+import { Mail, Phone, MapPin, Send, HelpCircle, Clock, Building, ChevronDown, CheckCircle2, MessageSquare, ShieldCheck } from 'lucide-react';
 import { User } from '../types';
-import { askAiTeacher, getGeminiApiKey, saveGeminiApiKey, getOpenAiApiKey, saveOpenAiApiKey } from '../services/aiTeacherService';
 import { sendContactFormEmail } from '../services/emailService';
 import { toast } from 'sonner';
 
@@ -12,119 +9,17 @@ interface ContactProps {
   currentUser?: User | null;
 }
 
-interface ChatMessage {
-  id: string;
-  sender: 'ai' | 'user';
-  text: string;
-  timestamp: string;
-}
-
 export default function Contact({ currentUser }: ContactProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tabParam = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState<'ai' | 'form'>(tabParam === 'form' ? 'form' : 'ai');
-
-  useEffect(() => {
-    if (tabParam === 'form' || tabParam === 'ai') {
-      setActiveTab(tabParam);
-    }
-  }, [tabParam]);
-
-  // AI Tutor Chat State
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    {
-      id: '1',
-      sender: 'ai',
-      text: currentUser 
-        ? `Olá, ${currentUser.name.split(' ')[0]}! Como posso te ajudar hoje?`
-        : 'Olá como posso te ajudar hoje?',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
-  ]);
-
-  useEffect(() => {
-    setMessages(prev => {
-      if (prev.length === 1 && prev[0].id === '1') {
-        return [{
-          ...prev[0],
-          text: currentUser 
-            ? `Olá, ${currentUser.name.split(' ')[0]}! Como posso te ajudar hoje?`
-            : 'Olá como posso te ajudar hoje?'
-        }];
-      }
-      return prev;
-    });
-  }, [currentUser]);
-  const [inputQuestion, setInputQuestion] = useState('');
-  const [isLoadingAi, setIsLoadingAi] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    if (activeTab === 'ai') {
-      scrollToBottom();
-    }
-  }, [messages, isLoadingAi, activeTab]);
-
   // Support Form State
   const [contactName, setContactName] = useState(currentUser?.name || '');
   const [contactEmail, setContactEmail] = useState(currentUser?.email || '');
+  const [contactMatricula, setContactMatricula] = useState(currentUser?.matricula || '');
   const [subject, setSubject] = useState('Dúvida sobre Aulas / Notas');
   const [message, setMessage] = useState('');
   const [isSendingForm, setIsSendingForm] = useState(false);
+  const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
-  // AI Connection Settings (Vercel & Browser)
-  const [showKeyModal, setShowKeyModal] = useState(false);
-  const [geminiKeyInput, setGeminiKeyInput] = useState(() => getGeminiApiKey());
-  const [openAiKeyInput, setOpenAiKeyInput] = useState(() => getOpenAiApiKey());
-
-  const handleSaveKeys = (e: React.FormEvent) => {
-    e.preventDefault();
-    saveGeminiApiKey(geminiKeyInput.trim());
-    saveOpenAiApiKey(openAiKeyInput.trim());
-    toast.success('Chave de IA configurada com sucesso!');
-    setShowKeyModal(false);
-  };
-
-  const handleAskAi = async (customPrompt?: string) => {
-    const query = customPrompt || inputQuestion;
-    if (!query.trim() || isLoadingAi) return;
-
-    const userMsg: ChatMessage = {
-      id: Date.now().toString(),
-      sender: 'user',
-      text: query,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMessages(prev => [...prev, userMsg]);
-    if (!customPrompt) setInputQuestion('');
-    setIsLoadingAi(true);
-
-    try {
-      const responseText = await askAiTeacher(
-        query,
-        currentUser?.course || 'Técnico Geral',
-        currentUser?.grade || '1º Ano'
-      );
-
-      const aiMsg: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        sender: 'ai',
-        text: responseText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setMessages(prev => [...prev, aiMsg]);
-    } catch (err) {
-      toast.error('Erro ao conectar com o Professor IA.');
-    } finally {
-      setIsLoadingAi(false);
-    }
-  };
+  const [lastSent, setLastSent] = useState<{ name: string; email: string; subject: string; message: string } | null>(null);
 
   const handleSendSupportForm = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,302 +29,128 @@ export default function Contact({ currentUser }: ContactProps) {
     }
 
     setIsSendingForm(true);
+    const submittedData = {
+      name: `${contactName} ${contactMatricula ? `(Matrícula: ${contactMatricula})` : ''}`,
+      email: contactEmail,
+      matricula: contactMatricula,
+      subject,
+      message
+    };
+
     try {
-      await sendContactFormEmail({
+      await sendContactFormEmail(submittedData);
+      toast.success('Mensagem enviada com sucesso para o Gmail: enzomedeirosdasilva6@gmail.com!');
+      setLastSent({
         name: contactName,
         email: contactEmail,
         subject,
         message
       });
-      toast.success('Mensagem enviada com sucesso para a equipe CETEP!');
       setMessage('');
     } catch (error) {
-      toast.error('Erro ao enviar mensagem.');
+      toast.error('Erro ao enviar mensagem. Tente novamente mais tarde.');
     } finally {
       setIsSendingForm(false);
     }
   };
 
-  const quickPrompts = [
-    { label: 'Explicar lógica de programação', query: 'Pode me explicar os conceitos básicos de lógica de programação com exemplos em JavaScript?' },
-    { label: 'Cálculo de dose (Enfermagem)', query: 'Como faço para calcular o gotejamento de soro e doses de medicação na enfermagem?' },
-    { label: 'Dicas de Gestão e Administração', query: 'Quais são os principais conceitos de administração e marketing para cursos técnicos?' },
-    { label: 'Estrutura de Redação', query: 'Como estruturar uma tese e argumentos fortes para uma redação escolar?' },
-    { label: 'Resolução de Exatas passo a passo', query: 'Pode me ensinar como resolver regra de três composta e equações?' }
+  const faqItems = [
+    {
+      q: 'Como emitir meu boletim oficial com notas e médias?',
+      a: 'Você pode acessar a aba "Boletim" no menu superior. Lá estão listadas todas as disciplinas com notas por trimestre/unidade e o botão "Baixar Boletim em PDF" para emitir o documento oficial autenticado.'
+    },
+    {
+      q: 'Como funciona o Portal da Família para pais e responsáveis?',
+      a: 'Os responsáveis podem cadastrar-se no portal selecionando a opção "Sou Pai / Responsável". Ao vincular a matrícula ou e-mail do aluno, o portal exibe o boletim, mural de recados, frequência escolar e relatórios de acompanhamento em tempo real.'
+    },
+    {
+      q: 'Como solicitar declaração de matrícula ou histórico escolar?',
+      a: 'Você pode enviar uma mensagem pelo formulário nesta página selecionando o assunto "Solicitação de Documento ou Declaração" ou comparecer presencialmente na Secretaria do CETEP em horário comercial.'
+    },
+    {
+      q: 'Quais os requisitos para realizar estágio supervisionado?',
+      a: 'O estágio é regulamentado pela Lei nº 11.788/2008. Alunos a partir do 2º ano dos cursos técnicos podem estagiar mediante assinatura do Termo de Compromisso de Estágio (TCE) entre empresa, aluno e a Direção do CETEP. Acesse a aba "Estágios MEC" para modelos e orientações.'
+    },
+    {
+      q: 'Como obter o certificado dos cursos de capacitação (Excel e Lógica)?',
+      a: 'Nos Cursos Extras, após assistir às videoaulas e atingir média mínima de 7,0 nos questionários de cada aula, o botão oficial "Baixar Certificado em PDF" é liberado instantaneamente com registro acadêmico e carga horária certificada.'
+    }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-12 px-6 font-sans transition-colors duration-200">
-      <div className="container mx-auto max-w-6xl">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pt-24 pb-16 px-4 sm:px-6 font-sans transition-colors duration-200">
+      <div className="container mx-auto max-w-6xl space-y-12">
         
         {/* Header Section */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8 text-center sm:text-left">
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-center max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-bold mb-4 shadow-xs">
             <HelpCircle className="w-4 h-4" />
-            <span>Central de Ajuda CETEP</span>
+            <span>Central de Atendimento & Ouvidoria CETEP</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight font-display mb-3">
+          <h1 className="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
             Como podemos te <span className="text-blue-600 dark:text-blue-400">ajudar</span> hoje?
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium max-w-2xl text-base">
-            Tire suas dúvidas acadêmicas instantaneamente com o <strong className="text-slate-800 dark:text-slate-200">Professor IA CETEP</strong> ou envie uma mensagem diretamente para a coordenação e secretaria escolar.
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-sm sm:text-base leading-relaxed">
+            Canal oficial de atendimento para alunos, pais e comunidade escolar. Fale diretamente com a Secretaria Escolar, Coordenação Pedagógica ou consulte as dúvidas frequentes.
           </p>
-
-          {/* Navigation Tabs */}
-          <div className="flex items-center gap-3 mt-8 border-b border-slate-200 dark:border-slate-800 pb-4 overflow-x-auto">
-            <button
-              onClick={() => { setActiveTab('ai'); setSearchParams({ tab: 'ai' }); }}
-              className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all shrink-0 cursor-pointer ${
-                activeTab === 'ai'
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
-              }`}
-            >
-              <Bot className="w-4 h-4" /> Chat IA
-            </button>
-            <button
-              onClick={() => { setActiveTab('form'); setSearchParams({ tab: 'form' }); }}
-              className={`flex items-center gap-2.5 px-6 py-3 rounded-2xl font-bold text-sm transition-all shrink-0 cursor-pointer ${
-                activeTab === 'form'
-                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
-                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800'
-              }`}
-            >
-              <HelpCircle className="w-4 h-4" /> Ajuda
-            </button>
-          </div>
         </motion.div>
 
-        {/* TAB 1: PROFESSOR IA CETEP */}
-        {activeTab === 'ai' && (
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            {/* Main Interactive Chat Panel */}
-            <div className="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm flex flex-col h-[650px] transition-colors">
-              
-              {/* Chat Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center shadow-md">
-                    <Bot className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-slate-900 dark:text-white text-base flex items-center gap-2">
-                      Professor IA CETEP
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[10px] font-black uppercase">
-                        Online
-                      </span>
-                    </h3>
-                    <p className="text-xs text-slate-400 dark:text-slate-400 font-medium">Tutor pedagógico com clareza e didática estilo ChatGPT</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => {
-                      setGeminiKeyInput(getGeminiApiKey());
-                      setOpenAiKeyInput(getOpenAiApiKey());
-                      setShowKeyModal(true);
-                    }}
-                    className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700/80 rounded-xl transition-colors cursor-pointer"
-                    title="Configurações de Conexão da IA (Vercel & Chave API)"
-                  >
-                    <KeyRound className="w-3.5 h-3.5 text-blue-500" />
-                    <span className="hidden sm:inline">Chave IA / Vercel</span>
-                  </button>
-                  <button
-                    onClick={() => setMessages([messages[0]])}
-                    className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
-                    title="Limpar conversa"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                  </button>
-                </div>
+        {/* Main Grid: Form + Contact Channels */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Contact Form */}
+          <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-8 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5" />
               </div>
-
-              {/* Message List */}
-              <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex gap-3 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    {msg.sender === 'ai' && (
-                      <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0 mt-1">
-                        <Bot className="w-4 h-4" />
-                      </div>
-                    )}
-                    <div
-                      className={`max-w-[85%] p-4 rounded-2xl text-sm leading-relaxed ${
-                        msg.sender === 'user'
-                          ? 'bg-blue-600 text-white font-medium rounded-tr-none shadow-sm'
-                          : 'bg-slate-100 dark:bg-slate-800/90 text-slate-800 dark:text-slate-100 rounded-tl-none border border-slate-200/60 dark:border-slate-700/60 shadow-xs'
-                      }`}
-                    >
-                      {msg.sender === 'ai' ? (
-                        <div className="markdown-body text-sm leading-relaxed space-y-2 prose prose-slate dark:prose-invert max-w-none">
-                          <Markdown>{msg.text}</Markdown>
-                        </div>
-                      ) : (
-                        <div className="whitespace-pre-wrap">{msg.text}</div>
-                      )}
-                      <p className={`text-[10px] mt-2 font-semibold ${msg.sender === 'user' ? 'text-blue-100 text-right' : 'text-slate-400 dark:text-slate-400'}`}>
-                        {msg.timestamp}
-                      </p>
-                    </div>
-                    {msg.sender === 'user' && (
-                      <div className="w-8 h-8 rounded-xl bg-slate-900 dark:bg-slate-700 text-white flex items-center justify-center shrink-0 mt-1">
-                        <UserIcon className="w-4 h-4" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                {isLoadingAi && (
-                  <div className="flex gap-3 items-end py-1">
-                    <div className="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 flex items-center justify-center shrink-0">
-                      <Bot className="w-4 h-4" />
-                    </div>
-                    <div className="bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 px-4 py-3 rounded-2xl rounded-tl-none flex items-center gap-2 shadow-xs">
-                      <span className="text-xs text-slate-500 dark:text-slate-300 font-semibold mr-1">Professor IA está formulando a resposta</span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                        <span className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                        <span className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-bounce"></span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
+              <div>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Enviar Mensagem Oficial</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Resposta encaminhada diretamente para seu e-mail cadastrado</p>
               </div>
+            </div>
 
-              {/* Chat Input */}
-              <div className="pt-4 border-t border-slate-100 dark:border-slate-800 mt-4 space-y-3">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    handleAskAi();
-                  }}
-                  className="flex gap-2"
-                >
+            <form onSubmit={handleSendSupportForm} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Nome Completo *</label>
                   <input
                     type="text"
-                    value={inputQuestion}
-                    onChange={(e) => setInputQuestion(e.target.value)}
-                    placeholder="Digite sua dúvida de aula, matéria, cálculo ou exercício..."
-                    className="flex-1 px-5 py-3.5 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                    required
+                    value={contactName}
+                    onChange={(e) => setContactName(e.target.value)}
+                    placeholder="Seu nome"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
                   />
-                  <button
-                    type="submit"
-                    disabled={!inputQuestion.trim() || isLoadingAi}
-                    className="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-xs transition-all disabled:opacity-50 flex items-center gap-2 shadow-md shrink-0 cursor-pointer"
-                  >
-                    <span>Enviar</span>
-                    <SendHorizontal className="w-4 h-4" />
-                  </button>
-                </form>
-              </div>
-
-            </div>
-
-            {/* Quick Prompts & Info Sidebar */}
-            <div className="lg:col-span-4 space-y-6">
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[32px] p-6 shadow-sm transition-colors">
-                <h4 className="font-bold text-slate-900 dark:text-white text-sm flex items-center gap-2 mb-4">
-                  <Sparkles className="w-4 h-4 text-amber-500" /> Tópicos Populares
-                </h4>
-                <div className="space-y-2.5">
-                  {quickPrompts.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleAskAi(item.query)}
-                      className="w-full text-left p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-300 text-slate-700 dark:text-slate-200 text-xs font-semibold border border-slate-200/80 dark:border-slate-700/70 transition-all cursor-pointer group"
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-slate-900 dark:bg-slate-900/90 border border-slate-800 text-white rounded-[32px] p-6 shadow-lg space-y-3">
-                <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-blue-400">
-                  <BookOpen className="w-5 h-5" />
-                </div>
-                <h4 className="font-bold text-base">Atendimento Pedagógico 24h</h4>
-                <p className="text-xs text-slate-300 font-medium leading-relaxed">
-                  O Professor IA CETEP está configurado para responder perguntas de todas as disciplinas técnicas e conteúdos do Ensino Médio com a clareza e estrutura do ChatGPT.
-                </p>
-              </div>
-            </div>
-
-          </motion.div>
-        )}
-
-        {/* TAB 2: SECRETARIA & FORM */}
-        {activeTab === 'form' && (
-          <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* Contact Info Side */}
-            <div className="lg:col-span-5 space-y-6">
-              <div className="bg-white dark:bg-slate-900 p-8 rounded-[32px] border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 transition-colors">
-                <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Atendimento Presencial e Canais</h3>
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
-                  Caso necessite de atendimento administrativo para documentos, transferências ou certificados presenciais:
-                </p>
-
-                <div className="space-y-4 pt-2">
-                  {[
-                    { icon: Mail, label: 'E-mail Oficial', value: 'contato@cetep-brc.edu.br' },
-                    { icon: Phone, label: 'Telefone / WhatsApp', value: '(77) 3483-3525' },
-                    { icon: MapPin, label: 'Endereço', value: 'Av. Gov. Roberto Santos, 54 - Sambaíba, Santa Maria da Vitória - BA' }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-                      <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
-                        <item.icon className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">{item.label}</p>
-                        <p className="text-xs font-bold text-slate-800 dark:text-slate-100 mt-0.5">{item.value}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Contact Form */}
-            <div className="lg:col-span-7 bg-white dark:bg-slate-900 p-8 sm:p-10 rounded-[32px] border border-slate-200 dark:border-slate-800 shadow-sm transition-colors">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">Enviar Mensagem de Ajuda</h3>
-              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-6">Preencha os dados abaixo para entrar em contato com nossa equipe de suporte escolar.</p>
-
-              <form onSubmit={handleSendSupportForm} className="space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Seu Nome Completo *</label>
-                    <input
-                      type="text"
-                      required
-                      value={contactName}
-                      onChange={(e) => setContactName(e.target.value)}
-                      placeholder="Ex: Ana Maria"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Seu E-mail *</label>
-                    <input
-                      type="email"
-                      required
-                      value={contactEmail}
-                      onChange={(e) => setContactEmail(e.target.value)}
-                      placeholder="seu.email@gmail.com"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Assunto</label>
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">E-mail para Retorno *</label>
+                  <input
+                    type="email"
+                    required
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    placeholder="seu.email@exemplo.com"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Matrícula (opcional)</label>
+                  <input
+                    type="text"
+                    value={contactMatricula}
+                    onChange={(e) => setContactMatricula(e.target.value)}
+                    placeholder="Ex: 2026001"
+                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Setor / Assunto *</label>
                   <select
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
@@ -437,151 +158,168 @@ export default function Contact({ currentUser }: ContactProps) {
                   >
                     <option className="dark:bg-slate-800 dark:text-white">Dúvida sobre Aulas / Notas</option>
                     <option className="dark:bg-slate-800 dark:text-white">Solicitação de Documento ou Declaração</option>
-                    <option className="dark:bg-slate-800 dark:text-white">Problemas de Acesso no Portal</option>
-                    <option className="dark:bg-slate-800 dark:text-white">Informações sobre Estágios e Cursos Extra</option>
-                    <option className="dark:bg-slate-800 dark:text-white">Outros Assuntos</option>
+                    <option className="dark:bg-slate-800 dark:text-white">Secretaria Escolar / Matrícula</option>
+                    <option className="dark:bg-slate-800 dark:text-white">Orientação sobre Estágio Supervisionado</option>
+                    <option className="dark:bg-slate-800 dark:text-white">Suporte Técnico no Portal Acadêmico</option>
+                    <option className="dark:bg-slate-800 dark:text-white">Ouvidoria / Elogios / Sugestões</option>
                   </select>
                 </div>
+              </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300">Mensagem *</label>
-                  <textarea
-                    rows={5}
-                    required
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Descreva detalhadamente sua dúvida ou solicitação..."
-                    className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                  />
-                </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300">Mensagem Detalhada *</label>
+                <textarea
+                  rows={5}
+                  required
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  placeholder="Descreva detalhadamente sua dúvida ou solicitação para que a equipe acadêmica possa responder com precisão..."
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-xs font-medium text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                />
+              </div>
 
-                <button
-                  type="submit"
-                  disabled={isSendingForm}
-                  className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-xs transition-all shadow-md flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer"
-                >
-                  <Send className="w-4 h-4" /> Enviar Mensagem
-                </button>
-              </form>
-            </div>
-
-          </motion.div>
-        )}
-
-        {/* Modal: Configuração da IA (Vercel & Chave de API) */}
-        <AnimatePresence>
-          {showKeyModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5"
-              >
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                      <KeyRound className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-slate-900 dark:text-white text-base">Conexão da IA & Vercel</h4>
-                      <p className="text-[11px] text-slate-400">Como fazer a IA responder 100% no Vercel e localmente</p>
-                    </div>
+              {lastSent && (
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-2xl space-y-2">
+                  <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span>Mensagem enviada com sucesso para enzomedeirosdasilva6@gmail.com!</span>
                   </div>
-                  <button
-                    onClick={() => setShowKeyModal(false)}
-                    className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                {/* Explanation about Vercel */}
-                <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-800/40 rounded-2xl p-4 text-xs space-y-2 text-slate-700 dark:text-slate-300">
-                  <div className="flex items-center gap-2 font-bold text-blue-800 dark:text-blue-300">
-                    <ShieldCheck className="w-4 h-4 text-blue-600" />
-                    <span>Por que a IA não respondia na Vercel?</span>
-                  </div>
-                  <p className="leading-relaxed">
-                    Na <strong>Vercel</strong>, o servidor Node tradicional não roda sozinho como no seu computador. Para funcionar 100%:
+                  <p className="text-[11px] text-emerald-700 dark:text-emerald-400">
+                    Sua solicitação de ajuda foi registrada e direcionada para a coordenação do Professor Enzo Medeiros.
                   </p>
-                  <ol className="list-decimal pl-4 space-y-1 font-medium text-[11px] text-slate-600 dark:text-slate-300">
-                    <li>
-                      Configuramos a rota de API Serverless em <code className="bg-blue-100/70 dark:bg-blue-900/60 px-1 py-0.5 rounded">api/chat.ts</code>.
-                    </li>
-                    <li>
-                      Você precisa adicionar a variável <code className="bg-blue-100/70 dark:bg-blue-900/60 px-1 py-0.5 rounded font-bold">GEMINI_API_KEY</code> no painel da Vercel (<strong>Settings ➔ Environment Variables</strong>).
-                    </li>
-                    <li>
-                      <strong>Ou se preferir testar agora mesmo:</strong> Cole sua chave abaixo! Ela é salva no seu navegador e responde na hora pelo cliente sem precisar redeploy.
-                    </li>
-                  </ol>
+                  <a
+                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=enzomedeirosdasilva6@gmail.com&su=${encodeURIComponent(`[Ajuda CETEP] ${lastSent.subject} - ${lastSent.name}`)}&body=${encodeURIComponent(`Olá Professor Enzo,\n\nNome: ${lastSent.name}\nE-mail: ${lastSent.email}\nAssunto: ${lastSent.subject}\n\nMensagem:\n${lastSent.message}`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[11px] font-bold transition-all shadow-xs cursor-pointer mt-1"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Abrir também no Gmail</span>
+                  </a>
                 </div>
+              )}
 
-                <form onSubmit={handleSaveKeys} className="space-y-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        Chave Gemini (Google AI Studio)
-                      </label>
-                      <a
-                        href="https://aistudio.google.com/apikey"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-[11px] text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 font-medium"
-                      >
-                        Obter chave gratuita <ExternalLink className="w-3 h-3" />
-                      </a>
+              <button
+                type="submit"
+                disabled={isSendingForm}
+                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-xs transition-all shadow-md shadow-blue-600/20 flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer"
+              >
+                <Send className="w-4 h-4" />
+                {isSendingForm ? 'Enviando para enzomedeirosdasilva6@gmail.com...' : 'Enviar Mensagem de Ajuda'}
+              </button>
+            </form>
+          </div>
+
+          {/* Contact Info & Channels */}
+          <div className="lg:col-span-5 space-y-6">
+            <div className="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6 transition-colors">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Canais Oficiais & Presencial</h3>
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                Você também pode entrar em contato diretamente com nossa equipe ou comparecer à unidade física durante os horários de funcionamento:
+              </p>
+
+              <div className="space-y-3 pt-2">
+                {[
+                  {
+                    icon: Building,
+                    label: 'Campus Oficial',
+                    value: 'CETEP - Centro Territorial de Educação Profissional',
+                    sub: 'Unidade Territorial Bacia do Rio Corrente'
+                  },
+                  {
+                    icon: MapPin,
+                    label: 'Endereço',
+                    value: 'Av. Gov. Roberto Santos, 54 - Sambaíba',
+                    sub: 'Santa Maria da Vitória - BA'
+                  },
+                  {
+                    icon: Mail,
+                    label: 'E-mail de Ajuda & Coordenação',
+                    value: 'enzomedeirosdasilva6@gmail.com',
+                    sub: 'Direção & Coordenação (Professor Enzo Medeiros)',
+                    href: 'mailto:enzomedeirosdasilva6@gmail.com'
+                  },
+                  {
+                    icon: Phone,
+                    label: 'Telefone Institucional',
+                    value: '(77) 3483-3525',
+                    sub: 'Atendimento de segunda a sexta-feira'
+                  },
+                  {
+                    icon: Clock,
+                    label: 'Horário de Atendimento',
+                    value: '07h30 às 17h30 (Segunda a Sexta)',
+                    sub: 'Plantão de secretaria das turmas técnicas'
+                  }
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-start gap-3.5 p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                    <div className="w-9 h-9 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                      <item.icon className="w-4 h-4" />
                     </div>
-                    <input
-                      type="password"
-                      placeholder="AIzaSy..."
-                      value={geminiKeyInput}
-                      onChange={(e) => setGeminiKeyInput(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <div className="flex-1">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{item.label}</p>
+                      {item.href ? (
+                        <a href={item.href} className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline mt-0.5 block break-all">
+                          {item.value}
+                        </a>
+                      ) : (
+                        <p className="text-xs font-bold text-slate-800 dark:text-slate-100 mt-0.5">{item.value}</p>
+                      )}
+                      {item.sub && <p className="text-[11px] text-slate-500 dark:text-slate-400">{item.sub}</p>}
+                    </div>
                   </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-                      (Opcional) Chave OpenAI / ChatGPT
-                    </label>
-                    <input
-                      type="password"
-                      placeholder="sk-proj-..."
-                      value={openAiKeyInput}
-                      onChange={(e) => setOpenAiKeyInput(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-
-                  <div className="flex gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        saveGeminiApiKey('');
-                        saveOpenAiApiKey('');
-                        setGeminiKeyInput('');
-                        setOpenAiKeyInput('');
-                        toast.success('Chaves removidas.');
-                        setShowKeyModal(false);
-                      }}
-                      className="flex-1 py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                    >
-                      Limpar Chaves
-                    </button>
-                    <button
-                      type="submit"
-                      className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
-                    >
-                      Salvar e Usar
-                    </button>
-                  </div>
-                </form>
-              </motion.div>
+                ))}
+              </div>
             </div>
-          )}
-        </AnimatePresence>
+
+            <div className="bg-gradient-to-br from-blue-900 to-indigo-950 text-white rounded-3xl p-6 shadow-md space-y-3">
+              <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-blue-300">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <h4 className="font-bold text-sm">Privacidade & Comunicação Segura</h4>
+              <p className="text-xs text-blue-100/80 leading-relaxed">
+                Todas as mensagens e dados enviados por estudantes e familiares são tratados com confidencialidade acadêmica conforme as diretrizes do CETEP.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        {/* FAQ Accordion Section */}
+        <div className="bg-white dark:bg-slate-900 p-8 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+              <HelpCircle className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Perguntas Frequentes (FAQ)</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Respostas rápidas para as dúvidas mais comuns dos estudantes</p>
+            </div>
+          </div>
+
+          <div className="divide-y divide-slate-100 dark:divide-slate-800 space-y-2">
+            {faqItems.map((item, index) => {
+              const isOpen = activeFaq === index;
+              return (
+                <div key={index} className="pt-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveFaq(isOpen ? null : index)}
+                    className="w-full flex items-center justify-between py-3 text-left font-bold text-sm text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+                  >
+                    <span>{item.q}</span>
+                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isOpen ? 'rotate-180 text-blue-600' : ''}`} />
+                  </button>
+                  {isOpen && (
+                    <div className="pb-4 pt-1 text-xs text-slate-600 dark:text-slate-300 leading-relaxed pr-6">
+                      {item.a}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
 
       </div>
     </div>

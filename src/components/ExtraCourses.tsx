@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { BookMarked, ExternalLink, GraduationCap, Star, Clock, Globe, Award, CheckCircle2, Play, Download } from 'lucide-react';
+import { BookMarked, ExternalLink, GraduationCap, Star, Clock, Globe, Award, CheckCircle2, Play, Download, HelpCircle } from 'lucide-react';
 import ExcelCoursePlayer from './ExcelCoursePlayer';
+import LogicCoursePlayer from './LogicCoursePlayer';
 import { getCompletedLessonIds, TOTAL_EXCEL_LESSONS } from '../data/excelCourseData';
+import { getCompletedLogicLessonIds, TOTAL_LOGIC_LESSONS } from '../data/logicCourseData';
 import { downloadCertificatePDF } from '../lib/pdfUtils';
 
 export default function ExtraCourses() {
   const [activeCourse, setActiveCourse] = useState<string | null>(null);
   const [excelCompletedCount, setExcelCompletedCount] = useState<number>(0);
+  const [logicCompletedCount, setLogicCompletedCount] = useState<number>(0);
   const [studentName, setStudentName] = useState<string>('Aluno(a)');
 
   useEffect(() => {
     setExcelCompletedCount(getCompletedLessonIds().length);
+    setLogicCompletedCount(getCompletedLogicLessonIds().length);
     try {
       const savedUser = localStorage.getItem('cetep_user');
       if (savedUser) {
@@ -21,7 +25,7 @@ export default function ExtraCourses() {
     } catch {}
   }, [activeCourse]);
 
-  // If the user selected the Excel course, show the full 16-lesson player!
+  // If the user selected the Excel course, show the Excel course player
   if (activeCourse === 'excel') {
     return (
       <ExcelCoursePlayer
@@ -34,7 +38,21 @@ export default function ExtraCourses() {
     );
   }
 
+  // If the user selected the Lógica de Programação course, show the Logic course player
+  if (activeCourse === 'logica') {
+    return (
+      <LogicCoursePlayer
+        onBack={() => {
+          setActiveCourse(null);
+          setLogicCompletedCount(getCompletedLogicLessonIds().length);
+        }}
+        studentName={studentName}
+      />
+    );
+  }
+
   const excelProgressPct = Math.round((excelCompletedCount / TOTAL_EXCEL_LESSONS) * 100);
+  const logicProgressPct = Math.round((logicCompletedCount / TOTAL_LOGIC_LESSONS) * 100);
 
   const myCourses = [
     {
@@ -44,16 +62,22 @@ export default function ExtraCourses() {
       duration: '20 Aulas (50h)',
       rating: '5.0',
       difficulty: 'Do Zero ao Avançado',
-      hasFullContent: true
+      completedCount: excelCompletedCount,
+      totalCount: TOTAL_EXCEL_LESSONS,
+      progressPct: excelProgressPct,
+      hours: 50
     },
     {
       id: 'logica',
       title: 'Lógica de Programação',
-      desc: 'O primeiro passo para quem quer entrar no mundo do desenvolvimento. Aprenda a pensar como um programador.',
-      duration: '20h',
-      rating: '4.8',
-      difficulty: 'Iniciante',
-      hasFullContent: false
+      desc: 'O primeiro passo para o mundo do desenvolvimento. Aprenda raciocínio lógico, variáveis, estruturas condicionais, laços de repetição, vetores e teste de mesa com simulador de código interativo.',
+      duration: '6 Aulas (30h)',
+      rating: '5.0',
+      difficulty: 'Iniciante ao Avançado',
+      completedCount: logicCompletedCount,
+      totalCount: TOTAL_LOGIC_LESSONS,
+      progressPct: logicProgressPct,
+      hours: 30
     }
   ];
 
@@ -65,7 +89,7 @@ export default function ExtraCourses() {
             <BookMarked className="text-indigo-600 dark:text-indigo-400 w-10 h-10" />
             <h1 className="text-4xl font-serif font-medium text-slate-900 dark:text-white">Cursos & Capacitação</h1>
           </div>
-          <p className="text-gray-500 dark:text-slate-400">Aprimore seus conhecimentos com cursos gratuitos e plataformas recomendadas.</p>
+          <p className="text-gray-500 dark:text-slate-400">Aprimore seus conhecimentos com cursos gratuitos, certificados oficiais e plataformas recomendadas.</p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -74,6 +98,7 @@ export default function ExtraCourses() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {myCourses.map((course) => {
                 const isExcel = course.id === 'excel';
+                const hasProgress = course.completedCount > 0;
 
                 return (
                   <motion.div
@@ -90,9 +115,9 @@ export default function ExtraCourses() {
                           <span className="text-[10px] font-bold text-gray-400 ml-1">{course.rating}</span>
                         </div>
 
-                        {isExcel && excelCompletedCount > 0 && (
+                        {hasProgress && (
                           <span className="px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-full text-[10px] font-black flex items-center gap-1">
-                            <CheckCircle2 className="w-3 h-3" /> {excelProgressPct}% Concluído
+                            <CheckCircle2 className="w-3 h-3" /> {course.progressPct}% Concluído
                           </span>
                         )}
                       </div>
@@ -104,23 +129,21 @@ export default function ExtraCourses() {
                         {course.desc}
                       </p>
 
-                      {/* Progress bar for Excel */}
-                      {isExcel && (
-                        <div className="mb-6 p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2">
-                          <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-300">
-                            <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400">
-                              <Award className="w-3.5 h-3.5" /> Progresso Oficial
-                            </span>
-                            <span>{excelCompletedCount} / {TOTAL_EXCEL_LESSONS} aulas</span>
-                          </div>
-                          <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-emerald-500 transition-all duration-500"
-                              style={{ width: `${excelProgressPct}%` }}
-                            />
-                          </div>
+                      {/* Progress bar */}
+                      <div className="mb-6 p-3.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-100 dark:border-slate-800 space-y-2">
+                        <div className="flex items-center justify-between text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                          <span className="flex items-center gap-1.5 text-indigo-700 dark:text-indigo-400">
+                            <Award className="w-3.5 h-3.5" /> Progresso Oficial
+                          </span>
+                          <span>{course.completedCount} / {course.totalCount} aulas</span>
                         </div>
-                      )}
+                        <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-indigo-600 transition-all duration-500"
+                            style={{ width: `${course.progressPct}%` }}
+                          />
+                        </div>
+                      </div>
                       
                       <div className="flex items-center gap-6 mt-auto border-t border-gray-50 dark:border-slate-800 pt-6">
                         <div className="flex items-center gap-2 text-gray-400">
@@ -137,34 +160,28 @@ export default function ExtraCourses() {
                     <div className="mt-8 flex flex-col sm:flex-row gap-2.5">
                       <button
                         onClick={() => {
-                          if (isExcel) {
-                            setActiveCourse('excel');
-                          }
+                          setActiveCourse(course.id);
                         }}
                         className={`flex-1 py-3.5 rounded-2xl font-bold text-sm shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer ${
                           isExcel
                             ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20'
-                            : 'bg-indigo-900 dark:bg-indigo-600 text-white hover:bg-slate-900 dark:hover:bg-indigo-700'
+                            : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/20'
                         }`}
                       >
                         <Play className="w-4 h-4 fill-current" />
-                        {isExcel
-                          ? excelCompletedCount > 0
-                            ? 'Continuar Curso'
-                            : 'Iniciar Curso de Excel'
-                          : 'Iniciar Curso'}
+                        {course.completedCount > 0
+                          ? `Continuar ${isExcel ? 'Excel' : 'Lógica'}`
+                          : `Iniciar Curso de ${isExcel ? 'Excel' : 'Lógica'}`}
                       </button>
 
-                      {isExcel && (
-                        <button
-                          onClick={() => downloadCertificatePDF(studentName, 'Excel do Zero ao Avançado', 50)}
-                          className="py-3.5 px-4 rounded-2xl font-bold text-sm bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                          title="Baixar Certificado Oficial de Conclusão em PDF"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span>Certificado</span>
-                        </button>
-                      )}
+                      <button
+                        onClick={() => downloadCertificatePDF(studentName, course.title, course.hours)}
+                        className="py-3.5 px-4 rounded-2xl font-bold text-sm bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                        title="Baixar Certificado Oficial de Conclusão em PDF"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Certificado</span>
+                      </button>
                     </div>
                     <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50 dark:bg-indigo-950/30 rounded-bl-[100%] opacity-0 group-hover:opacity-100 transition-opacity" />
                   </motion.div>
@@ -194,14 +211,15 @@ export default function ExtraCourses() {
             </div>
 
             <div className="bg-white dark:bg-slate-900 p-8 rounded-[40px] border border-gray-100 dark:border-slate-800 shadow-sm text-center transition-colors">
-              <p className="text-gray-400 dark:text-slate-400 text-xs font-black uppercase tracking-widest mb-2">Apoio</p>
-              <h4 className="font-bold text-slate-900 dark:text-white mb-4">Dúvidas com Excel?</h4>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mb-6">Mande sua dúvida no chat de inteligência artificial ou fale com o professor.</p>
+              <p className="text-gray-400 dark:text-slate-400 text-xs font-black uppercase tracking-widest mb-2">Suporte Acadêmico</p>
+              <h4 className="font-bold text-slate-900 dark:text-white mb-4">Dúvidas sobre os Cursos?</h4>
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-6">Entre em contato com a coordenação ou envie uma mensagem direta pela Central de Ajuda.</p>
               <a
                 href="/contact"
-                className="inline-block w-full py-3 border-2 border-indigo-50 rounded-2xl text-indigo-900 font-bold hover:bg-indigo-50 transition-colors"
+                className="inline-flex items-center justify-center gap-2 w-full py-3.5 bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 rounded-2xl text-indigo-900 dark:text-indigo-300 font-bold border border-indigo-200 dark:border-indigo-800 transition-colors"
               >
-                Tirar Dúvidas com IA
+                <HelpCircle className="w-4 h-4" />
+                <span>Central de Ajuda & Dúvidas</span>
               </a>
             </div>
           </aside>

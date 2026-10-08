@@ -29,62 +29,62 @@ export default function Grades({ user }: GradesProps) {
 
   const getSubjects = (courseName?: string) => {
     const regular = [
-      { name: 'Português', teacher: 'Profa. Regina Duarte' },
-      { name: 'Matemática', teacher: 'Profa. Ana Costa' },
-      { name: 'Química', teacher: 'Prof. Marcos Silva' },
-      { name: 'Física', teacher: 'Prof. André Souza' },
-      { name: 'Biologia', teacher: 'Profa. Carla Mendes' },
-      { name: 'História', teacher: 'Prof. José Oliveira' },
-      { name: 'Geografia', teacher: 'Profa. Sandra Lima' },
-      { name: 'Inglês', teacher: 'Profa. Mary Johnson' },
-      { name: 'Filosofia', teacher: 'Prof. Gilberto Gil' },
-      { name: 'Sociologia', teacher: 'Profa. Maria Bethânia' },
-      { name: 'Educação Física', teacher: 'Prof. Vanderlei Cordeiro' },
-      { name: 'Artes', teacher: 'Profa. Ivete Sangalo' },
+      { name: 'Português', teacher: '' },
+      { name: 'Matemática', teacher: '' },
+      { name: 'Química', teacher: '' },
+      { name: 'Física', teacher: '' },
+      { name: 'Biologia', teacher: '' },
+      { name: 'História', teacher: '' },
+      { name: 'Geografia', teacher: '' },
+      { name: 'Inglês', teacher: '' },
+      { name: 'Filosofia', teacher: '' },
+      { name: 'Sociologia', teacher: '' },
+      { name: 'Educação Física', teacher: '' },
+      { name: 'Artes', teacher: '' },
     ].map(s => ({ ...s, grade: getSubjectGrade(s.name) }));
 
     const technicalSubjects: Record<string, any[]> = {
       'Técnico em Informática': [
-        { name: 'Banco de Dados', teacher: 'Prof. Ricardo' },
-        { name: 'Robótica', teacher: 'Prof. Ricardo' },
-        { name: 'Prática Profissional', teacher: 'Prof. Ricardo' },
-        { name: 'Fundamentos e Arquitetura', teacher: 'Prof. Ricardo' },
-        { name: 'Programação Web', teacher: 'Prof. Ricardo' },
+        { name: 'Banco de Dados', teacher: '' },
+        { name: 'Robótica', teacher: '' },
+        { name: 'Prática Profissional', teacher: '' },
+        { name: 'Fundamentos e Arquitetura', teacher: '' },
+        { name: 'Programação Web', teacher: '' },
       ],
       'Administração': [
-        { name: 'Gestão de Pessoas', teacher: 'Prof. Roberto Melo' },
-        { name: 'Logística', teacher: 'Prof. Roberto Melo' },
-        { name: 'Contabilidade', teacher: 'Prof. Roberto Melo' },
-        { name: 'Marketing', teacher: 'Prof. Roberto Melo' },
-        { name: 'Administração Financeira', teacher: 'Prof. Roberto Melo' },
+        { name: 'Gestão de Pessoas', teacher: '' },
+        { name: 'Logística', teacher: '' },
+        { name: 'Contabilidade', teacher: '' },
+        { name: 'Marketing', teacher: '' },
+        { name: 'Administração Financeira', teacher: '' },
       ],
       'Nutrição': [
-        { name: 'Anatomia', teacher: 'Profa. Luciana' },
-        { name: 'Fisiologia', teacher: 'Profa. Luciana' },
-        { name: 'Composição de Alimentos', teacher: 'Profa. Luciana' },
-        { name: 'Nutrição Clínica', teacher: 'Profa. Luciana' },
-        { name: 'Higiene de Alimentos', teacher: 'Profa. Luciana' },
+        { name: 'Anatomia', teacher: '' },
+        { name: 'Fisiologia', teacher: '' },
+        { name: 'Composição de Alimentos', teacher: '' },
+        { name: 'Nutrição Clínica', teacher: '' },
+        { name: 'Higiene de Alimentos', teacher: '' },
       ],
       'Agropecuária': [
-        { name: 'Zootecnia', teacher: 'Prof. Carlos' },
-        { name: 'Fitotecnia', teacher: 'Prof. Carlos' },
-        { name: 'Máquinas Agrícolas', teacher: 'Prof. Carlos' },
-        { name: 'Solos', teacher: 'Prof. Carlos' },
-        { name: 'Topografia', teacher: 'Prof. Carlos' },
+        { name: 'Zootecnia', teacher: '' },
+        { name: 'Fitotecnia', teacher: '' },
+        { name: 'Máquinas Agrícolas', teacher: '' },
+        { name: 'Solos', teacher: '' },
+        { name: 'Topografia', teacher: '' },
       ],
       'Enfermagem': [
-        { name: 'Fundamentos de Enfermagem', teacher: 'Profa. Sandra' },
-        { name: 'Anatomia Humana', teacher: 'Profa. Sandra' },
-        { name: 'Farmacologia', teacher: 'Profa. Sandra' },
-        { name: 'Saúde Coletiva', teacher: 'Profa. Sandra' },
-        { name: 'Enfermagem Cirúrgica', teacher: 'Profa. Sandra' },
+        { name: 'Fundamentos de Enfermagem', teacher: '' },
+        { name: 'Anatomia Humana', teacher: '' },
+        { name: 'Farmacologia', teacher: '' },
+        { name: 'Saúde Coletiva', teacher: '' },
+        { name: 'Enfermagem Cirúrgica', teacher: '' },
       ],
       'Meio Ambiente': [
-        { name: 'Ecologia', teacher: 'Prof. Eduardo' },
-        { name: 'Gestão Ambiental', teacher: 'Prof. Eduardo' },
-        { name: 'Educação Ambiental', teacher: 'Prof. Eduardo' },
-        { name: 'Poluição e Controle', teacher: 'Prof. Eduardo' },
-        { name: 'Microbiologia Ambiental', teacher: 'Prof. Eduardo' },
+        { name: 'Ecologia', teacher: '' },
+        { name: 'Gestão Ambiental', teacher: '' },
+        { name: 'Educação Ambiental', teacher: '' },
+        { name: 'Poluição e Controle', teacher: '' },
+        { name: 'Microbiologia Ambiental', teacher: '' },
       ]
     };
 
@@ -135,7 +135,7 @@ export default function Grades({ user }: GradesProps) {
                   <div key={i} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
                     <div>
                       <p className="font-semibold text-slate-900 dark:text-white leading-tight">{sub.name}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{sub.teacher}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{sub.teacher || '—'}</p>
                     </div>
                     <div className="flex items-center gap-6">
                       <div className="text-right">

@@ -17,11 +17,13 @@ import Journal from './components/Journal';
 import Classroom from './components/Classroom';
 import ExtraCourses from './components/ExtraCourses';
 import ExcelCoursePlayer from './components/ExcelCoursePlayer';
+import LogicCoursePlayer from './components/LogicCoursePlayer';
 import Internships from './components/Internships';
 import Teachers from './components/Teachers';
 import About from './components/About';
 import Settings from './components/Settings';
 import DatabaseManager from './components/DatabaseManager';
+import ParentPortal from './components/ParentPortal';
 import Logo from './components/Logo';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ThemeProvider } from './context/ThemeContext';
@@ -54,20 +56,24 @@ export default function App() {
           const cleanEmail = (d.email || '').trim().toLowerCase();
           if (!cleanEmail) return;
 
-          let role: 'student' | 'teacher' = 'student';
+          let role: 'student' | 'teacher' | 'parent' = 'student';
           if (
             d.tipo === 'teacher' || 
             d.role === 'teacher' || 
             cleanEmail === 'codernador12@gmail.com' || 
-            cleanEmail === 'enzomedeirosdasilva6@gmail.com'
+            cleanEmail === 'enzomedeirosdasilva6@gmail.com' ||
+            cleanEmail === 'adm@gmail.com'
           ) {
             role = 'teacher';
+          } else if (d.tipo === 'parent' || d.role === 'parent') {
+            role = 'parent';
           }
 
           const userObj: User = {
             id: docSnap.id,
             name: d.nome || d.name || cleanEmail.split('@')[0] || 'Usuário',
             email: d.email || cleanEmail,
+            matricula: d.matricula || undefined,
             // Passwords are strictly confidential and stripped from public client state
             role,
             grade: d.grade || '1º Ano',
@@ -76,7 +82,10 @@ export default function App() {
             isOnline: false,
             lastSeen: d.updatedAt || new Date().toISOString(),
             subjectGrades: d.notas || d.subjectGrades || {},
-            frequencia: d.frequencia || 100
+            frequencia: d.frequencia || 100,
+            emailResponsavel: d.emailResponsavel || undefined,
+            nomeResponsavel: d.nomeResponsavel || undefined,
+            childStudentId: d.childStudentId || d.childMatricula || undefined
           };
 
           if (userMap.has(cleanEmail)) {
@@ -105,6 +114,9 @@ export default function App() {
             const updatedMe = fbUsers.find(u => u.id === prev.id || (u.email && u.email.toLowerCase().trim() === myEmail));
             if (updatedMe) {
               const newMe = { ...prev, ...updatedMe };
+              if (newMe.email === 'enzomedeirosdasilva6@gmail.com' && (!newMe.matricula || newMe.matricula === 'DIR-2024')) {
+                newMe.matricula = 'DIR-2026';
+              }
               try {
                 localStorage.setItem('cetep_user', JSON.stringify(newMe));
               } catch (e) {}
@@ -175,7 +187,15 @@ export default function App() {
         }
         if (savedUser) {
           const parsed = JSON.parse(savedUser);
-          if (parsed && typeof parsed === 'object') setCurrentUser(parsed);
+          if (parsed && typeof parsed === 'object') {
+            if (parsed.email === 'enzomedeirosdasilva6@gmail.com' && (!parsed.matricula || parsed.matricula === 'DIR-2024')) {
+              parsed.matricula = 'DIR-2026';
+              try {
+                localStorage.setItem('cetep_user', JSON.stringify(parsed));
+              } catch (e) {}
+            }
+            setCurrentUser(parsed);
+          }
         }
       } catch (e) {
         console.warn('LocalStorage load warning:', e);
@@ -209,7 +229,7 @@ export default function App() {
       if (data) {
         const mapped: User[] = data.map(d => {
           let role: 'student' | 'teacher' = 'student';
-          if (d.tipo === 'teacher' || d.email === 'codernador12@gmail.com' || d.email === 'enzomedeirosdasilva6@gmail.com') {
+          if (d.tipo === 'teacher' || d.email === 'codernador12@gmail.com' || d.email === 'enzomedeirosdasilva6@gmail.com' || d.email === 'adm@gmail.com') {
             role = 'teacher';
           }
           
@@ -252,7 +272,7 @@ export default function App() {
       }
 
       if (data) {
-        const role: 'student' | 'teacher' = (data.tipo === 'teacher' || data.email === 'codernador12@gmail.com' || data.email === 'enzomedeirosdasilva6@gmail.com') ? 'teacher' : 'student';
+        const role: 'student' | 'teacher' = (data.tipo === 'teacher' || data.email === 'codernador12@gmail.com' || data.email === 'enzomedeirosdasilva6@gmail.com' || data.email === 'adm@gmail.com') ? 'teacher' : 'student';
         
         setCurrentUser({
           id: data.id,
@@ -272,7 +292,7 @@ export default function App() {
           id: uid,
           nome: email.split('@')[0],
           email: email,
-          tipo: (email === 'codernador12@gmail.com' || email === 'enzomedeirosdasilva6@gmail.com') ? 'teacher' : 'student',
+          tipo: (email === 'codernador12@gmail.com' || email === 'enzomedeirosdasilva6@gmail.com' || email === 'adm@gmail.com') ? 'teacher' : 'student',
           grade: '1º Ano',
           curso: 'Técnico em Informática',
           avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${uid}`,
@@ -411,9 +431,20 @@ export default function App() {
                 isAuthenticated ? <Navigate to="/dashboard" /> : <Auth onLogin={login} onRegister={register} users={allUsers} />
               } />
               
-              {/* Protected Student Routes */}
+              {/* Protected Student / Parent Routes */}
               <Route path="/dashboard" element={
-                isAuthenticated ? <Dashboard user={currentUser} allUsers={allUsers} /> : <Navigate to="/auth" />
+                isAuthenticated ? (
+                  currentUser?.role === 'parent' ? (
+                    <ParentPortal currentUser={currentUser} allUsers={allUsers} />
+                  ) : (
+                    <Dashboard user={currentUser} allUsers={allUsers} />
+                  )
+                ) : <Navigate to="/auth" />
+              } />
+              <Route path="/parent-portal" element={
+                isAuthenticated ? (
+                  <ParentPortal currentUser={currentUser} allUsers={allUsers} />
+                ) : <Navigate to="/auth" />
               } />
               <Route path="/journal" element={
                 isAuthenticated ? <Journal /> : <Navigate to="/auth" />
@@ -428,28 +459,38 @@ export default function App() {
                 isAuthenticated ? <ExcelCoursePlayer onBack={() => window.history.back()} studentName={currentUser?.name} /> : <Navigate to="/auth" />
               } />
               <Route path="/excel" element={<Navigate to="/curso-excel" replace />} />
+              <Route path="/curso-logica" element={
+                isAuthenticated ? <LogicCoursePlayer onBack={() => window.history.back()} studentName={currentUser?.name} /> : <Navigate to="/auth" />
+              } />
+              <Route path="/logica" element={<Navigate to="/curso-logica" replace />} />
               <Route path="/internships" element={
                 isAuthenticated ? <Internships /> : <Navigate to="/auth" />
               } />
               <Route path="/boletim" element={
-                isAuthenticated ? <Grades user={currentUser} /> : <Navigate to="/auth" />
+                isAuthenticated ? (
+                  currentUser?.role === 'teacher' ? (
+                    <Navigate to="/teachers" replace />
+                  ) : (
+                    <Grades user={currentUser} />
+                  )
+                ) : <Navigate to="/auth" />
               } />
               <Route path="/assignments" element={
                 isAuthenticated ? <Assignments /> : <Navigate to="/auth" />
               } />
               
-              {/* Database Control Panel Route - Enzo Only */}
+              {/* Database Control Panel Route - Enzo and Adm */}
               <Route path="/database" element={
-                currentUser?.email === 'enzomedeirosdasilva6@gmail.com' ? (
+                (currentUser?.email === 'enzomedeirosdasilva6@gmail.com' || currentUser?.email === 'adm@gmail.com') ? (
                   <DatabaseManager onRefreshAll={fetchAllUsers} />
                 ) : (
                   <Navigate to="/dashboard" replace />
                 )
               } />
 
-              {/* Protected Teacher/Secretaria Route - Enzo Only */}
+              {/* Protected Teacher/Secretaria Route */}
               <Route path="/teachers" element={
-                currentUser?.email === 'enzomedeirosdasilva6@gmail.com' ? (
+                (currentUser?.email === 'enzomedeirosdasilva6@gmail.com' || currentUser?.email === 'adm@gmail.com' || currentUser?.role === 'teacher') ? (
                   <Teachers 
                     allUsers={allUsers}
                     onUpdateUsers={updateAllUsers}

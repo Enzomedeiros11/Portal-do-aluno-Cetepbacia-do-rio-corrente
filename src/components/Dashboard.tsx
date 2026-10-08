@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { User } from '../types';
+import DailyClassesBoard from './DailyClassesBoard';
 import { downloadBoletimPDF } from '../lib/pdfUtils';
 import { getCompletedLessonIds } from '../data/excelCourseData';
 
@@ -17,7 +18,23 @@ export default function Dashboard({ user }: DashboardProps) {
   const displayName = (user.name || user.email || 'Estudante').trim().split(' ')[0] || 'Estudante';
   const displayAvatar = user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.email || 'user')}`;
 
+  const isTeacher = user.role === 'teacher';
   const completedLessons = getCompletedLessonIds().length;
+
+  // Calculate real average from user.subjectGrades if student has real grades
+  const gradesList: number[] = [];
+  if (user.subjectGrades) {
+    Object.values(user.subjectGrades).forEach((g: any) => {
+      const vals = [g?.n1, g?.n2, g?.n3].filter((v: any) => v && v !== '-' && !isNaN(Number(v))).map(Number);
+      if (vals.length > 0) {
+        const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
+        gradesList.push(avg);
+      }
+    });
+  }
+  const realGPA = gradesList.length > 0
+    ? (gradesList.reduce((a, b) => a + b, 0) / gradesList.length).toFixed(1)
+    : null;
 
   const handleDownloadBoletim = () => {
     try {
@@ -42,7 +59,56 @@ export default function Dashboard({ user }: DashboardProps) {
     visible: { y: 0, opacity: 1 }
   };
 
-  const academicModules = [
+  const academicModules = isTeacher ? [
+    {
+      title: 'Secretaria & Lançamento de Notas',
+      category: 'Gestão Pedagógica',
+      description: 'Lançamento de notas bimestrais, frequências escolares e aprovação de novos cadastros de alunos.',
+      link: '/teachers',
+      badge: 'Painel Docente',
+      btnText: 'Acessar Secretaria'
+    },
+    {
+      title: 'Sala de Aula Virtual',
+      category: 'Ambiente de Estudo',
+      description: 'Acompanhe as salas de aula, envie materiais e consulte comunicados da instituição.',
+      link: '/classroom',
+      badge: 'Ativo',
+      btnText: 'Entrar na Sala'
+    },
+    {
+      title: 'Cursos Extras',
+      category: 'Capacitação Técnica',
+      description: 'Cursos de capacitação prática como Excel e Lógica de Programação para formação contínua.',
+      link: '/extra-courses',
+      badge: `${completedLessons}/20 Aulas`,
+      btnText: 'Acessar Cursos'
+    },
+    {
+      title: 'Estágios MEC',
+      category: 'Oportunidades & Convênios',
+      description: 'Informações e portal oficial do Ministério da Educação para convênios e estágios técnicos.',
+      link: '/internships',
+      badge: 'MEC Oficial',
+      btnText: 'Acessar Portal MEC'
+    },
+    {
+      title: 'Central de Atendimento & Coordenação',
+      category: 'Comunicação Escolar',
+      description: 'Canal de atendimento da secretaria escolar para esclarecimento de dúvidas e solicitações.',
+      link: '/contact',
+      badge: 'Atendimento',
+      btnText: 'Falar com a Escola'
+    },
+    {
+      title: 'Jornal CETEP',
+      category: 'Comunicação Escolar',
+      description: 'Notícias institucionais, eventos pedagógicos e avisos do campus escolar.',
+      link: '/journal',
+      badge: 'Edição Vigente',
+      btnText: 'Ler Notícias'
+    }
+  ] : [
     {
       title: 'Sala de Aula Virtual',
       category: 'Ambiente de Estudo',
@@ -52,43 +118,43 @@ export default function Dashboard({ user }: DashboardProps) {
       btnText: 'Entrar na Sala'
     },
     {
-      title: 'Cursos Extras: Excel',
+      title: 'Cursos Extras: Excel & Lógica',
       category: 'Capacitação Técnica',
-      description: 'Curso oficial do Zero ao Avançado com 20 aulas completas, resumos teóricos e questionários práticos.',
+      description: 'Cursos com aulas práticas, resumos teóricos e questionários para enriquecer seu currículo.',
       link: '/extra-courses',
       badge: `${completedLessons}/20 Aulas`,
-      btnText: 'Acessar Curso'
+      btnText: 'Acessar Cursos'
     },
     {
-      title: 'Painel de Estágios',
-      category: 'Oportunidades',
-      description: 'Vagas de estágio técnico, posições para menor aprendiz e conexões com empresas parceiras.',
+      title: 'Estágios MEC',
+      category: 'Oportunidades & Convênios',
+      description: 'Orientações oficiais do Ministério da Educação (MEC) para estágios curriculares.',
       link: '/internships',
-      badge: 'Vagas Abertas',
-      btnText: 'Ver Oportunidades'
+      badge: 'Portal MEC',
+      btnText: 'Ver Estágios MEC'
     },
     {
       title: 'Boletim & Histórico',
       category: 'Notas e Frequência',
-      description: 'Consulte notas por disciplina, cálculo de médias bimestrais e emita o boletim acadêmico em PDF.',
+      description: 'Consulte notas por disciplina, cálculo de médias e emita seu boletim oficial em PDF.',
       link: '/boletim',
-      badge: 'Média 9.2',
+      badge: realGPA ? `Média ${realGPA}` : 'Consultar',
       btnText: 'Consultar Notas'
     },
     {
-      title: 'Plantão de Dúvidas (Chat IA)',
-      category: 'Apoio Pedagógico',
-      description: 'Assistente inteligente para resolução de exercícios e esclarecimento de dúvidas 24 horas.',
-      link: '/contact?tab=ai',
-      badge: 'Online 24h',
-      btnText: 'Tirar Dúvida'
+      title: 'Central de Atendimento & Secretaria',
+      category: 'Apoio ao Estudante',
+      description: 'Canal direto para envio de dúvidas, solicitações de documentos e contato com a coordenação.',
+      link: '/contact',
+      badge: 'Secretaria',
+      btnText: 'Falar com a Escola'
     },
     {
-      title: 'Jornal Acadêmico CETEP',
+      title: 'Jornal CETEP',
       category: 'Comunicação Escolar',
-      description: 'Notícias institucionais, eventos do campus, projetos científicos e comunicados da instituição.',
+      description: 'Notícias do colégio, feiras de ciências e avisos importantes da instituição.',
       link: '/journal',
-      badge: 'Edição Vigente',
+      badge: 'Atualizado',
       btnText: 'Ler Notícias'
     }
   ];
@@ -134,29 +200,45 @@ export default function Dashboard({ user }: DashboardProps) {
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="px-2.5 py-0.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 rounded-md text-[10px] font-bold uppercase tracking-wider">
-                  Matrícula Ativa
+                <span className="px-2.5 py-0.5 bg-blue-50 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800 rounded-md text-[10px] font-bold uppercase tracking-wider">
+                  {isTeacher ? 'Corpo Docente • Gestão' : user.matricula ? `Matrícula: ${user.matricula}` : 'Estudante Regular'}
                 </span>
+                {user.matricula && !isTeacher && (
+                  <span className="px-2.5 py-0.5 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-800 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-md text-[10px] font-mono font-bold">
+                    Nº {user.matricula}
+                  </span>
+                )}
                 <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
-                  {user.grade || '1º Ano'} • {user.course || 'Curso Técnico'}
+                  {isTeacher ? 'Direção & Docência' : `${user.grade || '1º Ano'} • ${user.course || 'Curso Técnico'}`}
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 Olá, {displayName}
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-                Painel do estudante. Selecione uma das áreas abaixo para prosseguir.
+                {isTeacher 
+                  ? 'Painel do professor. Gerencie aulas do dia, secretaria acadêmica e comunicados.'
+                  : 'Painel do estudante. Acompanhe suas aulas, notas e comunicados escolares.'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3 shrink-0 flex-wrap">
-            <button
-              onClick={handleDownloadBoletim}
-              className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold transition-colors cursor-pointer"
-            >
-              Baixar Boletim (PDF)
-            </button>
+            {isTeacher ? (
+              <Link
+                to="/teachers"
+                className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+              >
+                Secretaria & Notas
+              </Link>
+            ) : (
+              <button
+                onClick={handleDownloadBoletim}
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+              >
+                Baixar Boletim (PDF)
+              </button>
+            )}
             <Link
               to="/classroom"
               className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
@@ -170,18 +252,26 @@ export default function Dashboard({ user }: DashboardProps) {
         <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Média Geral</p>
-            <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1">9.2</h3>
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
+              {isTeacher ? 'Perfil de Acesso' : 'Média Geral'}
+            </p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1">
+              {isTeacher ? 'Docente' : (realGPA || '—')}
+            </h3>
             <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold rounded">
-              Acima da média
+              {isTeacher ? 'Gestão / Professor' : (realGPA ? 'Desempenho apurado' : 'Aguardando notas')}
             </span>
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Frequência Escolar</p>
-            <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1">{user.frequencia || 100}%</h3>
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
+              {isTeacher ? 'Ano Letivo' : 'Frequência Escolar'}
+            </p>
+            <h3 className="text-3xl font-black text-slate-900 dark:text-white mt-1">
+              {isTeacher ? '2026' : `${user.frequencia || 100}%`}
+            </h3>
             <span className="inline-block mt-2 px-2 py-0.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold rounded">
-              Regularidade plena
+              {isTeacher ? 'Em andamento' : 'Regularidade plena'}
             </span>
           </div>
 
@@ -194,14 +284,25 @@ export default function Dashboard({ user }: DashboardProps) {
           </div>
 
           <div className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
-            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Situação Acadêmica</p>
-            <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">Regular</h3>
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
+              {isTeacher ? 'Unidade de Ensino' : 'Situação Acadêmica'}
+            </p>
+            <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">
+              {isTeacher ? 'CETEP Bacia do Rio Corrente' : 'Regular'}
+            </h3>
             <span className="inline-block mt-2 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-bold rounded">
-              Ano Letivo 2026
+              {isTeacher ? 'Bahia • SEC' : 'Ano Letivo 2026'}
             </span>
           </div>
 
         </motion.div>
+
+        {/* Mural de Aulas de Hoje */}
+        <DailyClassesBoard 
+          currentUser={user} 
+          filterForCourse={user.role === 'student' ? user.course : undefined} 
+          filterForGrade={user.role === 'student' ? user.grade : undefined} 
+        />
 
         {/* Academic Modules Grid - Clean, no icons */}
         <div>

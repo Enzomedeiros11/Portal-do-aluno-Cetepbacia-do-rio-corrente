@@ -131,6 +131,9 @@ export default function Settings({ currentUser, onLogout, onUpdateUser }: Settin
       if (currentUser.email === 'enzomedeirosdasilva6@gmail.com') {
         idsToUpdate.add('enzo_admin');
         idsToUpdate.add('enzomedeirosdasilva6_gmail_com');
+      } else if (currentUser.email === 'adm@gmail.com') {
+        idsToUpdate.add('adm_admin');
+        idsToUpdate.add('adm_gmail_com');
       }
 
       const updateData = {

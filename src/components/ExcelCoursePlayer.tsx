@@ -1053,10 +1053,18 @@ export default function ExcelCoursePlayer({ onBack, studentName = 'Aluno(a)' }: 
                       </div>
                       <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                         <div
-                          className="h-full bg-emerald-500 transition-all duration-300"
+                          className="h-full bg-blue-600 transition-all duration-300"
                           style={{ width: `${(Object.keys(selectedAnswers).length / 10) * 100}%` }}
                         />
                       </div>
+                    </div>
+
+                    {/* Notice informing students that official grading happens upon submission */}
+                    <div className="p-3.5 bg-blue-50/70 border border-blue-200/80 rounded-2xl flex items-center gap-3 text-xs text-blue-900">
+                      <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 animate-pulse" />
+                      <span>
+                        <strong>Dica:</strong> Ao marcar uma questão ela é destacada em azul neutro. O resultado oficial com acertos (verde) e erros (vermelho) será revelado após você enviar o questionário.
+                      </span>
                     </div>
 
                     {/* List of all 10 Questions */}
@@ -1069,7 +1077,7 @@ export default function ExcelCoursePlayer({ onBack, studentName = 'Aluno(a)' }: 
                             <div className="flex items-start gap-3 mb-4">
                               <span className={`w-7 h-7 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
                                 isAnswered
-                                  ? 'bg-emerald-600 text-white shadow-2xs'
+                                  ? 'bg-blue-600 text-white shadow-2xs'
                                   : 'bg-slate-100 text-slate-600 border border-slate-200'
                               }`}>
                                 {qIndex + 1}
@@ -1091,13 +1099,13 @@ export default function ExcelCoursePlayer({ onBack, studentName = 'Aluno(a)' }: 
                                     onClick={() => handleSelectAnswer(q.id, optIdx)}
                                     className={`w-full text-left p-3.5 rounded-2xl border text-xs transition-all flex items-center gap-3 cursor-pointer ${
                                       isSelected
-                                        ? 'bg-emerald-50 border-emerald-500 text-emerald-950 font-bold shadow-2xs'
+                                        ? 'bg-blue-50/80 border-blue-500 text-blue-950 font-bold shadow-2xs'
                                         : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
                                     }`}
                                   >
                                     <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 border ${
                                       isSelected
-                                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                                        ? 'bg-blue-600 border-blue-600 text-white'
                                         : 'bg-slate-50 border-slate-300 text-slate-500'
                                     }`}>
                                       {String.fromCharCode(65 + optIdx)}
@@ -1119,7 +1127,7 @@ export default function ExcelCoursePlayer({ onBack, studentName = 'Aluno(a)' }: 
                       </p>
                       <button
                         onClick={handleSubmitQuiz}
-                        className="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-xs shadow-md shadow-emerald-600/20 transition-all active:scale-95 cursor-pointer"
+                        className="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-xs shadow-md shadow-blue-600/20 transition-all active:scale-95 cursor-pointer"
                       >
                         Enviar Questionário e Ver Nota
                       </button>

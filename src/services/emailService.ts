@@ -98,12 +98,44 @@ export const sendSupportNotificationEmail = async (studentName: string, studentE
   });
 };
 
-export const sendContactFormEmail = async (data: { name: string; email: string; subject: string; message: string }) => {
+export const sendContactFormEmail = async (data: { name: string; email: string; subject: string; message: string; matricula?: string }) => {
+  // Persist help request locally for redundancy
+  try {
+    const helpMsg = {
+      id: `ajuda_${Date.now()}`,
+      name: data.name,
+      email: data.email,
+      matricula: data.matricula || '',
+      subject: data.subject,
+      message: data.message,
+      to_email: 'enzomedeirosdasilva6@gmail.com',
+      date: new Date().toISOString(),
+      status: 'pendente'
+    };
+    const stored = JSON.parse(localStorage.getItem('cetep_mensagens_ajuda') || '[]');
+    stored.unshift(helpMsg);
+    localStorage.setItem('cetep_mensagens_ajuda', JSON.stringify(stored.slice(0, 50)));
+
+    // Try persisting to Firestore if available
+    try {
+      const { collection, addDoc } = await import('firebase/firestore');
+      const { db } = await import('../lib/firebase');
+      await addDoc(collection(db, 'mensagens_ajuda'), {
+        ...helpMsg,
+        createdAt: new Date().toISOString()
+      });
+    } catch {
+      // Offline or mock mode
+    }
+  } catch (err) {
+    console.warn('Error saving help message locally:', err);
+  }
+
   return sendEmail({
-    to_name: 'Secretaria CETEP',
-    to_email: 'contato@cetep-brc.edu.br',
-    subject: `[Contato Site CETEP] ${data.subject} - ${data.name}`,
-    message: `Nome do Remetente: ${data.name}\nE-mail do Remetente: ${data.email}\nAssunto: ${data.subject}\n\nMensagem:\n${data.message}`,
+    to_name: 'Professor Enzo Medeiros (Coordenação CETEP)',
+    to_email: 'enzomedeirosdasilva6@gmail.com',
+    subject: `[Ajuda & Suporte CETEP] ${data.subject} - ${data.name}`,
+    message: `Nova mensagem recebida na Central de Ajuda do CETEP:\n\nRemetente: ${data.name}\nE-mail do Remetente: ${data.email}${data.matricula ? `\nMatrícula: ${data.matricula}` : ''}\nAssunto: ${data.subject}\n\nMensagem:\n${data.message}\n\nEncaminhado diretamente para: enzomedeirosdasilva6@gmail.com`,
     type: 'support'
   });
 };

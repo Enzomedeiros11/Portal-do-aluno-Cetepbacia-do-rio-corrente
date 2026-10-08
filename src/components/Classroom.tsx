@@ -24,6 +24,7 @@ import {
   GraduationCap
 } from 'lucide-react';
 import { User } from '../types';
+import DailyClassesBoard from './DailyClassesBoard';
 import { supabase } from '../lib/supabase';
 import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 import { collection, onSnapshot, addDoc, deleteDoc, doc, query, orderBy, limit } from 'firebase/firestore';
@@ -83,8 +84,9 @@ export const ALL_CLASS_GROUPS: ClassGroup[] = [
 
 export function checkUserAccessToGroup(u: User | null, grp: ClassGroup): boolean {
   if (!u) return false;
-  // Full admin permission for Enzo Medeiros and official teachers
-  if (u.email?.toLowerCase() === 'enzomedeirosdasilva6@gmail.com' || u.role === 'teacher') {
+  // Full admin permission for Enzo Medeiros, Adm and official teachers
+  const cleanEmail = u.email?.toLowerCase();
+  if (cleanEmail === 'enzomedeirosdasilva6@gmail.com' || cleanEmail === 'adm@gmail.com' || u.role === 'teacher') {
     return true;
   }
 
@@ -125,7 +127,7 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const isEnzoOrTeacher = user?.email?.toLowerCase() === 'enzomedeirosdasilva6@gmail.com' || user?.role === 'teacher';
+  const isEnzoOrTeacher = user?.email?.toLowerCase() === 'enzomedeirosdasilva6@gmail.com' || user?.email?.toLowerCase() === 'adm@gmail.com' || user?.role === 'teacher';
 
   useEffect(() => {
     if (user) {
@@ -269,7 +271,7 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
     u.role === 'student' && selectedClass && checkUserAccessToGroup(u, selectedClass)
   );
 
-  const officialStaff = allUsers.filter(u => u.role === 'teacher' || u.email?.toLowerCase() === 'enzomedeirosdasilva6@gmail.com');
+  const officialStaff = allUsers.filter(u => u.role === 'teacher' || u.email?.toLowerCase() === 'enzomedeirosdasilva6@gmail.com' || u.email?.toLowerCase() === 'adm@gmail.com');
 
   if (selectedClass) {
     return (
@@ -347,7 +349,7 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                         )}
                         <span className="text-[9px] text-slate-400">{new Date(msg.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
-                      {(user?.role === 'teacher' || user?.email?.toLowerCase() === 'enzomedeirosdasilva6@gmail.com' || msg.email === user?.email) && (
+                      {(user?.role === 'teacher' || user?.email?.toLowerCase() === 'enzomedeirosdasilva6@gmail.com' || user?.email?.toLowerCase() === 'adm@gmail.com' || msg.email === user?.email) && (
                         <button
                           onClick={() => handleDeleteMessage(msg.id)}
                           className="text-slate-400 hover:text-rose-600 transition-colors p-1"
@@ -536,6 +538,11 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
           </div>
         </div>
 
+        {/* Mural de Aulas de Hoje */}
+        <div className="mb-10">
+          <DailyClassesBoard currentUser={user} />
+        </div>
+
         {/* Layout em 3 Fileiras / Colunas Organizadas (1º Ano | 2º Ano | 3º Ano) */}
         <div className={`grid grid-cols-1 ${isEnzoOrTeacher ? 'lg:grid-cols-3' : 'max-w-xl mx-auto'} gap-8`}>
           {(['1º Ano', '2º Ano', '3º Ano'] as const).map((yearGrade, colIdx) => {
@@ -683,7 +690,7 @@ export default function Classroom({ user, allUsers }: ClassroomProps) {
                               {new Date(com.data).toLocaleDateString('pt-BR')} às {new Date(com.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                            </span>
                         </div>
-                        {(user?.role === 'teacher' || user?.email?.toLowerCase() === 'enzomedeirosdasilva6@gmail.com' || com.email === user?.email) && (
+                        {(user?.role === 'teacher' || user?.email?.toLowerCase() === 'enzomedeirosdasilva6@gmail.com' || user?.email?.toLowerCase() === 'adm@gmail.com' || com.email === user?.email) && (
                           <button
                             onClick={() => handleDeleteMessage(com.id)}
                             className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/20 rounded-xl transition-all"

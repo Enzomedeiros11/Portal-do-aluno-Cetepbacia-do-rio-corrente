@@ -57,7 +57,7 @@ export default function DatabaseManager({ onRefreshAll }: DatabaseManagerProps) 
   const [editingDocId, setEditingDocId] = useState<string>('');
   const [editingDocJson, setEditingDocJson] = useState<string>('');
 
-  const availableCollections = ['usuarios', 'mensagens', 'turmas', 'atividades', 'configuracoes'];
+  const availableCollections = ['usuarios', 'autorizados', 'mensagens', 'turmas', 'atividades', 'configuracoes'];
 
   // Subscribe to active collection in real-time
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, Home, BookOpen, GraduationCap, FileText, Bot, Sun, Moon } from 'lucide-react';
+import { Menu, X, ChevronDown, Home, BookOpen, GraduationCap, FileText, Briefcase, Sun, Moon, Users } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from './Logo';
@@ -8,7 +8,7 @@ import { useTheme } from '../context/ThemeContext';
 interface NavigationProps {
   isAuthenticated: boolean;
   logout: () => void;
-  userRole?: 'student' | 'teacher';
+  userRole?: 'student' | 'teacher' | 'parent';
   userEmail?: string;
 }
 
@@ -19,7 +19,7 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { theme, isDark, toggleTheme } = useTheme();
 
-  const isEnzoAdmin = userEmail === 'enzomedeirosdasilva6@gmail.com';
+  const isEnzoAdmin = userEmail === 'enzomedeirosdasilva6@gmail.com' || userEmail === 'adm@gmail.com';
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -32,26 +32,37 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
   }, []);
 
   // Primary navigation items (text only, no icons)
-  const primaryNavItems = [
+  const primaryNavItems = userRole === 'parent' ? [
+    { name: 'Portal da Família', path: '/dashboard' },
+    { name: 'Aulas de Hoje', path: '/classroom' },
+    { name: 'Estágios MEC', path: '/internships' },
+  ] : userRole === 'teacher' ? [
     { name: 'Início', path: '/dashboard' },
     { name: 'Sala de Aula', path: '/classroom' },
     { name: 'Cursos Extras', path: '/extra-courses' },
-    { name: 'Estágios', path: '/internships' },
+    { name: 'Estágios MEC', path: '/internships' },
+    { name: 'Secretaria & Notas', path: '/teachers' },
+  ] : [
+    { name: 'Início', path: '/dashboard' },
+    { name: 'Sala de Aula', path: '/classroom' },
+    { name: 'Cursos Extras', path: '/extra-courses' },
+    { name: 'Estágios MEC', path: '/internships' },
     { name: 'Boletim', path: '/boletim' },
   ];
 
   // Secondary tools (text only)
   const secondaryNavItems = [
+    { name: 'Portal da Família', path: '/parent-portal', desc: 'Acompanhamento do filho(a)' },
     { name: 'Jornal CETEP', path: '/journal', desc: 'Notícias e avisos escolares' },
-    { name: 'Chat IA', path: '/contact?tab=ai', desc: 'Plantão de dúvidas' },
-    { name: 'Ajuda', path: '/contact?tab=form', desc: 'Fale com a coordenação' },
+    { name: 'Estágios & Carreiras', path: '/internships', desc: 'Vagas e termo de compromisso' },
+    { name: 'Central de Ajuda', path: '/contact', desc: 'Fale com a coordenação e secretaria' },
   ];
 
   const publicNavItems = [
     { name: 'Página Inicial', path: '/lp-video' },
+    { name: 'Portal dos Pais', path: '/auth' },
     { name: 'Sobre Nós', path: '/about' },
-    { name: 'Ajuda', path: '/contact?tab=form' },
-    { name: 'Chat IA', path: '/contact?tab=ai' },
+    { name: 'Ajuda & Contato', path: '/contact' },
   ];
 
   const isSecondaryActive = secondaryNavItems.some(
@@ -137,8 +148,8 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
               </AnimatePresence>
             </div>
 
-            {/* Admin Badges if Enzo */}
-            {isEnzoAdmin && (
+            {/* Admin Badges if Teacher or Enzo */}
+            {(userRole === 'teacher' || isEnzoAdmin) && (
               <div className="flex items-center gap-1 border-l border-slate-200 dark:border-slate-800 pl-2 ml-1">
                 <Link
                   to="/teachers"
@@ -148,18 +159,20 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
                       : 'bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-950/50'
                   }`}
                 >
-                  Secretaria
+                  Secretaria & Aprovações
                 </Link>
-                <Link
-                  to="/database"
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-colors ${
-                    location.pathname === '/database'
-                      ? 'bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white'
-                      : 'bg-slate-100 dark:bg-slate-850 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800'
-                  }`}
-                >
-                  Banco de Dados
-                </Link>
+                {isEnzoAdmin && (
+                  <Link
+                    to="/database"
+                    className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all shadow-xs ${
+                      location.pathname === '/database'
+                        ? 'bg-black text-white ring-2 ring-slate-950 shadow-md'
+                        : 'bg-black text-white hover:bg-slate-900 border border-slate-900'
+                    }`}
+                  >
+                    Banco de Dados
+                  </Link>
+                )}
               </div>
             )}
           </div>
@@ -299,22 +312,28 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
                   ))}
                 </div>
 
-                {isEnzoAdmin && (
+                {(userRole === 'teacher' || isEnzoAdmin) && (
                   <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex gap-2">
                     <Link
                       to="/teachers"
                       onClick={() => setIsOpen(false)}
                       className="flex-1 p-2 bg-amber-50 dark:bg-amber-950/30 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800 rounded-lg text-xs font-bold text-center"
                     >
-                      Secretaria
+                      Secretaria & Aprovações
                     </Link>
-                    <Link
-                      to="/database"
-                      onClick={() => setIsOpen(false)}
-                      className="flex-1 p-2 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-center"
-                    >
-                      Banco de Dados
-                    </Link>
+                    {isEnzoAdmin && (
+                      <Link
+                        to="/database"
+                        onClick={() => setIsOpen(false)}
+                        className={`flex-1 p-2 rounded-lg text-xs font-bold text-center transition-all ${
+                          location.pathname === '/database'
+                            ? 'bg-black text-white ring-2 ring-slate-950 shadow-md'
+                            : 'bg-black text-white hover:bg-slate-900 border border-slate-900 shadow-xs'
+                        }`}
+                      >
+                        Banco de Dados
+                      </Link>
+                    )}
                   </div>
                 )}
 
@@ -396,13 +415,19 @@ export default function Navigation({ isAuthenticated, logout, userRole, userEmai
       {/* Mobile Fixed Bottom Navigation Bar for quick access */}
       {isAuthenticated && (
         <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-3 py-2 flex items-center justify-around shadow-lg">
-          {[
+          {(userRole === 'teacher' ? [
             { name: 'Início', path: '/dashboard', icon: Home },
             { name: 'Aulas', path: '/classroom', icon: BookOpen },
             { name: 'Cursos', path: '/extra-courses', icon: GraduationCap },
+            { name: 'Estágios', path: '/internships', icon: Briefcase },
+            { name: 'Secretaria', path: '/teachers', icon: Users },
+          ] : [
+            { name: 'Início', path: '/dashboard', icon: Home },
+            { name: 'Aulas', path: '/classroom', icon: BookOpen },
+            { name: 'Cursos', path: '/extra-courses', icon: GraduationCap },
+            { name: 'Estágios', path: '/internships', icon: Briefcase },
             { name: 'Boletim', path: '/boletim', icon: FileText },
-            { name: 'Chat IA', path: '/contact?tab=ai', icon: Bot },
-          ].map((item) => {
+          ]).map((item) => {
             const isActive = location.pathname === item.path || (item.path.includes('?') && (location.pathname + location.search) === item.path);
             const Icon = item.icon;
             return (

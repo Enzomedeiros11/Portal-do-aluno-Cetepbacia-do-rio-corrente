@@ -17,14 +17,34 @@ import {
   X, 
   AlertTriangle,
   GraduationCap,
-  Briefcase
+  Briefcase,
+  IdCard,
+  CheckCircle2,
+  KeyRound,
+  FileSpreadsheet,
+  Check,
+  Clock,
+  UserCheck,
+  UserX,
+  HeartHandshake
 } from 'lucide-react';
 import { useState, useEffect, useMemo, FormEvent } from 'react';
-import { User, COURSES, GRADES } from '../types';
+import { User, COURSES, GRADES, AuthorizedUser, PreRegistrationRequest } from '../types';
 import { toast } from 'sonner';
 import { supabase } from '../lib/supabase';
 import { db } from '../lib/firebase';
 import { doc, setDoc, deleteDoc, collection, addDoc, onSnapshot } from 'firebase/firestore';
+import { 
+  seedAuthorizedUsersIfEmpty, 
+  saveAuthorizedUser, 
+  deleteAuthorizedUser, 
+  getLocalAuthorizedUsers 
+} from '../services/authorizedService';
+import { 
+  getLocalPreRegistrations, 
+  approvePreRegistration, 
+  rejectPreRegistration 
+} from '../services/approvalService';
 
 interface TeachersProps {
   allUsers: User[];
@@ -67,7 +87,33 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
     return Array.from(map.values());
   }, [allUsers]);
 
+  // Direção Whitelist States
+  const [authorizedList, setAuthorizedList] = useState<AuthorizedUser[]>(getLocalAuthorizedUsers());
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalTab, setAuthModalTab] = useState<'aprovacoes' | 'matriculas' | 'novo'>('aprovacoes');
+  const [authSearchTerm, setAuthSearchTerm] = useState('');
+  const [isAddingAuth, setIsAddingAuth] = useState(false);
+  const [isBatchImportOpen, setIsBatchImportOpen] = useState(false);
+  const [batchImportText, setBatchImportText] = useState('');
+  const [newAuth, setNewAuth] = useState({
+    name: '',
+    matricula: '',
+    email: '',
+    emailResponsavel: '',
+    nomeResponsavel: '',
+    role: 'student' as 'student' | 'teacher',
+    course: COURSES[1] || 'Técnico em Informática',
+    grade: GRADES[0] || '1º Ano'
+  });
+
+  // Pre-Registration Approval States
+  const [pendingRequests, setPendingRequests] = useState<PreRegistrationRequest[]>(getLocalPreRegistrations());
+  const [isRequestsModalOpen, setIsRequestsModalOpen] = useState(false);
+  const [requestFilter, setRequestFilter] = useState<'aguardando_aprovacao' | 'aprovado' | 'recusado' | 'todos'>('aguardando_aprovacao');
+
   useEffect(() => {
+    seedAuthorizedUsersIfEmpty().catch(console.warn);
+
     const unsub = onSnapshot(collection(db, 'mensagens'), (snap) => {
       const list: any[] = [];
       snap.forEach((docSnap) => {
@@ -79,7 +125,33 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
       list.sort((a, b) => new Date(b.data || 0).getTime() - new Date(a.data || 0).getTime());
       setComunicadosList(list);
     });
-    return () => unsub();
+
+    const unsubAuth = onSnapshot(collection(db, 'autorizados'), (snap) => {
+      const list: AuthorizedUser[] = [];
+      snap.forEach((docSnap) => {
+        list.push({ id: docSnap.id, ...(docSnap.data() as any) });
+      });
+      if (list.length > 0) {
+        setAuthorizedList(list);
+      }
+    });
+
+    const unsubRequests = onSnapshot(collection(db, 'solicitacoes_cadastro'), (snap) => {
+      const list: PreRegistrationRequest[] = [];
+      snap.forEach((docSnap) => {
+        list.push({ id: docSnap.id, ...(docSnap.data() as any) });
+      });
+      list.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      if (list.length > 0) {
+        setPendingRequests(list);
+      }
+    });
+
+    return () => {
+      unsub();
+      unsubAuth();
+      unsubRequests();
+    };
   }, []);
 
   // Modal States
@@ -91,6 +163,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
   const [newUser, setNewUser] = useState({
     name: '',
     email: '',
+    matricula: '',
     role: 'student' as 'student' | 'teacher',
     course: COURSES[0] || 'Técnico em Informática',
     grade: GRADES[0] || '1º Ano',
@@ -101,7 +174,7 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
     id: string;
     name: string;
     email: string;
-    role: 'student' | 'teacher';
+    role: 'student' | 'teacher' | 'parent';
     course: string;
     grade: string;
     frequencia: number;
@@ -163,10 +236,15 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
     try {
       const cleanEmail = newUser.email.trim().toLowerCase();
       const newUid = `user_${Date.now()}`;
+      const generatedMatricula = (newUser.matricula && newUser.matricula.trim()) 
+        ? newUser.matricula.trim().toUpperCase() 
+        : `2026${Math.floor(100 + Math.random() * 900)}`;
+
       const payload = {
         id: newUid,
         nome: newUser.name.trim(),
         email: cleanEmail,
+        matricula: generatedMatricula,
         tipo: newUser.role,
         curso: newUser.course,
         grade: newUser.grade,
@@ -178,14 +256,29 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
       // Save to Firebase Firestore
       await setDoc(doc(db, 'usuarios', newUid), payload);
 
+      // Auto-authorize in /autorizados whitelist so student can log in
+      await saveAuthorizedUser({
+        id: cleanEmail.replace(/[^a-zA-Z0-9]/g, '_'),
+        matricula: generatedMatricula,
+        email: cleanEmail,
+        name: newUser.name.trim(),
+        role: newUser.role,
+        course: newUser.course,
+        grade: newUser.grade,
+        status: 'ativo',
+        cadastradoPor: currentUser?.name || 'Direção CETEP',
+        isActivated: true
+      });
+
       // Also upsert in Supabase for backwards compatibility
       await supabase.from('usuarios').upsert([payload]);
 
-      toast.success(`Usuário ${newUser.name} cadastrado com sucesso!`);
+      toast.success(`Usuário ${newUser.name} cadastrado e autorizado com matrícula ${generatedMatricula}!`);
       setIsAddModalOpen(false);
       setNewUser({
         name: '',
         email: '',
+        matricula: '',
         role: 'student',
         course: COURSES[0] || 'Técnico em Informática',
         grade: GRADES[0] || '1º Ano',
@@ -196,6 +289,130 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
     } catch (err) {
       console.error('Erro ao criar usuário:', err);
       toast.error('Erro ao cadastrar usuário.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveNewAuth = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!newAuth.name.trim() || !newAuth.email.trim() || !newAuth.matricula.trim()) {
+      toast.error('Preencha Nome, Matrícula e Gmail.');
+      return;
+    }
+    setLoading(true);
+    try {
+      await saveAuthorizedUser({
+        id: newAuth.matricula.trim().toUpperCase(),
+        matricula: newAuth.matricula.trim().toUpperCase(),
+        email: newAuth.email.trim().toLowerCase(),
+        name: newAuth.name.trim(),
+        role: newAuth.role,
+        course: newAuth.course,
+        grade: newAuth.grade,
+        emailResponsavel: newAuth.emailResponsavel.trim() ? newAuth.emailResponsavel.trim().toLowerCase() : undefined,
+        nomeResponsavel: newAuth.nomeResponsavel.trim() || undefined,
+        status: 'ativo',
+        cadastradoPor: currentUser?.name || 'Direção CETEP',
+        isActivated: false
+      });
+      toast.success(`Matrícula ${newAuth.matricula} (${newAuth.name}) autorizada pela Direção!`);
+      setIsAddingAuth(false);
+      setNewAuth({
+        name: '',
+        matricula: '',
+        email: '',
+        emailResponsavel: '',
+        nomeResponsavel: '',
+        role: 'student',
+        course: COURSES[1] || 'Técnico em Informática',
+        grade: GRADES[0] || '1º Ano'
+      });
+    } catch (e) {
+      toast.error('Erro ao salvar autorização.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAuth = async (id: string, name: string) => {
+    if (!window.confirm(`Deseja revogar a autorização de ${name}? O usuário não conseguirá mais entrar no portal.`)) return;
+    setLoading(true);
+    try {
+      await deleteAuthorizedUser(id);
+      toast.success(`Autorização de ${name} revogada.`);
+    } catch (e) {
+      toast.error('Erro ao revogar autorização.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBatchImport = async () => {
+    if (!batchImportText.trim()) {
+      toast.error('Cole as linhas com os dados.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const lines = batchImportText.split('\n');
+      let count = 0;
+      for (const line of lines) {
+        const parts = line.split(/[,;\t]/).map(p => p.trim());
+        if (parts.length >= 3) {
+          const [mat, nome, email, curso, grade] = parts;
+          if (mat && email) {
+            await saveAuthorizedUser({
+              id: mat.toUpperCase(),
+              matricula: mat.toUpperCase(),
+              email: email.toLowerCase(),
+              name: nome || 'Estudante CETEP',
+              role: 'student',
+              course: curso || 'Técnico em Informática',
+              grade: grade || '1º Ano',
+              status: 'ativo',
+              cadastradoPor: 'Importação em Lote',
+              isActivated: false
+            });
+            count++;
+          }
+        }
+      }
+      toast.success(`${count} matrículas importadas e autorizadas com sucesso!`);
+      setBatchImportText('');
+      setIsBatchImportOpen(false);
+    } catch (e) {
+      toast.error('Erro na importação em lote.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handlers for approving/rejecting pre-registration requests
+  const handleApproveRequest = async (req: PreRegistrationRequest) => {
+    setLoading(true);
+    try {
+      await approvePreRegistration(req, currentUser?.name || 'Professor Enzo Medeiros');
+      toast.success(
+        `Cadastro de ${req.name} (${req.role === 'parent' ? '👨‍👩‍👧 Responsável' : '🎓 Aluno'}) aprovado com sucesso! Acesso liberado no portal.`
+      );
+      await onRefresh();
+    } catch (e) {
+      console.error('Error approving request:', e);
+      toast.error('Erro ao aprovar solicitação de cadastro.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRejectRequest = async (req: PreRegistrationRequest) => {
+    if (!window.confirm(`Deseja recusar a solicitação de cadastro de ${req.name}?`)) return;
+    setLoading(true);
+    try {
+      await rejectPreRegistration(req.id, 'Dados não conferem com o cadastro oficial da Secretaria');
+      toast.info(`Solicitação de ${req.name} recusada.`);
+    } catch (e) {
+      toast.error('Erro ao recusar solicitação.');
     } finally {
       setLoading(false);
     }
@@ -427,6 +644,35 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
 
            <div className="flex items-center gap-3 flex-wrap">
               <button 
+                onClick={() => {
+                  setAuthModalTab('aprovacoes');
+                  setIsAuthModalOpen(true);
+                }}
+                className="relative flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-sm transition-all shadow-md active:scale-95 cursor-pointer"
+                title="Pessoas que preencheram o pré-cadastro e aguardam aprovação do Professor"
+              >
+                 <Clock className="w-4 h-4 text-slate-950" />
+                 <span>Aprovações Pendentes</span>
+                 {pendingRequests.filter(r => r.status === 'aguardando_aprovacao').length > 0 && (
+                   <span className="px-2 py-0.5 bg-rose-600 text-white text-[10px] font-black rounded-full shadow-xs animate-bounce">
+                     {pendingRequests.filter(r => r.status === 'aguardando_aprovacao').length}
+                   </span>
+                 )}
+              </button>
+
+              <button 
+                onClick={() => {
+                  const hasPending = pendingRequests.filter(r => r.status === 'aguardando_aprovacao').length > 0;
+                  setAuthModalTab(hasPending ? 'aprovacoes' : 'matriculas');
+                  setIsAuthModalOpen(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+                title="Lista oficial de Matrículas e Aprovações de Pais e Alunos pela Direção"
+              >
+                 <ShieldCheck className="w-4 h-4" /> Matrículas & Direção
+              </button>
+
+              <button 
                 onClick={() => setIsAddModalOpen(true)}
                 className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all shadow-md active:scale-95 cursor-pointer"
               >
@@ -608,7 +854,14 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
                       filteredUsers.map(s => (
                         <tr key={s.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                           <td className="px-6 py-4">
-                             <p className="font-bold text-slate-900 dark:text-white leading-tight">{s.name}</p>
+                             <div className="flex items-center gap-2 flex-wrap">
+                               <p className="font-bold text-slate-900 dark:text-white leading-tight">{s.name}</p>
+                               {s.matricula && (
+                                 <span className="text-[10px] font-mono font-extrabold px-1.5 py-0.5 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded border border-indigo-200 dark:border-indigo-800/60">
+                                   {s.matricula}
+                                 </span>
+                               )}
+                             </div>
                              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">{s.email}</p>
                           </td>
 
@@ -762,6 +1015,743 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
         </div>
       </div>
 
+      {/* --- MODAL DE APROVAÇÕES PENDENTES DA CONTA DE PROFESSOR --- */}
+      <AnimatePresence>
+        {isRequestsModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden"
+            >
+              {/* Header */}
+              <div className="p-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+                <div className="flex items-center gap-3.5">
+                  <div className="w-11 h-11 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 shadow-md">
+                    <Clock className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <span>Fila de Aprovações de Cadastro</span>
+                      <span className="text-[10px] uppercase font-extrabold bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full">
+                        Exclusivo Professor Enzo
+                      </span>
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Alunos e responsáveis que preencheram o pré-cadastro com matrícula, Gmail e senha aguardando sua aprovação para logar.
+                    </p>
+                  </div>
+                </div>
+                <button onClick={() => setIsRequestsModalOpen(false)} className="text-slate-400 hover:text-white transition-colors cursor-pointer p-1">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Sub-bar / Filters */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRequestFilter('aguardando_aprovacao')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      requestFilter === 'aguardando_aprovacao'
+                        ? 'bg-amber-500 text-slate-950 font-black shadow-xs'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>Aguardando Aprovação ({pendingRequests.filter(r => r.status === 'aguardando_aprovacao').length})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setRequestFilter('aprovado')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      requestFilter === 'aprovado'
+                        ? 'bg-emerald-600 text-white font-black shadow-xs'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Já Aprovados ({pendingRequests.filter(r => r.status === 'aprovado').length})</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setRequestFilter('todos')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      requestFilter === 'todos'
+                        ? 'bg-blue-600 text-white font-black shadow-xs'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
+                    }`}
+                  >
+                    <span>Todos ({pendingRequests.length})</span>
+                  </button>
+                </div>
+
+                <div className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                  {requestFilter === 'aguardando_aprovacao' && 'Apenas contas pendentes de liberação'}
+                </div>
+              </div>
+
+              {/* Table / List of Requests */}
+              <div className="flex-1 overflow-y-auto p-6">
+                {pendingRequests.filter(r => requestFilter === 'todos' || r.status === requestFilter).length === 0 ? (
+                  <div className="py-16 text-center">
+                    <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3 text-slate-400">
+                      <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-800 dark:text-white">Tudo em dia!</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+                      Nenhuma solicitação encontrada neste filtro. Quando novos alunos ou responsáveis fizerem o pré-cadastro, eles aparecerão aqui para sua aprovação.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {pendingRequests
+                      .filter(r => requestFilter === 'todos' || r.status === requestFilter)
+                      .map((req) => (
+                        <div 
+                          key={req.id}
+                          className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all hover:border-slate-300 dark:hover:border-slate-600"
+                        >
+                          <div className="flex items-start gap-3.5">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 ${
+                              req.role === 'parent'
+                                ? 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300'
+                                : 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
+                            }`}>
+                              {req.role === 'parent' ? <HeartHandshake className="w-5 h-5" /> : <GraduationCap className="w-5 h-5" />}
+                            </div>
+
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                                  {req.name}
+                                </h4>
+                                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                                  req.role === 'parent'
+                                    ? 'bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800'
+                                    : 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800'
+                                }`}>
+                                  {req.role === 'parent' ? '👨‍👩‍👧 Responsável (Pai/Mãe)' : '🎓 Aluno(a)'}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300 flex-wrap">
+                                <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                                  <IdCard className="w-3.5 h-3.5" />
+                                  <span>Matrícula: {req.matricula}</span>
+                                  {req.role === 'parent' && <span className="text-[10px] text-slate-400 font-normal">(mesma do filho)</span>}
+                                </span>
+                                <span>•</span>
+                                <span className="flex items-center gap-1 font-mono text-slate-500 dark:text-slate-400">
+                                  <Mail className="w-3.5 h-3.5" /> {req.email}
+                                </span>
+                              </div>
+
+                              <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                                <strong>Curso:</strong> {req.course} • <strong>Série:</strong> {req.grade} • <span className="text-slate-400">Enviado em: {new Date(req.createdAt).toLocaleString('pt-BR')}</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons or Status Badge */}
+                          <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-t-0 border-slate-200 dark:border-slate-700">
+                            {req.status === 'aguardando_aprovacao' ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRejectRequest(req)}
+                                  disabled={loading}
+                                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 transition-colors cursor-pointer flex items-center gap-1"
+                                >
+                                  <UserX className="w-3.5 h-3.5" />
+                                  <span>Recusar</span>
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => handleApproveRequest(req)}
+                                  disabled={loading}
+                                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold transition-all shadow-md hover:shadow-lg active:scale-95 cursor-pointer flex items-center gap-1.5"
+                                >
+                                  <UserCheck className="w-4 h-4" />
+                                  <span>Aprovar Cadastro</span>
+                                </button>
+                              </>
+                            ) : req.status === 'aprovado' ? (
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 rounded-full text-xs font-bold border border-emerald-200 dark:border-emerald-800">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Aprovado & Liberado</span>
+                              </div>
+                            ) : (
+                              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 rounded-full text-xs font-bold border border-rose-200 dark:border-rose-800">
+                                <UserX className="w-3.5 h-3.5 text-rose-600" />
+                                <span>Solicitação Recusada</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 shrink-0">
+                <span>
+                  Pendentes de aprovação: <strong>{pendingRequests.filter(r => r.status === 'aguardando_aprovacao').length}</strong> de {pendingRequests.length} solicitações
+                </span>
+                <button
+                  onClick={() => setIsRequestsModalOpen(false)}
+                  className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-xs hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  Fechar
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- MODAL DA DIREÇÃO: GESTÃO DE MATRÍCULAS & AUTORIZADOS --- */}
+      <AnimatePresence>
+        {isAuthModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden"
+            >
+              {/* Header */}
+              <div className="p-6 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md">
+                    <ShieldCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold flex items-center gap-2">
+                      <span>Matrículas & Direção Escolar</span>
+                      <span className="text-[10px] uppercase font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 px-2 py-0.5 rounded-full">
+                        Exclusivo Direção CETEP
+                      </span>
+                    </h3>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      Aprovação de pré-cadastros de pais e alunos, matrículas ativas e controle de acesso.
+                    </p>
+                  </div>
+                </div>
+                <button onClick={() => setIsAuthModalOpen(false)} className="text-slate-400 hover:text-white transition-colors cursor-pointer p-1">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Navigation Tabs */}
+              <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-950 px-6 pt-3 gap-2 overflow-x-auto shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setAuthModalTab('aprovacoes')}
+                  className={`px-4 py-2.5 rounded-t-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+                    authModalTab === 'aprovacoes'
+                      ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-t-2 border-indigo-600 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <Clock className="w-4 h-4" />
+                  <span>Aprovar Pais e Alunos</span>
+                  {pendingRequests.filter(r => r.status === 'aguardando_aprovacao').length > 0 && (
+                    <span className="px-2 py-0.5 bg-rose-600 text-white font-black text-[10px] rounded-full animate-bounce">
+                      {pendingRequests.filter(r => r.status === 'aguardando_aprovacao').length}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setAuthModalTab('matriculas')}
+                  className={`px-4 py-2.5 rounded-t-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+                    authModalTab === 'matriculas'
+                      ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-t-2 border-indigo-600 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4" />
+                  <span>Matrículas Ativas ({authorizedList.length})</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthModalTab('matriculas');
+                    setIsAddingAuth(true);
+                    setIsBatchImportOpen(false);
+                  }}
+                  className={`px-4 py-2.5 rounded-t-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shrink-0 ${
+                    authModalTab === 'matriculas' && isAddingAuth
+                      ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-t-2 border-indigo-600 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>+ Cadastrar Matrícula / Lote</span>
+                </button>
+              </div>
+
+              {/* TAB 1: APROVAÇÕES DE PAIS E ALUNOS */}
+              {authModalTab === 'aprovacoes' ? (
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {/* Filter Sub-bar */}
+                  <div className="p-4 bg-slate-50 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setRequestFilter('aguardando_aprovacao')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                          requestFilter === 'aguardando_aprovacao'
+                            ? 'bg-amber-500 text-slate-950 shadow-xs'
+                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                        }`}
+                      >
+                        Pendentes ({pendingRequests.filter(r => r.status === 'aguardando_aprovacao').length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRequestFilter('aprovado')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                          requestFilter === 'aprovado'
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                        }`}
+                      >
+                        Aprovados ({pendingRequests.filter(r => r.status === 'aprovado').length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRequestFilter('todos')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                          requestFilter === 'todos'
+                            ? 'bg-slate-800 text-white shadow-xs'
+                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+                        }`}
+                      >
+                        Todos ({pendingRequests.length})
+                      </button>
+                    </div>
+
+                    <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+                      Aprovação imediata de novos acessos de pais e estudantes
+                    </span>
+                  </div>
+
+                  {/* Requests List */}
+                  <div className="flex-1 overflow-y-auto p-6 space-y-3">
+                    {pendingRequests.filter(r => requestFilter === 'todos' || r.status === requestFilter).length === 0 ? (
+                      <div className="py-16 text-center">
+                        <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3 text-slate-400">
+                          <CheckCircle2 className="w-8 h-8 text-emerald-500" />
+                        </div>
+                        <h4 className="text-sm font-bold text-slate-800 dark:text-white">Tudo em dia!</h4>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+                          Nenhuma solicitação encontrada neste filtro. Quando pais ou alunos preencherem o formulário de cadastro, eles aparecerão aqui para sua aprovação.
+                        </p>
+                      </div>
+                    ) : (
+                      pendingRequests
+                        .filter(r => requestFilter === 'todos' || r.status === requestFilter)
+                        .map((req) => (
+                          <div 
+                            key={req.id}
+                            className="p-4 bg-slate-50 dark:bg-slate-850 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all hover:border-slate-300 dark:hover:border-slate-600"
+                          >
+                            <div className="flex items-start gap-3.5">
+                              <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 mt-0.5 ${
+                                req.role === 'parent'
+                                  ? 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300'
+                                  : 'bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300'
+                              }`}>
+                                {req.role === 'parent' ? <HeartHandshake className="w-5 h-5" /> : <GraduationCap className="w-5 h-5" />}
+                              </div>
+
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-tight">
+                                    {req.name}
+                                  </h4>
+                                  <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                                    req.role === 'parent'
+                                      ? 'bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-200 border border-indigo-200 dark:border-indigo-800'
+                                      : 'bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-200 border border-blue-200 dark:border-blue-800'
+                                  }`}>
+                                    {req.role === 'parent' ? '👨‍👩‍👧 Responsável (Pai/Mãe)' : '🎓 Aluno(a)'}
+                                  </span>
+                                </div>
+
+                                <div className="flex items-center gap-3 text-xs text-slate-600 dark:text-slate-300 flex-wrap">
+                                  <span className="font-mono font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                                    <IdCard className="w-3.5 h-3.5" />
+                                    <span>Matrícula: {req.matricula}</span>
+                                    {req.role === 'parent' && <span className="text-[10px] text-slate-400 font-normal">(filho(a))</span>}
+                                  </span>
+                                  <span>•</span>
+                                  <span className="flex items-center gap-1 font-mono text-slate-500 dark:text-slate-400">
+                                    <Mail className="w-3.5 h-3.5" /> {req.email}
+                                  </span>
+                                </div>
+
+                                <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                                  <strong>Curso:</strong> {req.course} • <strong>Série:</strong> {req.grade} • <span className="text-slate-400">Enviado em: {new Date(req.createdAt).toLocaleString('pt-BR')}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end pt-2 md:pt-0 border-t md:border-t-0 border-slate-200 dark:border-slate-700">
+                              {req.status === 'aguardando_aprovacao' ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRejectRequest(req)}
+                                    disabled={loading}
+                                    className="px-3.5 py-2 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 transition-colors cursor-pointer flex items-center gap-1"
+                                  >
+                                    <UserX className="w-3.5 h-3.5" />
+                                    <span>Recusar</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleApproveRequest(req)}
+                                    disabled={loading}
+                                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold transition-all shadow-md hover:shadow-lg active:scale-95 cursor-pointer flex items-center gap-1.5"
+                                  >
+                                    <UserCheck className="w-4 h-4" />
+                                    <span>Aprovar Cadastro</span>
+                                  </button>
+                                </>
+                              ) : req.status === 'aprovado' ? (
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 rounded-full text-xs font-bold border border-emerald-200 dark:border-emerald-800">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>Aprovado & Liberado</span>
+                                </div>
+                              ) : (
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 rounded-full text-xs font-bold border border-rose-200 dark:border-rose-800">
+                                  <UserX className="w-3.5 h-3.5 text-rose-600" />
+                                  <span>Solicitação Recusada</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Sub-bar / Actions */}
+                  <div className="p-4 bg-slate-50 dark:bg-slate-850 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 shrink-0">
+                    <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+                      <div className="relative w-full max-w-md">
+                        <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input 
+                          type="text" 
+                          placeholder="Buscar por matrícula, nome ou gmail..."
+                          value={authSearchTerm}
+                          onChange={(e) => setAuthSearchTerm(e.target.value)}
+                          className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-xs font-medium outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button 
+                        type="button"
+                        onClick={() => setAuthModalTab('aprovacoes')}
+                        className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                        title="Ver solicitações de pais e alunos aguardando aprovação"
+                      >
+                        <Clock className="w-3.5 h-3.5" />
+                        <span>Aprovações ({pendingRequests.filter(r => r.status === 'aguardando_aprovacao').length})</span>
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setIsAddingAuth(!isAddingAuth);
+                          setIsBatchImportOpen(false);
+                        }}
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                          isAddingAuth 
+                            ? 'bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-white' 
+                            : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
+                        }`}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>{isAddingAuth ? 'Fechar Formulário' : '+ Nova Matrícula'}</span>
+                      </button>
+
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          setIsBatchImportOpen(!isBatchImportOpen);
+                          setIsAddingAuth(false);
+                        }}
+                        className="px-3.5 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                      >
+                        <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                        <span>Importar Lote</span>
+                      </button>
+                    </div>
+                  </div>
+
+              {/* Collapsible: Add Single Authorized Student */}
+              <AnimatePresence>
+                {isAddingAuth && (
+                  <motion.form 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    onSubmit={handleSaveNewAuth}
+                    className="p-5 bg-indigo-50/60 dark:bg-indigo-950/20 border-b border-indigo-100 dark:border-indigo-900/30 overflow-hidden shrink-0 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-extrabold text-indigo-900 dark:text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
+                        <UserPlus className="w-3.5 h-3.5" /> Cadastrar Aluno ou Professor Autorizado
+                      </p>
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          const nextNum = 2026000 + authorizedList.length + 1;
+                          setNewAuth({ ...newAuth, matricula: nextNum.toString() });
+                        }}
+                        className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                      >
+                        ⚡ Gerar Matrícula 2026 Automática
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Matrícula Escolar</label>
+                        <input 
+                          type="text"
+                          required
+                          placeholder="Ex: 2026006"
+                          value={newAuth.matricula}
+                          onChange={(e) => setNewAuth({ ...newAuth, matricula: e.target.value })}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-bold text-slate-800 dark:text-white outline-none focus:border-indigo-500 uppercase"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Nome Completo</label>
+                        <input 
+                          type="text"
+                          required
+                          placeholder="Ex: Gabriel Souza"
+                          value={newAuth.name}
+                          onChange={(e) => setNewAuth({ ...newAuth, name: e.target.value })}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-800 dark:text-white outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Gmail Oficial</label>
+                        <input 
+                          type="email"
+                          required
+                          placeholder="gabriel.souza@gmail.com"
+                          value={newAuth.email}
+                          onChange={(e) => setNewAuth({ ...newAuth, email: e.target.value })}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-800 dark:text-white outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Gmail do Responsável (Pai/Mãe - Opcional)</label>
+                        <input 
+                          type="email"
+                          placeholder="pais@gmail.com"
+                          value={newAuth.emailResponsavel}
+                          onChange={(e) => setNewAuth({ ...newAuth, emailResponsavel: e.target.value })}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-800 dark:text-white outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Nome do Responsável (Opcional)</label>
+                        <input 
+                          type="text"
+                          placeholder="Ex: Márcia Silva (Mãe)"
+                          value={newAuth.nomeResponsavel}
+                          onChange={(e) => setNewAuth({ ...newAuth, nomeResponsavel: e.target.value })}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-800 dark:text-white outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Curso Técnico</label>
+                        <select 
+                          value={newAuth.course}
+                          onChange={(e) => setNewAuth({ ...newAuth, course: e.target.value })}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-800 dark:text-white outline-none"
+                        >
+                          {COURSES.map(c => <option key={c} value={c}>{c}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Série / Turma</label>
+                        <select 
+                          value={newAuth.grade}
+                          onChange={(e) => setNewAuth({ ...newAuth, grade: e.target.value })}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-800 dark:text-white outline-none"
+                        >
+                          {GRADES.map(g => <option key={g} value={g}>{g}</option>)}
+                        </select>
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <button 
+                          type="submit"
+                          disabled={loading}
+                          className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs disabled:opacity-50 cursor-pointer"
+                        >
+                          {loading ? 'Salvando...' : 'Salvar Autorização'}
+                        </button>
+                      </div>
+                    </div>
+                  </motion.form>
+                )}
+              </AnimatePresence>
+
+              {/* Collapsible: Batch Import */}
+              <AnimatePresence>
+                {isBatchImportOpen && (
+                  <motion.div 
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="p-5 bg-emerald-50/60 dark:bg-emerald-950/20 border-b border-emerald-100 dark:border-emerald-900/30 overflow-hidden shrink-0 space-y-3"
+                  >
+                    <p className="text-xs font-extrabold text-emerald-900 dark:text-emerald-300 uppercase tracking-wider flex items-center gap-1.5">
+                      <FileSpreadsheet className="w-3.5 h-3.5" /> Importar Várias Matrículas (CSV ou Linhas)
+                    </p>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400">
+                      Cole uma linha por aluno no formato: <strong>Matrícula, Nome, Gmail, Curso, Série</strong>
+                    </p>
+                    <textarea 
+                      rows={4}
+                      placeholder={`2026010, Mariana Dias, mariana@gmail.com, Técnico em Informática, 1º Ano\n2026011, Felipe Ramos, felipe@gmail.com, Enfermagem, 2º Ano`}
+                      value={batchImportText}
+                      onChange={(e) => setBatchImportText(e.target.value)}
+                      className="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono outline-none focus:border-emerald-500"
+                    />
+                    <div className="flex items-center justify-end gap-2">
+                      <button 
+                        type="button" 
+                        onClick={() => setIsBatchImportOpen(false)}
+                        className="px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-lg cursor-pointer"
+                      >
+                        Cancelar
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={handleBatchImport}
+                        disabled={loading}
+                        className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer disabled:opacity-50"
+                      >
+                        {loading ? 'Processando...' : 'Importar Matrículas'}
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Table / List */}
+              <div className="flex-1 overflow-y-auto p-6">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      <th className="pb-3">Matrícula</th>
+                      <th className="pb-3">Nome do Aluno / Servidor</th>
+                      <th className="pb-3">Gmail Autorizado</th>
+                      <th className="pb-3">Curso & Série</th>
+                      <th className="pb-3">Situação</th>
+                      <th className="pb-3 text-right">Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                    {authorizedList
+                      .filter(u => {
+                        const term = authSearchTerm.toLowerCase();
+                        return (
+                          (u.matricula || '').toLowerCase().includes(term) ||
+                          (u.name || '').toLowerCase().includes(term) ||
+                          (u.email || '').toLowerCase().includes(term) ||
+                          (u.course || '').toLowerCase().includes(term)
+                        );
+                      })
+                      .map((item) => (
+                        <tr key={item.id || item.matricula} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="py-3 font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                            {item.matricula}
+                          </td>
+                          <td className="py-3 font-bold text-slate-800 dark:text-white">
+                            {item.name}
+                          </td>
+                          <td className="py-3 text-slate-600 dark:text-slate-300">
+                            {item.email}
+                          </td>
+                          <td className="py-3 text-slate-500 dark:text-slate-400">
+                            {item.course} • {item.grade}
+                          </td>
+                          <td className="py-3">
+                            {item.isActivated ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300">
+                                <CheckCircle2 className="w-3 h-3" /> Conta Ativa
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300">
+                                Primeiro Acesso Pendente
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 text-right">
+                            {item.email !== 'enzomedeirosdasilva6@gmail.com' && item.email !== 'adm@gmail.com' && (
+                              <button
+                                onClick={() => handleDeleteAuth(item.id, item.name)}
+                                className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-lg transition-colors cursor-pointer"
+                                title="Revogar autorização"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+              {/* Footer */}
+              <div className="p-4 bg-slate-50 dark:bg-slate-850 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 shrink-0">
+                <span>Total de pessoas autorizadas pela Direção: <strong>{authorizedList.length}</strong></span>
+                <button
+                  onClick={() => setIsAuthModalOpen(false)}
+                  className="px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold text-xs hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  Concluir
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* --- MODAL 1: CADASTRAR PESSOA --- */}
       <AnimatePresence>
         {isAddModalOpen && (
@@ -795,16 +1785,28 @@ export default function Teachers({ allUsers, onUpdateUsers, currentUser, onRefre
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Gmail / E-mail</label>
-                  <input 
-                    type="email"
-                    required
-                    placeholder="exemplo@gmail.com"
-                    value={newUser.email}
-                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-                    className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-sm font-semibold outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Gmail / E-mail</label>
+                    <input 
+                      type="email"
+                      required
+                      placeholder="exemplo@gmail.com"
+                      value={newUser.email}
+                      onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-sm font-semibold outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-1">Matrícula Escolar (Opcional)</label>
+                    <input 
+                      type="text"
+                      placeholder="Ex: 2026010 (ou auto)"
+                      value={newUser.matricula}
+                      onChange={(e) => setNewUser({ ...newUser, matricula: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl text-sm font-semibold outline-none focus:bg-white dark:focus:bg-slate-800 focus:border-blue-500 uppercase"
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
